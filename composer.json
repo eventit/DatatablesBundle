@@ -18,11 +18,11 @@
         "issues": "https://github.com/stwe/DatatablesBundle/issues"
     },
     "require": {
-        "php": ">=7.0",
+        "php": "^7.0|^8.0",
         "ext-json": ">=1.4",
         "doctrine/orm": "^2.2",
         "friendsofsymfony/jsrouting-bundle": "^1.6|^2.0",
-        "friendsofsymfony/elastica-bundle": "^5.0",
+        "friendsofsymfony/elastica-bundle": "^6.0",
         "twig/extensions": "^1.5",
         "twig/twig": "^1.28 || ^2.0",
         "symfony/translation": "^2.7|^3.0|^4.0",
@@ -30,6 +30,9 @@
         "symfony/property-access": "^3.0|^4.0",
         "symfony/framework-bundle": "^3.0|^4.0",
         "symfony/security-bundle": "^2.1|^3.0|^4.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
     },
     "autoload": {
         "psr-4": { "Sg\\DatatablesBundle\\": "" }
