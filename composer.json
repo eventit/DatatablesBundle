@@ -22,7 +22,7 @@
         "ext-json": ">=1.4",
         "doctrine/orm": "^2.2",
         "friendsofsymfony/jsrouting-bundle": "^1.6|^2.0",
-        "friendsofsymfony/elastica-bundle": "^6.0",
+        "friendsofsymfony/elastica-bundle": "5.*@dev",
         "twig/extensions": "^1.5",
         "twig/twig": "^1.28 || ^2.0",
         "symfony/translation": "^2.7|^3.0|^4.0",
