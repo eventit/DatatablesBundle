@@ -16,7 +16,7 @@ use Sg\DatatablesBundle\Datatable\Column\ColumnInterface;
 use Sg\DatatablesBundle\Datatable\Filter\AbstractFilter;
 use Sg\DatatablesBundle\Datatable\Filter\FilterInterface;
 
-use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\Query;

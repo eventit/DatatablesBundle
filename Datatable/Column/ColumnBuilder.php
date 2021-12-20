@@ -13,7 +13,7 @@ namespace Sg\DatatablesBundle\Datatable\Column;
 
 use Sg\DatatablesBundle\Datatable\Factory;
 
-use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\EntityManagerInterface;
 use Twig_Environment;
