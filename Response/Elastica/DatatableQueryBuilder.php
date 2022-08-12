@@ -556,12 +556,12 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
     protected function createFilterMatchTerm(string $columnAlias, $searchValue, string $conditionType = null)
     {
         if ('' !== $columnAlias) {
-            /** @var Query\Match $query */
-            $query = new Query\Match();
+            /** @var Query\MatchQuery() $query */
+            $query = new Query\MatchQuery();
             $query->setFieldQuery($columnAlias, $searchValue);
             $query->setFieldMinimumShouldMatch($columnAlias, 1);
             if ($conditionType === self::CONDITION_TYPE_MUST) {
-                $query->setFieldOperator($columnAlias, Query\Match::OPERATOR_AND);
+                $query->setFieldOperator($columnAlias, Query\MatchQuery::OPERATOR_AND);
             }
 
             return $query;
