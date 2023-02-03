@@ -20,7 +20,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/brbkrbrns/FOSElasticaBundle.git"
+            "url": "https://github.com/eventit/FOSElasticaBundle.git"
         }
     ],
     "require": {
