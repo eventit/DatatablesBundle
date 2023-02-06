@@ -47,15 +47,17 @@ class Responsive extends AbstractExtension
     /**
      * @param array|bool $details
      *
+     * @throws Exception
+     *
      * @return $this
      */
     public function setDetails($details): self
     {
         if (\is_array($details)) {
             foreach ($details as $key => $value) {
-                if (false === \in_array($key, ['type', 'target', 'renderer', 'display'])) {
+                if (false === \in_array($key, ['type', 'target', 'renderer', 'display'], true)) {
                     throw new \UnexpectedValueException(
-                        "Responsive::setDetails(): $key is not an valid option."
+                        "Responsive::setDetails(): {$key} is not an valid option."
                     );
                 }
             }

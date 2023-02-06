@@ -11,25 +11,20 @@
 
 namespace Sg\DatatablesBundle\Twig;
 
-use Sg\DatatablesBundle\Datatable\DatatableInterface;
+use Closure;
+use Sg\DatatablesBundle\Datatable\Action\Action;
 use Sg\DatatablesBundle\Datatable\Column\ColumnInterface;
+use Sg\DatatablesBundle\Datatable\DatatableInterface;
 use Sg\DatatablesBundle\Datatable\Extensions;
 use Sg\DatatablesBundle\Datatable\Filter\FilterInterface;
-use Sg\DatatablesBundle\Datatable\Action\Action;
-
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
-use Twig_Environment;
-use Twig_Extension;
-use Twig_SimpleFunction;
-use Closure;
+use Twig\Environment as Twig_Extension;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
+use Twig\TwigFunction;
 
-/**
- * Class DatatableTwigExtension
- *
- * @package Sg\DatatablesBundle\Twig
- */
-class DatatableTwigExtension extends Twig_Extension
+class DatatableTwigExtension extends AbstractExtension
 {
     /** @var PropertyAccessor */
     protected $accessor;
@@ -53,32 +48,32 @@ class DatatableTwigExtension extends Twig_Extension
     public function getFunctions(): array
     {
         return [
-            new Twig_SimpleFunction(
-                'sg_datatables_render_html',
-                [$this, 'datatablesRenderHtml'],
-                ['is_safe' => ['html'], 'needs_environment' => true]
-            ),
-            new Twig_SimpleFunction(
+            new TwigFunction(
                 'sg_datatables_render',
                 [$this, 'datatablesRender'],
                 ['is_safe' => ['html'], 'needs_environment' => true]
             ),
-            new Twig_SimpleFunction(
+            new TwigFunction(
+                'sg_datatables_render_html',
+                [$this, 'datatablesRenderHtml'],
+                ['is_safe' => ['html'], 'needs_environment' => true]
+            ),
+            new TwigFunction(
                 'sg_datatables_render_js',
                 [$this, 'datatablesRenderJs'],
                 ['is_safe' => ['html'], 'needs_environment' => true]
             ),
-            new Twig_SimpleFunction(
+            new TwigFunction(
                 'sg_datatable_extensions_render',
                 [$this, 'datatablesRenderExtensions'],
                 ['is_safe' => ['html'], 'needs_environment' => true]
             ),
-            new Twig_SimpleFunction(
+            new TwigFunction(
                 'sg_datatables_render_filter',
                 [$this, 'datatablesRenderFilter'],
                 ['is_safe' => ['html'], 'needs_environment' => true]
             ),
-            new Twig_SimpleFunction(
+            new TwigFunction(
                 'sg_datatables_render_multiselect_actions',
                 [$this, 'datatablesRenderMultiselectActions'],
                 ['is_safe' => ['html'], 'needs_environment' => true]
@@ -92,7 +87,7 @@ class DatatableTwigExtension extends Twig_Extension
     public function getFilters()
     {
         return [
-            new \Twig_SimpleFilter('sg_datatables_bool_var', [$this, 'boolVar']),
+            new TwigFilter('sg_datatables_bool_var', [$this, 'boolVar']),
         ];
     }
 
@@ -189,7 +184,7 @@ class DatatableTwigExtension extends Twig_Extension
         $searchColumn = $this->accessor->getValue($filter, 'searchColumn');
 
         if (null !== $searchColumn) {
-            $columns = $datatable->getColumnNames();
+            $columns = $datatable->getColumnBuilder()->getColumnNames();
             $searchColumnIndex = $columns[$searchColumn];
         } else {
             $searchColumnIndex = $index;
@@ -227,12 +222,12 @@ class DatatableTwigExtension extends Twig_Extension
         /** @var Action $action */
         foreach ($actions as $actionKey => $action) {
             $routeParameters = $action->getRouteParameters();
-            if (is_array($routeParameters)) {
+            if (\is_array($routeParameters)) {
                 foreach ($routeParameters as $key => $value) {
                     $parameters[$actionKey][$key] = $value;
                 }
             } elseif ($routeParameters instanceof Closure) {
-                $parameters[$actionKey] = call_user_func($routeParameters);
+                $parameters[$actionKey] = \call_user_func($routeParameters);
             } else {
                 $parameters[$actionKey] = [];
             }
@@ -241,8 +236,8 @@ class DatatableTwigExtension extends Twig_Extension
                 if (null !== $action->getButtonValue()) {
                     $values[$actionKey] = $action->getButtonValue();
 
-                    if (is_bool($values[$actionKey])) {
-                        $values[$actionKey] = (int)$values[$actionKey];
+                    if (\is_bool($values[$actionKey])) {
+                        $values[$actionKey] = (int) $values[$actionKey];
                     }
 
                     if (true === $action->isButtonValuePrefix()) {
@@ -278,8 +273,8 @@ class DatatableTwigExtension extends Twig_Extension
     {
         if ($value) {
             return 'true';
-        } else {
-            return 'false';
         }
+
+        return 'false';
     }
 }

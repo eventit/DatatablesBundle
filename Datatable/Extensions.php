@@ -18,7 +18,6 @@ use Sg\DatatablesBundle\Datatable\Extension\FixedHeaderFooter;
 use Sg\DatatablesBundle\Datatable\Extension\Responsive;
 use Sg\DatatablesBundle\Datatable\Extension\Select;
 use Sg\DatatablesBundle\Datatable\Extension\RowGroup;
-
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class Extensions
@@ -27,36 +26,36 @@ class Extensions
 
     /**
      * The Buttons extension.
-     * Default: null
+     * Default: null.
      *
-     * @var null|array|bool|Buttons
+     * @var array|bool|Buttons|null
      */
     protected $buttons;
 
     /**
      * The Responsive Extension.
      * Automatically optimise the layout for different screen sizes.
-     * Default: null
+     * Default: null.
      *
-     * @var null|array|bool|Responsive
+     * @var array|bool|Responsive|null
      */
     protected $responsive;
 
     /**
      * The Select Extension.
      * Select adds item selection capabilities to a DataTable.
-     * Default: null
+     * Default: null.
      *
-     * @var null|array|bool|Select
+     * @var array|bool|Select|null
      */
     protected $select;
 
     /**
      * The RowGroup Extension.
      * Automatically group rows.
-     * Default: null
+     * Default: null.
      *
-     * @var null|array|bool|RowGroup
+     * @var array|bool|RowGroup|null
      */
     protected $rowGroup;
 
@@ -139,7 +138,7 @@ class Extensions
      */
     public function setResponsive($responsive)
     {
-        if (is_array($responsive)) {
+        if (\is_array($responsive)) {
             $newResponsive = new Responsive();
             $this->responsive = $newResponsive->set($responsive);
         } else {
@@ -251,7 +250,7 @@ class Extensions
      */
     public function setSelect($select)
     {
-        if (is_array($select)) {
+        if (\is_array($select)) {
             $newSelect = new Select();
             $this->select = $newSelect->set($select);
         } else {
@@ -262,9 +261,7 @@ class Extensions
     }
 
     /**
-     * Get rowGroup.
-     *
-     * @return null|array|bool|RowGroup
+     * @return array|bool|RowGroup|null
      */
     public function getRowGroup()
     {
@@ -272,16 +269,15 @@ class Extensions
     }
 
     /**
-     * Set rowGroup.
+     * @param array|bool|null $rowGroup
      *
-     * @param null|array|bool $rowGroup
+     * @throws \Exception
      *
      * @return $this
-     * @throws \Exception
      */
     public function setRowGroup($rowGroup)
     {
-        if (is_array($rowGroup)) {
+        if (\is_array($rowGroup)) {
             $newRowGroup = new RowGroup();
             $this->rowGroup = $newRowGroup->set($rowGroup);
         } else {

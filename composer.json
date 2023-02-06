@@ -2,8 +2,8 @@
     "name": "sg/datatablesbundle",
     "type": "symfony-bundle",
     "description": "Symfony Datatable Bundle For Doctrine2 Entities with additional Elasticsearch functionality",
-    "keywords": ["symfony3", "datatable", "datatables", "data-table", "grid", "table", "datagrid", "pagination"],
-    "homepage": "https://github.com/stwe/DatatablesBundle",
+    "keywords": ["symfony", "datatable", "datatables", "data-table", "grid", "table", "datagrid", "pagination"],
+    "homepage": "https://github.com/eventit/DatatablesBundle",
     "license": "MIT",
     "authors": [
         {
@@ -15,7 +15,7 @@
         }
     ],
     "support": {
-        "issues": "https://github.com/stwe/DatatablesBundle/issues"
+        "issues": "https://github.com/eventit/DatatablesBundle/issues"
     },
     "repositories": [
         {
@@ -24,21 +24,27 @@
         }
     ],
     "require": {
-        "php": "^7.0|^8.0",
+        "php": ">=7.2|>=8.0",
         "ext-json": ">=1.4",
-        "doctrine/orm": "^2.2",
-        "friendsofsymfony/jsrouting-bundle": "^1.6|^2.0",
+        "doctrine/orm": "^2.5",
+        "friendsofsymfony/jsrouting-bundle": "^2.0|^3.0",
         "friendsofsymfony/elastica-bundle": "dev-php8",
-        "twig/extensions": "^1.5",
-        "twig/twig": "^1.28 || ^2.0",
-        "symfony/translation": "^2.7|^3.0|^4.0",
-        "symfony/options-resolver": "^3.0|^4.0",
-        "symfony/property-access": "^3.0|^4.0",
-        "symfony/framework-bundle": "^3.0|^4.0",
-        "symfony/security-bundle": "^2.1|^3.0|^4.0"
+        "symfony/config": "^4.4|^5.4|^6.0",
+        "symfony/dependency-injection": "^4.4|^5.4|^6.0",
+        "symfony/http-foundation": "^4.4|^5.4|^6.0",
+        "symfony/http-kernel": "^4.4|^5.4|^6.0",
+        "symfony/framework-bundle": "^4.4|^5.4|^6.0",
+        "symfony/options-resolver": "^4.4|^5.4|^6.0",
+        "symfony/property-access": "^4.4|^5.4|^6.0",
+        "symfony/routing": "^4.4|^5.4|^6.0",
+        "symfony/security-core": "^4.4|^5.4|^6.0",
+        "symfony/translation": "^4.4|^5.4|^6.0",
+        "twig/extra-bundle": "^3.5",
+        "twig/twig": "^2.9|^3.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.5"
+        "phpunit/phpunit": "^9.5",
+        "friendsofphp/php-cs-fixer": "^3.6"
     },
     "autoload": {
         "psr-4": { "Sg\\DatatablesBundle\\": "" }

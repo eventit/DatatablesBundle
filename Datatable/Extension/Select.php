@@ -2,7 +2,9 @@
 
 /**
  * This file is part of the SgDatatablesBundle package.
+ *
  * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
@@ -14,42 +16,42 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class Select extends AbstractExtension
 {
     /**
-     * Indicate if the selected items will be removed when clicking outside of the table
+     * Indicate if the selected items will be removed when clicking outside of the table.
      *
-     * @var boolean|null
+     * @var bool|null
      */
     protected $blurable;
 
     /**
-     * Set the class name that will be applied to selected items
+     * Set the class name that will be applied to selected items.
      *
      * @var string|null
      */
     protected $className;
 
     /**
-     * Enable / disable the display for item selection information in the table summary
+     * Enable / disable the display for item selection information in the table summary.
      *
-     * @var boolean|null
+     * @var bool|null
      */
     protected $info;
 
     /**
-     * Set which table items to select (rows, columns or cells)
+     * Set which table items to select (rows, columns or cells).
      *
      * @var string|null
      */
     protected $items;
 
     /**
-     * Set the element selector used for mouse event capture to select items
+     * Set the element selector used for mouse event capture to select items.
      *
      * @var string|null
      */
     protected $selector;
 
     /**
-     * Set the selection style for end user interaction with the table
+     * Set the selection style for end user interaction with the table.
      *
      * @var string|null
      */
@@ -91,7 +93,7 @@ class Select extends AbstractExtension
     }
 
     /**
-     * @return boolean|null
+     * @return bool|null
      */
     public function getBlurable()
     {
@@ -119,7 +121,7 @@ class Select extends AbstractExtension
     }
 
     /**
-     * @param null|string $className
+     * @param string|null $className
      *
      * @return $this
      */
@@ -131,7 +133,7 @@ class Select extends AbstractExtension
     }
 
     /**
-     * @return boolean|null
+     * @return bool|null
      */
     public function getInfo()
     {
@@ -139,7 +141,7 @@ class Select extends AbstractExtension
     }
 
     /**
-     * @param boolean|null $info
+     * @param bool|null $info
      *
      * @return $this
      */

@@ -96,8 +96,9 @@ class Buttons extends AbstractExtension
     /**
      * @param array|null $createButtons
      *
-     * @return $this
      * @throws Exception
+     *
+     * @return $this
      */
     public function setCreateButtons($createButtons): self
     {

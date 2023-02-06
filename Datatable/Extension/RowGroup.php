@@ -84,6 +84,8 @@ class RowGroup extends AbstractExtension
     /**
      * @param string $dataSrc
      *
+     * @throws Exception
+     *
      * @return $this
      */
     public function setDataSrc($dataSrc): self
@@ -121,7 +123,7 @@ class RowGroup extends AbstractExtension
         }
 
         foreach ($startRender as $key => $value) {
-            if (false === \in_array($key, ['template', 'vars',])) {
+            if (false === \in_array($key, ['template', 'vars'], true)) {
                 throw new \UnexpectedValueException(
                     'RowGroup::setStartRender(): ' . $key . ' is not a valid option.'
                 );
@@ -155,7 +157,7 @@ class RowGroup extends AbstractExtension
         }
 
         foreach ($endRender as $key => $value) {
-            if (false === \in_array($key, ['template', 'vars',])) {
+            if (false === \in_array($key, ['template', 'vars'], true)) {
                 throw new \UnexpectedValueException(
                     'RowGroup::setEndRender(): ' . $key . ' is not a valid option.'
                 );
