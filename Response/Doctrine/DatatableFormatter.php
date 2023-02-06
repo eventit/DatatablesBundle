@@ -15,7 +15,7 @@ use Sg\DatatablesBundle\Response\AbstractDatatableFormatter;
 
 class DatatableFormatter extends AbstractDatatableFormatter
 {
-    protected function doCustomFormatterForRow(array &$row)
+    protected function doCustomFormatterForRow(array &$row): void
     {
         if (isset($row[0])) {
             $row = array_merge($row, $row[0]);

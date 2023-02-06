@@ -25,13 +25,13 @@ abstract class AbstractDatatableFormatter
     /**
      * @param array $row
      */
-    abstract protected function doCustomFormatterForRow(array &$row);
+    abstract protected function doCustomFormatterForRow(array &$row): void;
 
     /**
      * @param \IteratorAggregate $entries
      * @param DatatableInterface $datatable
      */
-    public function runFormatter(\IteratorAggregate $entries, DatatableInterface $datatable)
+    public function runFormatter(\IteratorAggregate $entries, DatatableInterface $datatable): void
     {
         $lineFormatter = $datatable->getLineFormatter();
         $columns = $datatable->getColumnBuilder()->getColumns();
@@ -46,7 +46,7 @@ abstract class AbstractDatatableFormatter
                     /** @noinspection PhpUndefinedMethodInspection */
                     $columnAlias = str_replace('.', '_', $column->getData());
                     /** @noinspection PhpUndefinedMethodInspection */
-                    $columnPath = '[' . str_replace('.', '][', $column->getData()) . ']';
+                    $columnPath = '['.str_replace('.', '][', $column->getData()).']';
                     /** @noinspection PhpUndefinedMethodInspection */
                     if ($columnAlias !== $column->getData()) {
                         $this->accessor->setValue($row, $columnPath, $row[$columnAlias]);
@@ -84,6 +84,12 @@ abstract class AbstractDatatableFormatter
                 $column->renderCellContent($row);
             }
 
+            foreach ($columns as $column) {
+                if (! $column->getSentInResponse()) {
+                    unset($row[$column->getDql()]);
+                }
+            }
+
             $this->output['data'][] = $row;
         }
     }
@@ -91,7 +97,7 @@ abstract class AbstractDatatableFormatter
     /**
      * @return array
      */
-    public function getOutput()
+    public function getOutput(): array
     {
         return $this->output;
     }

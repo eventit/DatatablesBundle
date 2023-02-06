@@ -6,7 +6,7 @@ use Sg\DatatablesBundle\Response\AbstractDatatableFormatter;
 
 class DatatableFormatter extends AbstractDatatableFormatter
 {
-    protected function doCustomFormatterForRow(array &$row)
+    protected function doCustomFormatterForRow(array &$row): void
     {
         // nothing to do here right now
     }
