@@ -7,28 +7,22 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "stwe"
+            "name": "eventit"
         },
         {
             "name": "SgDatatablesBundle contributors",
-            "homepage": "https://github.com/stwe/DatatablesBundle/graphs/contributors"
+            "homepage": "https://github.com/eventit/DatatablesBundle/graphs/contributors"
         }
     ],
     "support": {
         "issues": "https://github.com/eventit/DatatablesBundle/issues"
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/eventit/FOSElasticaBundle.git"
-        }
-    ],
     "require": {
-        "php": ">=7.2|>=8.0",
+        "php": ">=8.0",
         "ext-json": ">=1.4",
         "doctrine/orm": "^2.5",
         "friendsofsymfony/jsrouting-bundle": "^2.0|^3.0",
-        "friendsofsymfony/elastica-bundle": "dev-php8",
+        "friendsofsymfony/elastica-bundle": "^5.1|^6.0",
         "symfony/config": "^4.4|^5.4|^6.0",
         "symfony/dependency-injection": "^4.4|^5.4|^6.0",
         "symfony/http-foundation": "^4.4|^5.4|^6.0",
@@ -43,10 +37,20 @@
         "twig/twig": "^2.9|^3.0"
     },
     "require-dev": {
+        "roave/security-advisories": "dev-latest",
         "phpunit/phpunit": "^9.5",
         "friendsofphp/php-cs-fixer": "^3.6"
     },
     "autoload": {
         "psr-4": { "Sg\\DatatablesBundle\\": "" }
+    },
+    "config": {
+        "sort-packages": true,
+        "process-timeout": 0,
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true,
+            "endroid/installer": true,
+            "symfony/flex": true
+        }
     }
 }
