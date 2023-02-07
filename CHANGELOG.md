@@ -1,3 +1,11 @@
+# Version 2.0
+* Dropped support for PHP 7.2
+* [BC] changed namespace of datatable and querybuilder classes which were only used in combination with doctrine
+* Support Elasticsearch - This is not totally done yet. It is just a kind of way to use the elasticabundle with this datatablesbundle. Primarly to use this to visualize tables and simple filtering
+* Extensions are changed to be quicker adding a new extension to the bundle
+* Added fixed Header / Footer Extension for Datatable
+* Refactored stuff to be more clean code
+
 # Version 1.3
 
 * Dropped support for PHP 7.1
