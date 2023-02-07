@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Sg\DatatablesBundle\Tests\Response;
+namespace Sg\DatatablesBundle\Tests\Response\Doctrine;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Platforms\MySqlPlatform;
@@ -23,7 +23,7 @@ use Sg\DatatablesBundle\Datatable\Column\ColumnBuilder;
 use Sg\DatatablesBundle\Datatable\DatatableInterface;
 use Sg\DatatablesBundle\Datatable\Features;
 use Sg\DatatablesBundle\Datatable\Options;
-use Sg\DatatablesBundle\Response\DatatableQueryBuilder;
+use Sg\DatatablesBundle\Response\Doctrine\DatatableQueryBuilder;
 
 /**
  * @internal

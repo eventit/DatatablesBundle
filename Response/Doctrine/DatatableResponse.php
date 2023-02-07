@@ -14,49 +14,21 @@ namespace Sg\DatatablesBundle\Response\Doctrine;
 use Sg\DatatablesBundle\Datatable\DatatableInterface;
 use Sg\DatatablesBundle\Datatable\Column\ColumnInterface;
 use Sg\DatatablesBundle\Response\AbstractDatatableResponse;
+use \Sg\DatatablesBundle\Response\Doctrine\DatatableFormatter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
 class DatatableResponse extends AbstractDatatableResponse
 {
-    /**
-     * @var Request
-     */
-    protected $request;
-
-    /**
-     * $_GET or $_POST parameters.
-     *
-     * @var array
-     */
-    protected $requestParams;
-
-    /**
-     * A DatatableInterface instance.
-     * Default: null
-     *
-     * @var null|DatatableInterface
-     */
-    protected $datatable;
-
-    /**
-     * A DatatableQueryBuilder instance.
-     * This class generates a Query by given Columns.
-     * Default: null
-     *
-     * @var null|DatatableQueryBuilder
-     */
-    protected $datatableQueryBuilder;
+    /** @var bool */
+    protected bool $countAllResults = false;
 
     /** @var bool */
-    protected $countAllResults;
+    protected bool $outputWalkers = false;
 
     /** @var bool */
-    protected $outputWalkers;
-
-    /** @var bool */
-    protected $fetchJoinCollection;
+    protected bool $fetchJoinCollection = false;
 
     /**
      * @param bool $countAllResults
@@ -104,7 +76,7 @@ class DatatableResponse extends AbstractDatatableResponse
     {
         $val = $this->validateColumnsPositions($datatable);
         if (is_int($val)) {
-            throw new \Exception("DatatableResponse::setDatatable(): The Column with the index $val is on a not allowed position.");
+            throw new \RuntimeException("DatatableResponse::setDatatable(): The Column with the index $val is on a not allowed position.");
         };
 
         $this->datatable = $datatable;
@@ -113,7 +85,7 @@ class DatatableResponse extends AbstractDatatableResponse
         return $this;
     }
 
-    public function resetResponseOptions()
+    public function resetResponseOptions(): void
     {
         $this->countAllResults = true;
         $this->outputWalkers = false;
@@ -125,16 +97,56 @@ class DatatableResponse extends AbstractDatatableResponse
      * @param bool $outputWalkers
      * @param bool $fetchJoinCollection
      *
-     * @return JsonResponse
      * @throws \Exception
+     *@return JsonResponse
      */
-    public function getResponse($countAllResults = true, $outputWalkers = false, $fetchJoinCollection = true)
-    {
+    public function getResponse(
+        bool $countAllResults = true,
+        bool $outputWalkers = false,
+        bool $fetchJoinCollection = true
+    ): JsonResponse {
         $this->countAllResults = $countAllResults;
         $this->outputWalkers = $outputWalkers;
         $this->fetchJoinCollection = $fetchJoinCollection;
 
         return $this->getJsonResponse();
+    }
+
+
+    /**
+     * Get response data as array.
+     *
+     * @param bool $countAllResults
+     * @param bool $outputWalkers
+     * @param bool $fetchJoinCollection
+     *
+     * @throws Exception
+     *
+     * @return array
+     */
+    public function getData(bool $countAllResults = true, bool $outputWalkers = false, bool $fetchJoinCollection = true): array
+    {
+        if (null === $this->datatable) {
+            throw new \RuntimeException('DatatableResponse::getResponse(): Set a Datatable class with setDatatable().');
+        }
+
+        if (null === $this->datatableQueryBuilder) {
+            throw new \RuntimeException('DatatableResponse::getResponse(): A DatatableQueryBuilder instance is needed. Call getDatatableQueryBuilder().');
+        }
+
+        $paginator = new Paginator($this->datatableQueryBuilder->execute(), $fetchJoinCollection);
+        $paginator->setUseOutputWalkers($outputWalkers);
+
+        $formatter = new DatatableFormatter();
+        $formatter->runFormatter($paginator, $this->datatable);
+
+        $outputHeader = [
+            'draw' => (int) $this->requestParams['draw'],
+            'recordsFiltered' => \count($paginator),
+            'recordsTotal' => true === $countAllResults ? (int) $this->datatableQueryBuilder->getCountAllResults() : 0,
+        ];
+
+        return array_merge($outputHeader, $formatter->getOutput());
     }
 
     /**
@@ -164,65 +176,15 @@ class DatatableResponse extends AbstractDatatableResponse
      * @return DatatableQueryBuilder
      * @throws \Exception
      */
-    protected function createDatatableQueryBuilder()
+    protected function createDatatableQueryBuilder(): DatatableQueryBuilder
     {
         if (null === $this->datatable) {
-            throw new \Exception('DatatableResponse::getDatatableQueryBuilder(): Set a Datatable class with setDatatable().');
+            throw new \RuntimeException('DatatableResponse::getDatatableQueryBuilder(): Set a Datatable class with setDatatable().');
         }
 
         $this->requestParams = $this->getRequestParams();
         $this->datatableQueryBuilder = new DatatableQueryBuilder($this->requestParams, $this->datatable);
 
         return $this->datatableQueryBuilder;
-    }
-
-    /**
-     * @return array
-     */
-    protected function getRequestParams()
-    {
-        $parameterBag = null;
-        $type = $this->datatable->getAjax()->getType();
-
-        if ('GET' === strtoupper($type)) {
-            $parameterBag = $this->request->query;
-        }
-
-        if ('POST' === strtoupper($type)) {
-            $parameterBag = $this->request->request;
-        }
-
-        return $parameterBag->all();
-    }
-
-    /**
-     * @param DatatableInterface $datatable
-     *
-     * @return int|bool
-     */
-    protected function validateColumnsPositions(DatatableInterface $datatable)
-    {
-        $columns = $datatable->getColumnBuilder()->getColumns();
-        $lastPosition = count($columns);
-
-        /** @var ColumnInterface $column */
-        foreach ($columns as $column) {
-            $allowedPositions = $column->allowedPositions();
-            /** @noinspection PhpUndefinedMethodInspection */
-            $index = $column->getIndex();
-            if (is_array($allowedPositions)) {
-                $allowedPositions = array_flip($allowedPositions);
-                if (array_key_exists(ColumnInterface::LAST_POSITION, $allowedPositions)) {
-                    $allowedPositions[$lastPosition] = $allowedPositions[ColumnInterface::LAST_POSITION];
-                    unset($allowedPositions[ColumnInterface::LAST_POSITION]);
-                }
-
-                if (false === array_key_exists($index, $allowedPositions)) {
-                    return $index;
-                }
-            }
-        }
-
-        return true;
     }
 }

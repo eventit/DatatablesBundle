@@ -16,8 +16,15 @@ use Symfony\Component\PropertyAccess\PropertyAccessor;
 
 abstract class AbstractDatatableQueryBuilder
 {
-    const DISABLE_PAGINATION = -1;
-    const INIT_PARAMETER_COUNTER = 100;
+    /**
+     * @internal
+     */
+    public const DISABLE_PAGINATION = -1;
+
+    /**
+     * @internal
+     */
+    public const INIT_PARAMETER_COUNTER = 100;
 
     /** @var array */
     protected $requestParams;
@@ -47,16 +54,19 @@ abstract class AbstractDatatableQueryBuilder
     protected $columns;
 
     /** @var array */
-    protected $selectColumns;
+    protected $columnNames;
 
     /** @var array */
-    protected $searchColumns;
+    protected $selectColumns = [];
 
     /** @var array */
-    protected $searchColumnGroups;
+    protected $searchColumns = [];
 
     /** @var array */
-    protected $orderColumns;
+    protected $searchColumnGroups = [];
+
+    /** @var array */
+    protected $orderColumns = [];
 
     /** @var Options */
     protected $options;
@@ -98,6 +108,7 @@ abstract class AbstractDatatableQueryBuilder
 
         $this->metadata = $this->getMetadata($this->entityName);
         $this->entityShortName = $this->getEntityShortName($this->metadata);
+
         $this->rootEntityIdentifier = $this->getIdentifier($this->metadata);
 
         $this->loadIndividualConstructSettings();
@@ -105,6 +116,7 @@ abstract class AbstractDatatableQueryBuilder
         $this->accessor = PropertyAccess::createPropertyAccessor();
 
         $this->columns = $datatable->getColumnBuilder()->getColumns();
+        $this->columnNames = $datatable->getColumnBuilder()->getColumnNames();
 
         $this->options = $datatable->getOptions();
         $this->features = $datatable->getFeatures();
@@ -130,6 +142,8 @@ abstract class AbstractDatatableQueryBuilder
         return $metadata;
     }
 
+    abstract protected function getSafeName($name): string;
+
     /**
      * @param ClassMetadata $metadata
      *
@@ -149,8 +163,9 @@ abstract class AbstractDatatableQueryBuilder
      */
     protected function isSearchableColumn(ColumnInterface $column): bool
     {
-        $searchColumn = null !== $this->accessor->getValue($column,
-                'dql') && true === $this->accessor->getValue($column, 'searchable');
+        $searchColumn = null !== $this->accessor->getValue($column, 'dql') &&
+            true === $this->accessor->getValue($column, 'searchable')
+        ;
 
         if (false === $this->options->isSearchInNonVisibleColumns()) {
             return $searchColumn && true === $this->accessor->getValue($column, 'visible');

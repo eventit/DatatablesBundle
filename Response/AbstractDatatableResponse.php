@@ -2,6 +2,7 @@
 
 namespace Sg\DatatablesBundle\Response;
 
+use Exception;
 use Sg\DatatablesBundle\Datatable\Column\ColumnInterface;
 use Sg\DatatablesBundle\Datatable\DatatableInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -33,9 +34,9 @@ abstract class AbstractDatatableResponse
      * This class generates a Query by given Columns.
      * Default: null
      *
-     * @var null|DatatableQueryBuilder
+     * @var null|AbstractDatatableQueryBuilder
      */
-    protected $datatableQueryBuilder;
+    protected ?AbstractDatatableQueryBuilder $datatableQueryBuilder = null;
 
     /**
      * @param RequestStack $requestStack
@@ -46,6 +47,18 @@ abstract class AbstractDatatableResponse
         $this->datatable = null;
         $this->datatableQueryBuilder = null;
     }
+
+    abstract public function getResponse(
+        bool $countAllResults = true,
+        bool $outputWalkers = false,
+        bool $fetchJoinCollection = true
+    ): JsonResponse;
+
+    abstract public function getData(
+        bool $countAllResults = true,
+        bool $outputWalkers = false,
+        bool $fetchJoinCollection = true
+    ): array;
 
     /**
      * @return JsonResponse
@@ -65,7 +78,7 @@ abstract class AbstractDatatableResponse
     {
         $val = $this->validateColumnsPositions($datatable);
         if (is_int($val)) {
-            throw new \Exception("DatatableResponse::setDatatable(): The Column with the index $val is on a not allowed position.");
+            throw new \RuntimeException("DatatableResponse::setDatatable(): The Column with the index $val is on a not allowed position.");
         };
 
         $this->datatable = $datatable;
@@ -95,30 +108,20 @@ abstract class AbstractDatatableResponse
     }
 
     /**
-     * @return DatatableQueryBuilder
+     * @return AbstractDatatableQueryBuilder
      * @throws \Exception
      */
-    protected function createDatatableQueryBuilder()
-    {
-        if (null === $this->datatable) {
-            throw new \Exception('DatatableResponse::getDatatableQueryBuilder(): Set a Datatable class with setDatatable().');
-        }
-
-        $this->requestParams = $this->getRequestParams();
-        $this->datatableQueryBuilder = new DatatableQueryBuilder($this->requestParams, $this->datatable);
-
-        return $this->datatableQueryBuilder;
-    }
+    abstract protected function createDatatableQueryBuilder(): AbstractDatatableQueryBuilder;
 
     /**
      * Get request params.
      *
      * @return array
      */
-    protected function getRequestParams()
+    protected function getRequestParams(): array
     {
         $parameterBag = null;
-        $type = $this->datatable->getAjax()->getType();
+        $type = $this->datatable->getAjax()->getMethod();
 
         if ('GET' === strtoupper($type)) {
             $parameterBag = $this->request->query;
@@ -136,7 +139,7 @@ abstract class AbstractDatatableResponse
      *
      * @return int|bool
      */
-    protected function validateColumnsPositions(DatatableInterface $datatable)
+    protected function validateColumnsPositions(DatatableInterface $datatable): bool|int
     {
         $columns = $datatable->getColumnBuilder()->getColumns();
         $lastPosition = count($columns);
