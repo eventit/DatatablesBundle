@@ -88,7 +88,7 @@ class ColumnBuilder
     /**
      * @param string $datatableName
      */
-    public function __construct(ClassMetadata $metadata, Environment $twig, RouterInterface $router, $datatableName, EntityManagerInterface $em)
+    public function __construct(ClassMetadata $metadata, Twig_Environment $twig, RouterInterface $router, $datatableName, EntityManagerInterface $em)
     {
         $this->metadata = $metadata;
         $this->twig = $twig;
