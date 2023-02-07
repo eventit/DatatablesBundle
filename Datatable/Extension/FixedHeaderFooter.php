@@ -1,5 +1,11 @@
 <?php
 
+/*
+ * This file is part of the SgDatatablesBundle package.
+ *
+ * <https://github.com/eventit/DatatablesBundle>
+ */
+
 namespace Sg\DatatablesBundle\Datatable\Extension;
 
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -21,8 +27,6 @@ class FixedHeaderFooter extends AbstractExtension
     }
 
     /**
-     * @param OptionsResolver $resolver
-     *
      * @return $this
      */
     public function configureOptions(OptionsResolver $resolver): ExtensionInterface
@@ -40,11 +44,6 @@ class FixedHeaderFooter extends AbstractExtension
         return $this;
     }
 
-    /**
-     * @param bool $enabled
-     *
-     * @return FixedHeaderFooter
-     */
     public function setHeader(bool $enabled): self
     {
         $this->header = $enabled;
@@ -52,27 +51,16 @@ class FixedHeaderFooter extends AbstractExtension
         return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function getHeader(): bool
     {
         return $this->header;
     }
 
-    /**
-     * @return bool
-     */
     public function getFooter(): bool
     {
         return $this->footer;
     }
 
-    /**
-     * @param bool $footer
-     *
-     * @return FixedHeaderFooter
-     */
     public function setFooter(bool $footer): self
     {
         $this->footer = $footer;
@@ -80,19 +68,11 @@ class FixedHeaderFooter extends AbstractExtension
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getHeaderOffset(): int
     {
         return $this->headerOffset;
     }
 
-    /**
-     * @param int $headerOffset
-     *
-     * @return FixedHeaderFooter
-     */
     public function setHeaderOffset(int $headerOffset): self
     {
         $this->headerOffset = $headerOffset;
@@ -101,7 +81,7 @@ class FixedHeaderFooter extends AbstractExtension
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getJavaScriptConfiguration(array $config = []): array
     {

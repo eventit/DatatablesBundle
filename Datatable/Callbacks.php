@@ -3,10 +3,7 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable;
@@ -17,9 +14,9 @@ class Callbacks
 {
     use OptionsTrait;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // DataTables - Callbacks
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Callback for whenever a TR element is created for the table's body.
@@ -124,9 +121,9 @@ class Callbacks
         $this->initOptions();
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Configure options.
@@ -170,9 +167,9 @@ class Callbacks
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Getters && Setters
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return array|null

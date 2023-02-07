@@ -3,10 +3,7 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Controller;
@@ -25,9 +22,9 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class DatatableController extends AbstractController
 {
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Actions
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Edit field.
@@ -35,8 +32,6 @@ class DatatableController extends AbstractController
      * @Route("/datatables/edit/field", methods={"POST"}, name="sg_datatables_edit")
      *
      * @throws Exception
-     *
-     * @return Response
      */
     public function editAction(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -83,9 +78,9 @@ class DatatableController extends AbstractController
         return new Response('Bad request', 400);
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Helper
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Finds an object by its primary key / identifier.

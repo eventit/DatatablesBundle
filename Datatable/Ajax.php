@@ -3,10 +3,7 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable;
@@ -17,9 +14,9 @@ class Ajax
 {
     use OptionsTrait;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // DataTables - Ajax/Data
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * URL set as the Ajax data source for the table.
@@ -60,9 +57,9 @@ class Ajax
         $this->initOptions();
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return $this
@@ -86,9 +83,9 @@ class Ajax
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Getters && Setters
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return string|null
@@ -141,8 +138,6 @@ class Ajax
     }
 
     /**
-     * @param $method
-     *
      * @return \Sg\DatatablesBundle\Datatable\Ajax
      *
      * @deprecated Use setMethod() instead

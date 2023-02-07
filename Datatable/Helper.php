@@ -3,10 +3,7 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable;
@@ -22,9 +19,9 @@ class Helper
      */
     public static function generateUniqueID($prefix = '')
     {
-        $id = sha1(microtime(true).mt_rand(10000, 90000));
+        $id = sha1(microtime(true) . mt_rand(10000, 90000));
 
-        return $prefix ? $prefix.'-'.$id : $id;
+        return $prefix ? $prefix . '-' . $id : $id;
     }
 
     /**
@@ -45,13 +42,13 @@ class Helper
             // remove needle
             $value = str_replace('].', '', $value);
             // format value
-            $value = '['.str_replace('.', '][', $value).']';
+            $value = '[' . str_replace('.', '][', $value) . ']';
 
             $data = $before;
         }
 
         // e.g. 'createdBy.allowed' => [createdBy][allowed]
-        return '['.str_replace('.', '][', $data).']';
+        return '[' . str_replace('.', '][', $data) . ']';
     }
 
     /**
@@ -68,6 +65,6 @@ class Helper
         $objectValue = str_replace('][', '.', $value);
         $objectValue = str_replace(['[', ']'], '', $objectValue);
 
-        return str_replace(['[', ']'], '', $path).'['.$key.'].'.$objectValue;
+        return str_replace(['[', ']'], '', $path) . '[' . $key . '].' . $objectValue;
     }
 }

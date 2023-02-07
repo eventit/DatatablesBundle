@@ -1,12 +1,9 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable\Column;
@@ -28,9 +25,9 @@ abstract class AbstractColumn implements ColumnInterface
 
     use OptionsTrait;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Column Types
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Identifies a Data Column.
@@ -52,14 +49,14 @@ abstract class AbstractColumn implements ColumnInterface
      */
     public const VIRTUAL_COLUMN = 'virtual';
 
-    //--------------------------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------------
     // DataTables - Columns Options
     // ----------------------------
     // All Column Options are initialized with 'null' - except 'searchable', 'orderable', and 'visible'.
     // These 'null' initialized options uses the default value of the DataTables plugin.
     // 'searchable', 'orderable', and 'visible' are required in the QueryBuilder and are therefore
     // pre-assigned with a value (true or false).
-    //--------------------------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------------
 
     /**
      * Change the cell type created for the column - either TD cells or TH cells.
@@ -177,9 +174,9 @@ abstract class AbstractColumn implements ColumnInterface
      */
     protected $width;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Custom Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Join type (default: 'leftJoin'), if the column represents an association.
@@ -207,9 +204,9 @@ abstract class AbstractColumn implements ColumnInterface
      */
     protected $dql;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Extensions Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Set column's visibility priority.
@@ -220,9 +217,9 @@ abstract class AbstractColumn implements ColumnInterface
      */
     protected $responsivePriority;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Other Properties
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * True if DQL option is provided.
@@ -298,15 +295,15 @@ abstract class AbstractColumn implements ColumnInterface
     protected $sentInResponse;
 
     /**
-     * The group name of search columns to look at in a column search
+     * The group name of search columns to look at in a column search.
      *
-     * @var null|string
+     * @var string|null
      */
     protected $searchColumnGroup;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return $this
@@ -356,7 +353,7 @@ abstract class AbstractColumn implements ColumnInterface
         $resolver->setAllowedTypes('type_of_field', ['null', 'string']);
         $resolver->setAllowedTypes('responsive_priority', ['null', 'int']);
         $resolver->setAllowedTypes('sent_in_response', ['bool']);
-        $resolver->setAllowedTypes('search_column_group', array('null', 'string'));
+        $resolver->setAllowedTypes('search_column_group', ['null', 'string']);
 
         $resolver->setAllowedValues('cell_type', [null, 'th', 'td']);
         $resolver->setAllowedValues('join_type', [null, 'join', 'leftJoin', 'innerJoin']);
@@ -365,9 +362,9 @@ abstract class AbstractColumn implements ColumnInterface
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // ColumnInterface
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * {@inheritdoc}
@@ -483,9 +480,9 @@ abstract class AbstractColumn implements ColumnInterface
         return false;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Getters && Setters
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return string|null
@@ -1040,20 +1037,20 @@ abstract class AbstractColumn implements ColumnInterface
     }
 
     /**
-     * Get the group name of columns to look at in a column search
+     * Get the group name of columns to look at in a column search.
      *
-     * @return null|string
+     * @return string|null
      */
     public function getSearchColumnGroup()
     {
         return $this->searchColumnGroup;
     }
 
-
     /**
-     * Set the group name of columns to look at in a column search
+     * Set the group name of columns to look at in a column search.
      *
-     * @param null|string $searchColumnGroup
+     * @param string|null $searchColumnGroup
+     *
      * @return $this
      */
     public function setSearchColumnGroup($searchColumnGroup)

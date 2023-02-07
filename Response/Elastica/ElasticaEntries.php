@@ -1,10 +1,18 @@
 <?php
 
+/*
+ * This file is part of the SgDatatablesBundle package.
+ *
+ * <https://github.com/eventit/DatatablesBundle>
+ */
+
 namespace Sg\DatatablesBundle\Response\Elastica;
 
+use ArrayIterator;
+use IteratorAggregate;
 use Traversable;
 
-class ElasticaEntries implements \IteratorAggregate
+class ElasticaEntries implements IteratorAggregate
 {
     /** @var int */
     protected $count = 0;
@@ -12,38 +20,24 @@ class ElasticaEntries implements \IteratorAggregate
     /** @var array */
     protected $entries = [];
 
-    /** @return int */
     public function getCount(): int
     {
         return $this->count;
     }
 
-    /**
-     * @param int $count
-     *
-     * @return ElasticaEntries
-     */
-    public function setCount(int $count): ElasticaEntries
+    public function setCount(int $count): self
     {
         $this->count = $count;
 
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getEntries(): array
     {
         return $this->entries;
     }
 
-    /**
-     * @param array $entries
-     *
-     * @return ElasticaEntries
-     */
-    public function setEntries(array $entries): ElasticaEntries
+    public function setEntries(array $entries): self
     {
         $this->entries = $entries;
 
@@ -51,10 +45,10 @@ class ElasticaEntries implements \IteratorAggregate
     }
 
     /**
-     * @return \ArrayIterator|Traversable
+     * @return ArrayIterator|Traversable
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->getEntries());
+        return new ArrayIterator($this->getEntries());
     }
 }

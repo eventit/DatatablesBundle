@@ -1,12 +1,9 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable;
@@ -17,12 +14,12 @@ class Options
 {
     use OptionsTrait;
 
-    //--------------------------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------------
     // DataTables - Options
     // --------------------
     // All DataTables Options are initialized with 'null'.
     // These 'null' initialized options uses the default value of the DataTables plugin.
-    //--------------------------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------------
 
     /**
      * Delay the loading of server-side data until second draw.
@@ -190,9 +187,9 @@ class Options
      */
     protected $stripeClasses;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Custom Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * To define the style for the table.
@@ -228,7 +225,7 @@ class Options
 
     /**
      * Enable or disable individual filtering with search column groups
-     * Default: false
+     * Default: false.
      *
      * @var bool
      */
@@ -247,9 +244,9 @@ class Options
         $this->initOptions();
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return $this
@@ -281,7 +278,7 @@ class Options
             'search_in_non_visible_columns' => false,
             'global_search_type' => 'like',
             'search_column_group_filtering' => false,
-         ]);
+        ]);
 
         $resolver->setAllowedTypes('defer_loading', ['null', 'int', 'array']);
         $resolver->setAllowedTypes('display_start', ['null', 'int']);
@@ -314,9 +311,9 @@ class Options
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Getters && Setters
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return array|int|null
@@ -801,7 +798,7 @@ class Options
     /**
      * Get searchColumnGroupFiltering.
      *
-     * @return boolean
+     * @return bool
      */
     public function isSearchColumnGroupFiltering()
     {
@@ -811,7 +808,7 @@ class Options
     /**
      * Set searchColumnGroupFiltering.
      *
-     * @param boolean $searchColumnGroupFiltering
+     * @param bool $searchColumnGroupFiltering
      *
      * @return $this
      */

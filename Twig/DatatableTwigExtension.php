@@ -1,12 +1,9 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Twig;
@@ -19,7 +16,6 @@ use Sg\DatatablesBundle\Datatable\Extensions;
 use Sg\DatatablesBundle\Datatable\Filter\FilterInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
-use Twig\Environment as Twig_Extension;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -91,12 +87,6 @@ class DatatableTwigExtension extends AbstractExtension
         ];
     }
 
-    /**
-     * @param Twig_Environment $twig
-     * @param DatatableInterface $datatable
-     *
-     * @return string
-     */
     public function datatablesRender(Twig_Environment $twig, DatatableInterface $datatable): string
     {
         return $twig->render(
@@ -107,12 +97,6 @@ class DatatableTwigExtension extends AbstractExtension
         );
     }
 
-    /**
-     * @param Twig_Environment $twig
-     * @param DatatableInterface $datatable
-     *
-     * @return string
-     */
     public function datatablesRenderHtml(Twig_Environment $twig, DatatableInterface $datatable): string
     {
         return $twig->render(
@@ -123,12 +107,6 @@ class DatatableTwigExtension extends AbstractExtension
         );
     }
 
-    /**
-     * @param Twig_Environment $twig
-     * @param DatatableInterface $datatable
-     *
-     * @return string
-     */
     public function datatablesRenderJs(Twig_Environment $twig, DatatableInterface $datatable): string
     {
         return $twig->render(
@@ -139,12 +117,6 @@ class DatatableTwigExtension extends AbstractExtension
         );
     }
 
-    /**
-     * @param Twig_Environment $twig
-     * @param DatatableInterface $datatable
-     *
-     * @return string
-     */
     public function datatablesRenderExtensions(Twig_Environment $twig, DatatableInterface $datatable): string
     {
         /** @var Extensions $extensionRegistry */
@@ -152,7 +124,7 @@ class DatatableTwigExtension extends AbstractExtension
         $jsParts = [];
 
         foreach ($extensionRegistry->getExtensions() as $extension) {
-            if (!$extension->isEnabled()) {
+            if (! $extension->isEnabled()) {
                 continue;
             }
             $config = $extension->getJavaScriptConfiguration();
@@ -165,12 +137,7 @@ class DatatableTwigExtension extends AbstractExtension
     }
 
     /**
-     * @param Twig_Environment $twig
-     * @param DatatableInterface $datatable
-     * @param ColumnInterface $column
      * @param string $position
-     *
-     * @return string
      */
     public function datatablesRenderFilter(
         Twig_Environment $twig,
@@ -202,11 +169,7 @@ class DatatableTwigExtension extends AbstractExtension
     }
 
     /**
-     * @param Twig_Environment $twig
-     * @param ColumnInterface $multiselectColumn
      * @param int $pipeline
-     *
-     * @return string
      */
     public function datatablesRenderMultiselectActions(
         Twig_Environment $twig,
@@ -263,9 +226,7 @@ class DatatableTwigExtension extends AbstractExtension
     }
 
     /**
-     * Renders: {{ var ? 'true' : 'false' }}
-     *
-     * @param mixed $value
+     * Renders: {{ var ? 'true' : 'false' }}.
      *
      * @return string
      */

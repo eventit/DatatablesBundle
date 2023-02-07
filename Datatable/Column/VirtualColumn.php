@@ -1,20 +1,17 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable\Column;
 
 use Doctrine\DBAL\Types\Type as DoctrineType;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\OptionsResolver\Options;
 use Exception;
+use Symfony\Component\OptionsResolver\Options;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class VirtualColumn extends Column
 {
@@ -35,13 +32,13 @@ class VirtualColumn extends Column
     /**
      * Order field type.
      *
-     * @var null|string
+     * @var string|null
      */
     protected $orderColumnTypeOfField;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return $this
@@ -65,7 +62,7 @@ class VirtualColumn extends Column
         $resolver->setAllowedTypes('order_column', ['null', 'string', 'array']);
         $resolver->setAllowedTypes('search_column', ['null', 'string', 'array']);
 
-        $resolver->setAllowedValues('order_column_type_of_field', array_merge(array(null), array_keys(DoctrineType::getTypesMap())));
+        $resolver->setAllowedValues('order_column_type_of_field', array_merge([null], array_keys(DoctrineType::getTypesMap())));
 
         $resolver->setNormalizer('orderable', function (Options $options, $value) {
             if (null === $options['order_column'] && true === $value) {
@@ -86,9 +83,9 @@ class VirtualColumn extends Column
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // ColumnInterface
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * {@inheritdoc}
@@ -106,9 +103,9 @@ class VirtualColumn extends Column
         return parent::VIRTUAL_COLUMN;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Getters && Setters
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return string|null
@@ -150,11 +147,10 @@ class VirtualColumn extends Column
         return $this;
     }
 
-
     /**
-     * Get orderColumnTypeOfField
+     * Get orderColumnTypeOfField.
      *
-     * @return null|string
+     * @return string|null
      */
     public function getOrderColumnTypeOfField()
     {
@@ -162,11 +158,9 @@ class VirtualColumn extends Column
     }
 
     /**
-     * Set orderColumnTypeOfField
+     * Set orderColumnTypeOfField.
      *
-     * @param null|string $orderColumnTypeOfField
-     *
-     * @return VirtualColumn
+     * @param string|null $orderColumnTypeOfField
      */
     public function setOrderColumnTypeOfField($orderColumnTypeOfField): self
     {

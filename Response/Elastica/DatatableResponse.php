@@ -1,17 +1,25 @@
 <?php
 
+/*
+ * This file is part of the SgDatatablesBundle package.
+ *
+ * <https://github.com/eventit/DatatablesBundle>
+ */
+
 namespace Sg\DatatablesBundle\Response\Elastica;
 
+use Exception;
 use FOS\ElasticaBundle\Finder\PaginatedFinderInterface;
 use Sg\DatatablesBundle\Model\ModelDefinitionInterface;
 use Sg\DatatablesBundle\Response\AbstractDatatableQueryBuilder;
 use Sg\DatatablesBundle\Response\AbstractDatatableResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use UnexpectedValueException;
 
 class DatatableResponse extends AbstractDatatableResponse
 {
-    /** @var AbstractDatatableQueryBuilder $datatableQueryBuilder */
-    /** @var PaginatedFinderInterface $paginatedFinder */
+    /** @var AbstractDatatableQueryBuilder */
+    /** @var PaginatedFinderInterface */
     protected $paginatedFinder;
 
     /** @var string */
@@ -23,11 +31,6 @@ class DatatableResponse extends AbstractDatatableResponse
     /** @var bool */
     protected $countAllResults;
 
-    /**
-     * @param PaginatedFinderInterface $paginatedFinder
-     *
-     * @return DatatableResponse
-     */
     public function setPaginatedFinder(PaginatedFinderInterface $paginatedFinder): self
     {
         $this->paginatedFinder = $paginatedFinder;
@@ -35,11 +38,6 @@ class DatatableResponse extends AbstractDatatableResponse
         return $this;
     }
 
-    /**
-     * @param string $datatableQueryBuilderClass
-     *
-     * @return DatatableResponse
-     */
     public function setDatatableQueryBuilderClass(string $datatableQueryBuilderClass): self
     {
         $this->datatableQueryBuilderClass = $datatableQueryBuilderClass;
@@ -47,11 +45,6 @@ class DatatableResponse extends AbstractDatatableResponse
         return $this;
     }
 
-    /**
-     * @param ModelDefinitionInterface $modelDefinition
-     *
-     * @return DatatableResponse
-     */
     public function setModelDefinition(ModelDefinitionInterface $modelDefinition): self
     {
         $this->modelDefinition = $modelDefinition;
@@ -59,11 +52,6 @@ class DatatableResponse extends AbstractDatatableResponse
         return $this;
     }
 
-    /**
-     * @param bool $countAllResults
-     *
-     * @return DatatableResponse
-     */
     public function setCountAllResults(bool $countAllResults): self
     {
         $this->countAllResults = $countAllResults;
@@ -79,8 +67,7 @@ class DatatableResponse extends AbstractDatatableResponse
     /**
      * @param bool $countAllResults
      *
-     * @return JsonResponse
-     * @throws \Exception
+     * @throws Exception
      */
     public function getResponse($countAllResults = true): JsonResponse
     {
@@ -90,7 +77,7 @@ class DatatableResponse extends AbstractDatatableResponse
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getJsonResponse(): JsonResponse
     {
@@ -106,7 +93,7 @@ class DatatableResponse extends AbstractDatatableResponse
         $formatter->runFormatter($entries, $this->datatable);
 
         $outputHeader = [
-            'draw' => (int)$this->requestParams['draw'],
+            'draw' => (int) $this->requestParams['draw'],
             'recordsFiltered' => $entries->getCount(),
             'recordsTotal' => true === $this->countAllResults ? $this->datatableQueryBuilder->getCountAllResults() : 0,
         ];
@@ -118,17 +105,18 @@ class DatatableResponse extends AbstractDatatableResponse
     }
 
     /**
+     * @throws Exception
+     *
      * @return DatatableQueryBuilder
-     * @throws \Exception
      */
     protected function createDatatableQueryBuilder(): AbstractDatatableQueryBuilder
     {
         if (null === $this->datatable) {
-            throw new \UnexpectedValueException('Elastica\DatatableResponse::getDatatableQueryBuilder(): Set a Datatable class with setDatatable().');
+            throw new UnexpectedValueException('Elastica\DatatableResponse::getDatatableQueryBuilder(): Set a Datatable class with setDatatable().');
         }
 
         if (null === $this->datatableQueryBuilderClass) {
-            throw new \UnexpectedValueException('Elastica\DatatableResponse::getDatatableQueryBuilder(): Set a datatableQueryBuilderClass first.');
+            throw new UnexpectedValueException('Elastica\DatatableResponse::getDatatableQueryBuilder(): Set a datatableQueryBuilderClass first.');
         }
 
         $this->requestParams = $this->getRequestParams();

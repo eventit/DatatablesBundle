@@ -3,10 +3,7 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable\Column;
@@ -84,9 +81,9 @@ class ImageColumn extends AbstractColumn
      */
     protected $enlarge;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // ColumnInterface
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * {@inheritdoc}
@@ -120,13 +117,13 @@ class ImageColumn extends AbstractColumn
 
             if (\count($images) > 0) {
                 foreach ($images as $key => $image) {
-                    $currentPath = $path.'['.$key.']'.$value;
+                    $currentPath = $path . '[' . $key . ']' . $value;
                     $content = $this->renderImageTemplate($this->accessor->getValue($row, $currentPath), '-gallery-image');
                     $this->accessor->setValue($row, $currentPath, $content);
                 }
             } else {
                 // create an entry for the placeholder image
-                $currentPath = $path.'[0]'.$value;
+                $currentPath = $path . '[0]' . $value;
                 $content = $this->renderImageTemplate(null, '-gallery-image');
                 $this->accessor->setValue($row, $currentPath, $content);
             }
@@ -143,9 +140,9 @@ class ImageColumn extends AbstractColumn
         return '@SgDatatables/render/thumb.html.twig';
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return $this
@@ -186,9 +183,9 @@ class ImageColumn extends AbstractColumn
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Getters && Setters
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return string
@@ -330,9 +327,9 @@ class ImageColumn extends AbstractColumn
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Helper
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Render image template.
@@ -349,7 +346,7 @@ class ImageColumn extends AbstractColumn
             [
                 'data' => $data,
                 'image' => $this,
-                'image_class' => 'sg-datatables-'.$this->getDatatableName().$classSuffix,
+                'image_class' => 'sg-datatables-' . $this->getDatatableName() . $classSuffix,
             ]
         );
     }

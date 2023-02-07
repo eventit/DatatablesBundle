@@ -3,15 +3,13 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Tests;
 
 use Doctrine\ORM\EntityManager;
+use LogicException;
 use ReflectionClass;
 use Sg\DatatablesBundle\Datatable\AbstractDatatable;
 use Sg\DatatablesBundle\Tests\Datatables\PostDatatable;
@@ -23,6 +21,7 @@ use Twig\Environment;
 
 /**
  * @internal
+ *
  * @coversNothing
  */
 final class DatatableTest extends \PHPUnit\Framework\TestCase
@@ -106,7 +105,7 @@ final class DatatableTest extends \PHPUnit\Framework\TestCase
 
         $refledtionClass = new ReflectionClass(AbstractDatatable::class);
         $constructor = $refledtionClass->getConstructor();
-        $this->expectException(\LogicException::class);
+        $this->expectException(LogicException::class);
         $constructor->invoke($mock, $authorizationChecker, $securityToken, $translator, $router, $em, $twig);
     }
 

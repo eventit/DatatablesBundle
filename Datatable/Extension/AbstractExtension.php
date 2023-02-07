@@ -1,5 +1,11 @@
 <?php
 
+/*
+ * This file is part of the SgDatatablesBundle package.
+ *
+ * <https://github.com/eventit/DatatablesBundle>
+ */
+
 namespace Sg\DatatablesBundle\Datatable\Extension;
 
 use Sg\DatatablesBundle\Datatable\OptionsTrait;
@@ -14,9 +20,6 @@ abstract class AbstractExtension implements ExtensionInterface
     /** @var bool */
     protected $enabled;
 
-    /**
-     * @param $name
-     */
     public function __construct($name)
     {
         $this->name = $name;
@@ -26,7 +29,7 @@ abstract class AbstractExtension implements ExtensionInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function setName(string $name): ExtensionInterface
     {
@@ -36,7 +39,7 @@ abstract class AbstractExtension implements ExtensionInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getName(): string
     {
@@ -44,7 +47,7 @@ abstract class AbstractExtension implements ExtensionInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function setOptions(array $options): ExtensionInterface
     {
@@ -54,7 +57,7 @@ abstract class AbstractExtension implements ExtensionInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function isEnabled(): bool
     {
@@ -62,7 +65,7 @@ abstract class AbstractExtension implements ExtensionInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function setEnabled(bool $enabled): ExtensionInterface
     {
@@ -72,7 +75,7 @@ abstract class AbstractExtension implements ExtensionInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getJavaScriptConfiguration(array $config = []): array
     {

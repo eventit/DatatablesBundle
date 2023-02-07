@@ -3,13 +3,12 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable\Column;
+
+use DateTime;
 
 class ArrayColumn extends Column
 {
@@ -36,7 +35,7 @@ class ArrayColumn extends Column
             }
 
             if ($isArrayAssociative) {
-                $arrayField .= $key.': ';
+                $arrayField .= $key . ': ';
             }
 
             if (\is_array($arrayElement)) {
@@ -47,13 +46,13 @@ class ArrayColumn extends Column
                 continue;
             }
 
-            if ($arrayElement instanceof \DateTime) {
-                $arrayField .= $arrayElement->format('Y-m-d').'<br/>';
+            if ($arrayElement instanceof DateTime) {
+                $arrayField .= $arrayElement->format('Y-m-d') . '<br/>';
 
                 continue;
             }
 
-            $arrayField .= $arrayElement.'<br/>';
+            $arrayField .= $arrayElement . '<br/>';
         }
 
         return $arrayField;

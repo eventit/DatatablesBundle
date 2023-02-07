@@ -3,14 +3,12 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Tests\Datatables;
 
+use NumberFormatter;
 use Sg\DatatablesBundle\Datatable\AbstractDatatable;
 use Sg\DatatablesBundle\Datatable\Column\ActionColumn;
 use Sg\DatatablesBundle\Datatable\Column\AttributeColumn;
@@ -65,7 +63,7 @@ class PostDatatable extends AbstractDatatable
             ])
             ->add('number', NumberColumn::class, [
                 'title' => 'NumberColumn',
-                'formatter' => new \NumberFormatter('en_US', \NumberFormatter::DECIMAL),
+                'formatter' => new NumberFormatter('en_US', NumberFormatter::DECIMAL),
             ])
             ->add('virtual', VirtualColumn::class, [
                 'title' => 'VirtualColumn',

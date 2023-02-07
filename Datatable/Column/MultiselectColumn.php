@@ -3,10 +3,7 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable\Column;
@@ -53,9 +50,9 @@ class MultiselectColumn extends ActionColumn
      */
     protected $renderActionsToId;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // ColumnInterface
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * {@inheritdoc}
@@ -93,7 +90,7 @@ class MultiselectColumn extends ActionColumn
         }
 
         if (true === $this->valuePrefix) {
-            $value = 'sg-datatables-'.$this->getDatatableName().'-checkbox-'.$value;
+            $value = 'sg-datatables-' . $this->getDatatableName() . '-checkbox-' . $value;
         }
 
         $row[$this->getIndex()] = $this->twig->render(
@@ -132,9 +129,9 @@ class MultiselectColumn extends ActionColumn
         return parent::MULTISELECT_COLUMN;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Configure options.
@@ -165,9 +162,9 @@ class MultiselectColumn extends ActionColumn
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Getters && Setters
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @throws Exception
@@ -217,7 +214,7 @@ class MultiselectColumn extends ActionColumn
      */
     public function setAttributes($attributes)
     {
-        $value = 'sg-datatables-'.$this->datatableName.'-multiselect-checkbox';
+        $value = 'sg-datatables-' . $this->datatableName . '-multiselect-checkbox';
 
         if (\is_array($attributes)) {
             if (\array_key_exists('type', $attributes)) {
@@ -229,17 +226,17 @@ class MultiselectColumn extends ActionColumn
             }
 
             if (\array_key_exists('name', $attributes)) {
-                $attributes['name'] = $attributes['name'].'[]';
+                $attributes['name'] = $attributes['name'] . '[]';
             } else {
-                $attributes['name'] = $value.'[]';
+                $attributes['name'] = $value . '[]';
             }
             if (\array_key_exists('class', $attributes)) {
-                $attributes['class'] = $value.' '.$attributes['class'];
+                $attributes['class'] = $value . ' ' . $attributes['class'];
             } else {
                 $attributes['class'] = $value;
             }
         } else {
-            $attributes['name'] = $value.'[]';
+            $attributes['name'] = $value . '[]';
             $attributes['class'] = $value;
         }
 

@@ -3,14 +3,12 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable\Column;
 
+use NumberFormatter;
 use Sg\DatatablesBundle\Datatable\Helper;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -20,7 +18,7 @@ class NumberColumn extends Column
      * A NumberFormatter instance.
      * A required option.
      *
-     * @var \NumberFormatter
+     * @var NumberFormatter
      */
     protected $formatter;
 
@@ -40,9 +38,9 @@ class NumberColumn extends Column
      */
     protected $currency;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // ColumnInterface
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * {@inheritdoc}
@@ -77,7 +75,7 @@ class NumberColumn extends Column
         if ($this->accessor->isReadable($row, $path)) {
             if (\count($entries) > 0) {
                 foreach ($entries as $key => $entry) {
-                    $currentPath = $path.'['.$key.']'.$value;
+                    $currentPath = $path . '[' . $key . ']' . $value;
                     $currentObjectPath = Helper::getPropertyPathObjectNotation($path, $key, $value);
 
                     if (true === $this->isEditableContentRequired($row)) {
@@ -99,9 +97,9 @@ class NumberColumn extends Column
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return $this
@@ -124,7 +122,7 @@ class NumberColumn extends Column
         $resolver->setAllowedTypes('currency', ['null', 'string']);
 
         $resolver->setAllowedValues('formatter', function ($formatter) {
-            if (! $formatter instanceof \NumberFormatter) {
+            if (! $formatter instanceof NumberFormatter) {
                 return false;
             }
 
@@ -134,12 +132,12 @@ class NumberColumn extends Column
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Getters && Setters
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
-     * @return \NumberFormatter
+     * @return NumberFormatter
      */
     public function getFormatter()
     {
@@ -149,7 +147,7 @@ class NumberColumn extends Column
     /**
      * @return $this
      */
-    public function setFormatter(\NumberFormatter $formatter)
+    public function setFormatter(NumberFormatter $formatter)
     {
         $this->formatter = $formatter;
 
@@ -196,9 +194,9 @@ class NumberColumn extends Column
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Helper
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Render template.
@@ -217,7 +215,7 @@ class NumberColumn extends Column
             }
 
             if (null === $this->currency) {
-                $this->currency = $this->formatter->getSymbol(\NumberFormatter::INTL_CURRENCY_SYMBOL);
+                $this->currency = $this->formatter->getSymbol(NumberFormatter::INTL_CURRENCY_SYMBOL);
             }
 
             $data = $this->formatter->formatCurrency($data, $this->currency);

@@ -3,10 +3,7 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable\Column;
@@ -34,9 +31,9 @@ class ActionColumn extends AbstractColumn
      */
     protected $actions;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // ColumnInterface
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * {@inheritdoc}
@@ -124,7 +121,7 @@ class ActionColumn extends AbstractColumn
                     }
 
                     if (true === $action->isButtonValuePrefix()) {
-                        $values[$actionKey] = 'sg-datatables-'.$this->getDatatableName().'-action-button-'.$actionKey.'-'.$values[$actionKey];
+                        $values[$actionKey] = 'sg-datatables-' . $this->getDatatableName() . '-action-button-' . $actionKey . '-' . $values[$actionKey];
                     }
                 } else {
                     $values[$actionKey] = null;
@@ -170,9 +167,9 @@ class ActionColumn extends AbstractColumn
         return parent::ACTION_COLUMN;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return $this
@@ -210,9 +207,9 @@ class ActionColumn extends AbstractColumn
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Getters && Setters
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return Action[]

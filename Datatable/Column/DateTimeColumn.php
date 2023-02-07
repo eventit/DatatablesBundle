@@ -3,10 +3,7 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable\Column;
@@ -41,9 +38,9 @@ class DateTimeColumn extends AbstractColumn
      */
     protected $timeago;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // ColumnInterface
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * {@inheritdoc}
@@ -78,7 +75,7 @@ class DateTimeColumn extends AbstractColumn
 
             if (null !== $entries && \count($entries) > 0) {
                 foreach ($entries as $key => $entry) {
-                    $currentPath = $path.'['.$key.']'.$value;
+                    $currentPath = $path . '[' . $key . ']' . $value;
                     $currentObjectPath = Helper::getPropertyPathObjectNotation($path, $key, $value);
 
                     if (true === $this->isEditableContentRequired($row)) {
@@ -129,9 +126,9 @@ class DateTimeColumn extends AbstractColumn
         return null;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return $this
@@ -155,9 +152,9 @@ class DateTimeColumn extends AbstractColumn
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Getters && Setters
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Get date format.
@@ -209,9 +206,9 @@ class DateTimeColumn extends AbstractColumn
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Helper
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Render template.

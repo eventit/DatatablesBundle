@@ -1,12 +1,9 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable\Extension;
@@ -54,8 +51,6 @@ class Button extends AbstractExtension
     }
 
     /**
-     * @param OptionsResolver $resolver
-     *
      * @return $this
      */
     public function configureOptions(OptionsResolver $resolver): ExtensionInterface
@@ -142,7 +137,7 @@ class Button extends AbstractExtension
     }
 
     /**
-     * @return null|string
+     * @return string|null
      */
     public function getClassName()
     {
@@ -150,7 +145,7 @@ class Button extends AbstractExtension
     }
 
     /**
-     * @param null|string $className
+     * @param string|null $className
      *
      * @return $this
      */
@@ -186,7 +181,7 @@ class Button extends AbstractExtension
     }
 
     /**
-     * @return null|string
+     * @return string|null
      */
     public function getExtend()
     {
@@ -194,7 +189,7 @@ class Button extends AbstractExtension
     }
 
     /**
-     * @param null|string $extend
+     * @param string|null $extend
      *
      * @return $this
      */
@@ -230,7 +225,7 @@ class Button extends AbstractExtension
     }
 
     /**
-     * @return null|string
+     * @return string|null
      */
     public function getKey()
     {
@@ -238,7 +233,7 @@ class Button extends AbstractExtension
     }
 
     /**
-     * @param null|string $key
+     * @param string|null $key
      *
      * @return $this
      */
@@ -250,7 +245,7 @@ class Button extends AbstractExtension
     }
 
     /**
-     * @return null|string
+     * @return string|null
      */
     public function getNamespace()
     {
@@ -258,7 +253,7 @@ class Button extends AbstractExtension
     }
 
     /**
-     * @param null|string $namespace
+     * @param string|null $namespace
      *
      * @return $this
      */
@@ -270,7 +265,7 @@ class Button extends AbstractExtension
     }
 
     /**
-     * @return null|string
+     * @return string|null
      */
     public function getText()
     {
@@ -278,7 +273,7 @@ class Button extends AbstractExtension
     }
 
     /**
-     * @param null|string $text
+     * @param string|null $text
      *
      * @return $this
      */
@@ -290,7 +285,7 @@ class Button extends AbstractExtension
     }
 
     /**
-     * @return null|string
+     * @return string|null
      */
     public function getTitleAttr()
     {
@@ -298,7 +293,7 @@ class Button extends AbstractExtension
     }
 
     /**
-     * @param null|string $titleAttr
+     * @param string|null $titleAttr
      *
      * @return $this
      */
@@ -330,7 +325,7 @@ class Button extends AbstractExtension
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getJavaScriptConfiguration(array $config = []): array
     {

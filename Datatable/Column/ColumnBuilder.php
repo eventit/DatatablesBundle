@@ -1,12 +1,9 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable\Column;
@@ -102,9 +99,9 @@ class ColumnBuilder
         $this->entityClassName = $metadata->getName();
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Builder
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Add Column.
@@ -153,9 +150,9 @@ class ColumnBuilder
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Getters && Setters
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return array
@@ -185,9 +182,9 @@ class ColumnBuilder
         return \array_key_exists($columnType, $this->uniqueColumns) ? $this->uniqueColumns[$columnType] : null;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Helper
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @param string $entityName
@@ -201,7 +198,7 @@ class ColumnBuilder
         try {
             $metadata = $this->em->getMetadataFactory()->getMetadataFor($entityName);
         } catch (MappingException $e) {
-            throw new Exception('DatatableQueryBuilder::getMetadata(): Given object '.$entityName.' is not a Doctrine Entity.');
+            throw new Exception('DatatableQueryBuilder::getMetadata(): Given object ' . $entityName . ' is not a Doctrine Entity.');
         }
 
         return $metadata;

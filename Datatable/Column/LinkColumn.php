@@ -3,10 +3,7 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable\Column;
@@ -68,9 +65,9 @@ class LinkColumn extends AbstractColumn
      */
     protected $email;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // ColumnInterface
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * {@inheritdoc}
@@ -143,7 +140,7 @@ class LinkColumn extends AbstractColumn
 
                 if (\count($entries) > 0) {
                     foreach ($entries as $key => $entry) {
-                        $currentPath = $path.'['.$key.']'.$value;
+                        $currentPath = $path . '[' . $key . ']' . $value;
                         $currentObjectPath = Helper::getPropertyPathObjectNotation($path, $key, $value);
 
                         $content = $this->renderTemplate(
@@ -155,7 +152,7 @@ class LinkColumn extends AbstractColumn
                         $this->accessor->setValue($row, $currentPath, $content);
                     }
                 }
-                // no placeholder - leave this blank
+            // no placeholder - leave this blank
             } else {
                 if (null !== $this->getFilterFunction()) {
                     $entries = array_values(array_filter($entries, $this->getFilterFunction()));
@@ -222,9 +219,9 @@ class LinkColumn extends AbstractColumn
         return parent::ACTION_COLUMN;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return $this
@@ -412,9 +409,9 @@ class LinkColumn extends AbstractColumn
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Helper
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Render template.

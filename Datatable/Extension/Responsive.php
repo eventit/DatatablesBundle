@@ -1,17 +1,15 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable\Extension;
 
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use UnexpectedValueException;
 
 class Responsive extends AbstractExtension
 {
@@ -24,8 +22,6 @@ class Responsive extends AbstractExtension
     }
 
     /**
-     * @param OptionsResolver $resolver
-     *
      * @return $this
      */
     public function configureOptions(OptionsResolver $resolver): ExtensionInterface
@@ -56,7 +52,7 @@ class Responsive extends AbstractExtension
         if (\is_array($details)) {
             foreach ($details as $key => $value) {
                 if (false === \in_array($key, ['type', 'target', 'renderer', 'display'], true)) {
-                    throw new \UnexpectedValueException(
+                    throw new UnexpectedValueException(
                         "Responsive::setDetails(): {$key} is not an valid option."
                     );
                 }
@@ -76,11 +72,6 @@ class Responsive extends AbstractExtension
         return $this;
     }
 
-    /**
-     * @param array $config
-     *
-     * @return array
-     */
     public function getJavaScriptConfiguration(array $config = []): array
     {
         if (null !== $this->getDetails()) {

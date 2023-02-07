@@ -3,18 +3,19 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Tests\Column;
 
+use DateTime;
+use ReflectionClass;
+use ReflectionException;
 use Sg\DatatablesBundle\Datatable\Column\ArrayColumn;
 
 /**
  * @internal
+ *
  * @coversNothing
  */
 final class ArrayColumnTest extends \PHPUnit\Framework\TestCase
@@ -29,20 +30,17 @@ final class ArrayColumnTest extends \PHPUnit\Framework\TestCase
     public function testArrayToString()
     {
         $arrayColumn = new ArrayColumn();
-        $result = $this->callMethod($arrayColumn, 'arrayToString', [['a', 'b' => ['d' => new \DateTime()]]]);
+        $result = $this->callMethod($arrayColumn, 'arrayToString', [['a', 'b' => ['d' => new DateTime()]]]);
         static::assertNotEmpty($result);
         static::assertIsString($result);
     }
 
     /**
-     * @param $obj
-     * @param $name
-     *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public static function callMethod($obj, $name, array $args)
     {
-        $class = new \ReflectionClass($obj);
+        $class = new ReflectionClass($obj);
         $method = $class->getMethod($name);
         $method->setAccessible(true);
 

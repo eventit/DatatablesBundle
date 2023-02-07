@@ -1,23 +1,21 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable;
 
+use Exception;
 use Sg\DatatablesBundle\Datatable\Extension\Buttons;
 use Sg\DatatablesBundle\Datatable\Extension\Exception\ExtensionAlreadyRegisteredException;
 use Sg\DatatablesBundle\Datatable\Extension\ExtensionInterface;
 use Sg\DatatablesBundle\Datatable\Extension\FixedHeaderFooter;
 use Sg\DatatablesBundle\Datatable\Extension\Responsive;
-use Sg\DatatablesBundle\Datatable\Extension\Select;
 use Sg\DatatablesBundle\Datatable\Extension\RowGroup;
+use Sg\DatatablesBundle\Datatable\Extension\Select;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class Extensions
@@ -71,8 +69,6 @@ class Extensions
     }
 
     /**
-     * @param OptionsResolver $resolver
-     *
      * @return $this
      */
     public function configureOptions(OptionsResolver $resolver): self
@@ -98,7 +94,7 @@ class Extensions
     }
 
     /**
-     * @return null|array|bool|Buttons
+     * @return array|bool|Buttons|null
      */
     public function getButtons()
     {
@@ -106,10 +102,11 @@ class Extensions
     }
 
     /**
-     * @param null|array|bool $buttons
+     * @param array|bool|null $buttons
+     *
+     * @throws Exception
      *
      * @return $this
-     * @throws \Exception
      */
     public function setButtons($buttons)
     {
@@ -124,7 +121,7 @@ class Extensions
     }
 
     /**
-     * @return null|array|bool|Responsive
+     * @return array|bool|Responsive|null
      */
     public function getResponsive()
     {
@@ -132,7 +129,7 @@ class Extensions
     }
 
     /**
-     * @param null|array|bool $responsive
+     * @param array|bool|null $responsive
      *
      * @return $this
      */
@@ -149,10 +146,7 @@ class Extensions
     }
 
     /**
-     * @param ExtensionInterface $extension
-     *
-     * @return Extensions
-     * @throws \Exception
+     * @throws Exception
      */
     public function addExtension(ExtensionInterface $extension): self
     {
@@ -172,14 +166,11 @@ class Extensions
     }
 
     /**
-     * @param string $name
-     *
-     * @return ExtensionInterface
-     * @throws \Exception
+     * @throws Exception
      */
     public function getExtension(string $name): ExtensionInterface
     {
-        if (!$this->hasExtension($name)) {
+        if (! $this->hasExtension($name)) {
             throw new ExtensionAlreadyRegisteredException(
                 sprintf(
                     'Extension with name "%s" already registered',
@@ -192,9 +183,7 @@ class Extensions
     }
 
     /**
-     * @param string $name
-     *
-     * @throws \Exception
+     * @throws Exception
      */
     public function enableExtension(string $name)
     {
@@ -202,11 +191,11 @@ class Extensions
     }
 
     /**
-     * @param string $name
      * @param array|bool $options
      *
+     * @throws Exception
+     *
      * @return $this
-     * @throws \Exception
      */
     public function setExtensionOptions(string $name, array $options): self
     {
@@ -217,14 +206,9 @@ class Extensions
         return $this;
     }
 
-    /**
-     * @param string $name
-     *
-     * @return bool
-     */
     public function hasExtension(string $name): bool
     {
-        return array_key_exists($name, $this->extensions);
+        return \array_key_exists($name, $this->extensions);
     }
 
     /**
@@ -236,7 +220,7 @@ class Extensions
     }
 
     /**
-     * @return null|array|bool|Select
+     * @return array|bool|Select|null
      */
     public function getSelect()
     {
@@ -244,7 +228,7 @@ class Extensions
     }
 
     /**
-     * @param null|array|bool $select
+     * @param array|bool|null $select
      *
      * @return $this
      */
@@ -271,7 +255,7 @@ class Extensions
     /**
      * @param array|bool|null $rowGroup
      *
-     * @throws \Exception
+     * @throws Exception
      *
      * @return $this
      */

@@ -3,10 +3,7 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable\Column;
@@ -25,9 +22,9 @@ trait EditableTrait
      */
     protected $editable;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Getters && Setters
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return EditableInterface|null
@@ -68,9 +65,9 @@ trait EditableTrait
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Helper
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Get class selector name for editable.
@@ -79,6 +76,6 @@ trait EditableTrait
      */
     protected function getColumnClassEditableSelector()
     {
-        return 'sg-datatables-'.$this->getDatatableName().'-editable-column-'.$this->index;
+        return 'sg-datatables-' . $this->getDatatableName() . '-editable-column-' . $this->index;
     }
 }

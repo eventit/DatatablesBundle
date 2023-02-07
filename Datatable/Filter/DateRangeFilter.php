@@ -3,10 +3,7 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable\Filter;
@@ -18,9 +15,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class DateRangeFilter extends AbstractFilter
 {
-    //-------------------------------------------------
+    // -------------------------------------------------
     // FilterInterface
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * {@inheritdoc}
@@ -46,9 +43,9 @@ class DateRangeFilter extends AbstractFilter
         return $andExpr;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return $this
@@ -62,9 +59,9 @@ class DateRangeFilter extends AbstractFilter
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Helper
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Returns the type for the <input> element.

@@ -1,13 +1,21 @@
 <?php
 
+/*
+ * This file is part of the SgDatatablesBundle package.
+ *
+ * <https://github.com/eventit/DatatablesBundle>
+ */
+
 namespace Sg\DatatablesBundle\Response;
 
 use Exception;
+use RuntimeException;
 use Sg\DatatablesBundle\Datatable\Column\ColumnInterface;
 use Sg\DatatablesBundle\Datatable\DatatableInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use UnexpectedValueException;
 
 abstract class AbstractDatatableResponse
 {
@@ -23,24 +31,19 @@ abstract class AbstractDatatableResponse
 
     /**
      * A DatatableInterface instance.
-     * Default: null
+     * Default: null.
      *
-     * @var null|DatatableInterface
+     * @var DatatableInterface|null
      */
     protected $datatable;
 
     /**
      * A DatatableQueryBuilder instance.
      * This class generates a Query by given Columns.
-     * Default: null
-     *
-     * @var null|AbstractDatatableQueryBuilder
+     * Default: null.
      */
     protected ?AbstractDatatableQueryBuilder $datatableQueryBuilder = null;
 
-    /**
-     * @param RequestStack $requestStack
-     */
     public function __construct(RequestStack $requestStack)
     {
         $this->request = $requestStack->getCurrentRequest();
@@ -61,25 +64,21 @@ abstract class AbstractDatatableResponse
     ): array;
 
     /**
-     * @return JsonResponse
-     * @throws \Exception
+     * @throws Exception
      */
     abstract public function getJsonResponse(): JsonResponse;
 
     abstract public function resetResponseOptions();
 
     /**
-     * @param DatatableInterface $datatable
-     *
-     * @return AbstractDatatableResponse
-     * @throws \Exception
+     * @throws Exception
      */
-    public function setDatatable(DatatableInterface $datatable): AbstractDatatableResponse
+    public function setDatatable(DatatableInterface $datatable): self
     {
         $val = $this->validateColumnsPositions($datatable);
-        if (is_int($val)) {
-            throw new \RuntimeException("DatatableResponse::setDatatable(): The Column with the index $val is on a not allowed position.");
-        };
+        if (\is_int($val)) {
+            throw new RuntimeException("DatatableResponse::setDatatable(): The Column with the index {$val} is on a not allowed position.");
+        }
 
         $this->datatable = $datatable;
         $this->datatableQueryBuilder = null;
@@ -87,36 +86,32 @@ abstract class AbstractDatatableResponse
         return $this;
     }
 
-    protected function checkResponseDependencies()
-    {
-        if (null === $this->datatable) {
-            throw new \UnexpectedValueException('DatatableResponse::getResponse(): Set a Datatable class with setDatatable().');
-        }
-
-        if (null === $this->datatableQueryBuilder) {
-            throw new \UnexpectedValueException('DatatableResponse::getResponse(): A DatatableQueryBuilder instance is needed. Call getDatatableQueryBuilder().');
-        }
-    }
-
     /**
-     * @return AbstractDatatableQueryBuilder
-     * @throws \Exception
+     * @throws Exception
      */
     public function getDatatableQueryBuilder(): AbstractDatatableQueryBuilder
     {
         return $this->datatableQueryBuilder ?: $this->createDatatableQueryBuilder();
     }
 
+    protected function checkResponseDependencies()
+    {
+        if (null === $this->datatable) {
+            throw new UnexpectedValueException('DatatableResponse::getResponse(): Set a Datatable class with setDatatable().');
+        }
+
+        if (null === $this->datatableQueryBuilder) {
+            throw new UnexpectedValueException('DatatableResponse::getResponse(): A DatatableQueryBuilder instance is needed. Call getDatatableQueryBuilder().');
+        }
+    }
+
     /**
-     * @return AbstractDatatableQueryBuilder
-     * @throws \Exception
+     * @throws Exception
      */
     abstract protected function createDatatableQueryBuilder(): AbstractDatatableQueryBuilder;
 
     /**
      * Get request params.
-     *
-     * @return array
      */
     protected function getRequestParams(): array
     {
@@ -134,29 +129,24 @@ abstract class AbstractDatatableResponse
         return $parameterBag->all();
     }
 
-    /**
-     * @param DatatableInterface $datatable
-     *
-     * @return int|bool
-     */
     protected function validateColumnsPositions(DatatableInterface $datatable): bool|int
     {
         $columns = $datatable->getColumnBuilder()->getColumns();
-        $lastPosition = count($columns);
+        $lastPosition = \count($columns);
 
         /** @var ColumnInterface $column */
         foreach ($columns as $column) {
             $allowedPositions = $column->allowedPositions();
             /** @noinspection PhpUndefinedMethodInspection */
             $index = $column->getIndex();
-            if (is_array($allowedPositions)) {
+            if (\is_array($allowedPositions)) {
                 $allowedPositions = array_flip($allowedPositions);
-                if (array_key_exists(ColumnInterface::LAST_POSITION, $allowedPositions)) {
+                if (\array_key_exists(ColumnInterface::LAST_POSITION, $allowedPositions)) {
                     $allowedPositions[$lastPosition] = $allowedPositions[ColumnInterface::LAST_POSITION];
                     unset($allowedPositions[ColumnInterface::LAST_POSITION]);
                 }
 
-                if (false === array_key_exists($index, $allowedPositions)) {
+                if (false === \array_key_exists($index, $allowedPositions)) {
                     return $index;
                 }
             }

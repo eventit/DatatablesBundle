@@ -3,10 +3,7 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable\Filter;
@@ -83,9 +80,9 @@ abstract class AbstractFilter implements FilterInterface
         $this->initOptions();
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return $this
@@ -115,9 +112,9 @@ abstract class AbstractFilter implements FilterInterface
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Getters && Setters
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return string
@@ -259,9 +256,9 @@ abstract class AbstractFilter implements FilterInterface
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Helper
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Add an or condition.
@@ -348,67 +345,67 @@ abstract class AbstractFilter implements FilterInterface
                     ? $expr->add($qb->expr()->eq(1, 0))
                     // Column skipped from search
                     : $expr
-                ;
+            ;
         }
 
         switch ($searchType) {
             case 'like':
-                $expr->add($qb->expr()->like($searchField, '?'.$parameterCounter));
-                $qb->setParameter($parameterCounter, '%'.$searchValue.'%');
+                $expr->add($qb->expr()->like($searchField, '?' . $parameterCounter));
+                $qb->setParameter($parameterCounter, '%' . $searchValue . '%');
 
                 break;
             case '%like':
-                $expr->add($qb->expr()->like($searchField, '?'.$parameterCounter));
-                $qb->setParameter($parameterCounter, '%'.$searchValue);
+                $expr->add($qb->expr()->like($searchField, '?' . $parameterCounter));
+                $qb->setParameter($parameterCounter, '%' . $searchValue);
 
                 break;
             case 'like%':
-                $expr->add($qb->expr()->like($searchField, '?'.$parameterCounter));
-                $qb->setParameter($parameterCounter, $searchValue.'%');
+                $expr->add($qb->expr()->like($searchField, '?' . $parameterCounter));
+                $qb->setParameter($parameterCounter, $searchValue . '%');
 
                 break;
             case 'notLike':
-                $expr->add($qb->expr()->notLike($searchField, '?'.$parameterCounter));
-                $qb->setParameter($parameterCounter, '%'.$searchValue.'%');
+                $expr->add($qb->expr()->notLike($searchField, '?' . $parameterCounter));
+                $qb->setParameter($parameterCounter, '%' . $searchValue . '%');
 
                 break;
             case 'eq':
-                $expr->add($qb->expr()->eq($searchField, '?'.$parameterCounter));
+                $expr->add($qb->expr()->eq($searchField, '?' . $parameterCounter));
                 $qb->setParameter($parameterCounter, $searchValue);
 
                 break;
             case 'neq':
-                $expr->add($qb->expr()->neq($searchField, '?'.$parameterCounter));
+                $expr->add($qb->expr()->neq($searchField, '?' . $parameterCounter));
                 $qb->setParameter($parameterCounter, $searchValue);
 
                 break;
             case 'lt':
-                $expr->add($qb->expr()->lt($searchField, '?'.$parameterCounter));
+                $expr->add($qb->expr()->lt($searchField, '?' . $parameterCounter));
                 $qb->setParameter($parameterCounter, $searchValue);
 
                 break;
             case 'lte':
-                $expr->add($qb->expr()->lte($searchField, '?'.$parameterCounter));
+                $expr->add($qb->expr()->lte($searchField, '?' . $parameterCounter));
                 $qb->setParameter($parameterCounter, $searchValue);
 
                 break;
             case 'gt':
-                $expr->add($qb->expr()->gt($searchField, '?'.$parameterCounter));
+                $expr->add($qb->expr()->gt($searchField, '?' . $parameterCounter));
                 $qb->setParameter($parameterCounter, $searchValue);
 
                 break;
             case 'gte':
-                $expr->add($qb->expr()->gte($searchField, '?'.$parameterCounter));
+                $expr->add($qb->expr()->gte($searchField, '?' . $parameterCounter));
                 $qb->setParameter($parameterCounter, $searchValue);
 
                 break;
             case 'in':
-                $expr->add($qb->expr()->in($searchField, '?'.$parameterCounter));
+                $expr->add($qb->expr()->in($searchField, '?' . $parameterCounter));
                 $qb->setParameter($parameterCounter, explode(',', $searchValue));
 
                 break;
             case 'notIn':
-                $expr->add($qb->expr()->notIn($searchField, '?'.$parameterCounter));
+                $expr->add($qb->expr()->notIn($searchField, '?' . $parameterCounter));
                 $qb->setParameter($parameterCounter, explode(',', $searchValue));
 
                 break;
@@ -438,7 +435,7 @@ abstract class AbstractFilter implements FilterInterface
         ++$parameterCounter;
 
         $k = $parameterCounter + 1;
-        $andExpr->add($qb->expr()->between($searchField, '?'.$parameterCounter, '?'.$k));
+        $andExpr->add($qb->expr()->between($searchField, '?' . $parameterCounter, '?' . $k));
         $qb->setParameter($parameterCounter, $from);
         $qb->setParameter($k, $to);
 

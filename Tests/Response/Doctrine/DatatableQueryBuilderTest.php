@@ -3,10 +3,7 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Tests\Response\Doctrine;
@@ -18,6 +15,7 @@ use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\Mapping\ClassMetadataFactory;
 use Prophecy\Prophecy\ObjectProphecy;
+use ReflectionClass;
 use Sg\DatatablesBundle\Datatable\Ajax;
 use Sg\DatatablesBundle\Datatable\Column\ColumnBuilder;
 use Sg\DatatablesBundle\Datatable\DatatableInterface;
@@ -27,6 +25,7 @@ use Sg\DatatablesBundle\Response\Doctrine\DatatableQueryBuilder;
 
 /**
  * @internal
+ *
  * @coversNothing
  */
 final class DatatableQueryBuilderTest extends \PHPUnit\Framework\TestCase
@@ -46,7 +45,7 @@ final class DatatableQueryBuilderTest extends \PHPUnit\Framework\TestCase
     /** @var ClassMetadata|ObjectProphecy */
     private $classMetadata;
 
-    /** @var ObjectProphecy|\ReflectionClass */
+    /** @var ObjectProphecy|ReflectionClass */
     private $reflectionClass;
 
     /** @var ColumnBuilder|ObjectProphecy */
@@ -74,7 +73,7 @@ final class DatatableQueryBuilderTest extends \PHPUnit\Framework\TestCase
         $this->connection = $this->prophesize(Connection::class);
         $this->queryBuilder = $this->prophesize(QueryBuilder::class);
         $this->classMetadata = $this->prophesize(ClassMetadata::class);
-        $this->reflectionClass = $this->prophesize(\ReflectionClass::class);
+        $this->reflectionClass = $this->prophesize(ReflectionClass::class);
         $this->columnBuilder = $this->prophesize(ColumnBuilder::class);
         $this->options = $this->prophesize(Options::class);
         $this->features = $this->prophesize(Features::class);

@@ -1,18 +1,16 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable\Extension;
 
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use Exception;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use UnexpectedValueException;
 
 class Buttons extends AbstractExtension
 {
@@ -28,8 +26,6 @@ class Buttons extends AbstractExtension
     }
 
     /**
-     * @param OptionsResolver $resolver
-     *
      * @return $this
      */
     public function configureOptions(OptionsResolver $resolver): ExtensionInterface
@@ -85,7 +81,7 @@ class Buttons extends AbstractExtension
         $createButtons = [];
         if (\is_array($this->getCreateButtons())) {
             foreach ($this->getCreateButtons() as $button) {
-                /** @var Button $button */
+                /* @var Button $button */
                 $createButtons[] = $button->getJavaScriptConfiguration();
             }
         }
@@ -109,7 +105,7 @@ class Buttons extends AbstractExtension
                     $this->createButtons[] = $newButton->set($button);
                 }
             } else {
-                throw new \UnexpectedValueException('Buttons::setCreateButtons(): The createButtons array should contain at least one element.');
+                throw new UnexpectedValueException('Buttons::setCreateButtons(): The createButtons array should contain at least one element.');
             }
         } else {
             $this->createButtons = $createButtons;
@@ -118,11 +114,6 @@ class Buttons extends AbstractExtension
         return $this;
     }
 
-    /**
-     * @param array $config
-     *
-     * @return array
-     */
     public function getJavaScriptConfiguration(array $config = []): array
     {
         if (null !== $this->getCreateButtons()) {

@@ -3,10 +3,7 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * (c) stwe <https://github.com/stwe/DatatablesBundle>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * <https://github.com/eventit/DatatablesBundle>
  */
 
 namespace Sg\DatatablesBundle\Datatable\Column;
@@ -30,9 +27,9 @@ class AttributeColumn extends AbstractColumn
      */
     protected $attributes;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // ColumnInterface
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * {@inheritdoc}
@@ -74,7 +71,7 @@ class AttributeColumn extends AbstractColumn
 
                 if (\count($entries) > 0) {
                     foreach ($entries as $key => $entry) {
-                        $currentPath = $path.'['.$key.']'.$value;
+                        $currentPath = $path . '[' . $key . ']' . $value;
                         $currentObjectPath = Helper::getPropertyPathObjectNotation($path, $key, $value);
 
                         $content = $this->renderTemplate(
@@ -117,9 +114,9 @@ class AttributeColumn extends AbstractColumn
         return parent::ACTION_COLUMN;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * @return $this
@@ -161,9 +158,9 @@ class AttributeColumn extends AbstractColumn
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Helper
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Render template.
