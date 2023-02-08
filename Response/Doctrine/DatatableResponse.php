@@ -9,6 +9,7 @@
 namespace Sg\DatatablesBundle\Response\Doctrine;
 
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Exception;
 use RuntimeException;
 use Sg\DatatablesBundle\Datatable\DatatableInterface;
 use Sg\DatatablesBundle\Response\AbstractDatatableResponse;
@@ -44,7 +45,7 @@ class DatatableResponse extends AbstractDatatableResponse
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      *
      * @return $this
      */
@@ -52,7 +53,7 @@ class DatatableResponse extends AbstractDatatableResponse
     {
         $val = $this->validateColumnsPositions($datatable);
         if (\is_int($val)) {
-            throw new RuntimeException("DatatableResponse::setDatatable(): The Column with the index {$val} is on a not allowed position.");
+            throw new RuntimeException("Doctrine\DatatableResponse::setDatatable(): The Column with the index {$val} is on a not allowed position.");
         }
 
         $this->datatable = $datatable;
@@ -69,7 +70,7 @@ class DatatableResponse extends AbstractDatatableResponse
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function getResponse(
         bool $countAllResults = true,
@@ -90,13 +91,7 @@ class DatatableResponse extends AbstractDatatableResponse
      */
     public function getData(bool $countAllResults = true, bool $outputWalkers = false, bool $fetchJoinCollection = true): array
     {
-        if (null === $this->datatable) {
-            throw new RuntimeException('DatatableResponse::getResponse(): Set a Datatable class with setDatatable().');
-        }
-
-        if (null === $this->datatableQueryBuilder) {
-            throw new RuntimeException('DatatableResponse::getResponse(): A DatatableQueryBuilder instance is needed. Call getDatatableQueryBuilder().');
-        }
+        $this->checkResponseDependencies();
 
         $paginator = new Paginator($this->datatableQueryBuilder->execute(), $fetchJoinCollection);
         $paginator->setUseOutputWalkers($outputWalkers);
@@ -118,6 +113,8 @@ class DatatableResponse extends AbstractDatatableResponse
      */
     public function getJsonResponse(): JsonResponse
     {
+        $this->checkResponseDependencies();
+
         $paginator = new Paginator($this->datatableQueryBuilder->execute(), $this->fetchJoinCollection);
         $paginator->setUseOutputWalkers($this->outputWalkers);
 
@@ -137,12 +134,12 @@ class DatatableResponse extends AbstractDatatableResponse
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     protected function createDatatableQueryBuilder(): DatatableQueryBuilder
     {
         if (null === $this->datatable) {
-            throw new RuntimeException('DatatableResponse::getDatatableQueryBuilder(): Set a Datatable class with setDatatable().');
+            throw new RuntimeException('Doctrine\DatatableResponse::getDatatableQueryBuilder(): Set a Datatable class with setDatatable().');
         }
 
         $this->requestParams = $this->getRequestParams();

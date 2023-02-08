@@ -10,26 +10,22 @@ namespace Sg\DatatablesBundle\Response\Elastica;
 
 use Exception;
 use FOS\ElasticaBundle\Finder\PaginatedFinderInterface;
+use RuntimeException;
 use Sg\DatatablesBundle\Model\ModelDefinitionInterface;
 use Sg\DatatablesBundle\Response\AbstractDatatableQueryBuilder;
 use Sg\DatatablesBundle\Response\AbstractDatatableResponse;
+use Sg\DatatablesBundle\Response\Doctrine\DatatableFormatter;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use UnexpectedValueException;
 
 class DatatableResponse extends AbstractDatatableResponse
 {
-    /** @var AbstractDatatableQueryBuilder */
-    /** @var PaginatedFinderInterface */
-    protected $paginatedFinder;
+    protected ?PaginatedFinderInterface $paginatedFinder = null;
 
-    /** @var string */
-    protected $datatableQueryBuilderClass;
+    protected ?string $datatableQueryBuilderClass = null;
 
-    /** @var ModelDefinitionInterface */
-    protected $modelDefinition;
+    protected ?ModelDefinitionInterface $modelDefinition = null;
 
-    /** @var bool */
-    protected $countAllResults;
+    protected bool $countAllResults = false;
 
     public function setPaginatedFinder(PaginatedFinderInterface $paginatedFinder): self
     {
@@ -59,21 +55,45 @@ class DatatableResponse extends AbstractDatatableResponse
         return $this;
     }
 
-    public function resetResponseOptions()
+    public function resetResponseOptions(): void
     {
         $this->countAllResults = true;
     }
 
     /**
-     * @param bool $countAllResults
-     *
      * @throws Exception
      */
-    public function getResponse($countAllResults = true): JsonResponse
-    {
+    public function getResponse(
+        bool $countAllResults = true,
+        bool $outputWalkers = false,
+        bool $fetchJoinCollection = false
+    ): JsonResponse {
         $this->countAllResults = $countAllResults;
 
         return $this->getJsonResponse();
+    }
+
+    /**
+     * Get response data as array.
+     *
+     * @throws Exception
+     */
+    public function getData(bool $countAllResults = true, bool $outputWalkers = false, bool $fetchJoinCollection = true): array
+    {
+        $this->checkResponseDependencies();
+
+        $entries = $this->datatableQueryBuilder->execute();
+
+        $formatter = new DatatableFormatter();
+        $formatter->runFormatter($entries, $this->datatable);
+
+        $outputHeader = [
+            'draw' => (int) $this->requestParams['draw'],
+            'recordsFiltered' => $entries->getCount(),
+            'recordsTotal' => true === $countAllResults ? $this->datatableQueryBuilder->getCountAllResults() : 0,
+        ];
+
+        return array_merge($outputHeader, $formatter->getOutput());
     }
 
     /**
@@ -82,6 +102,7 @@ class DatatableResponse extends AbstractDatatableResponse
     public function getJsonResponse(): JsonResponse
     {
         $this->checkResponseDependencies();
+
         /** @var DatatableQueryBuilder $datatableQueryBuilder */
         $datatableQueryBuilder = $this->getDatatableQueryBuilder();
         $datatableQueryBuilder->setPaginatedFinder($this->paginatedFinder);
@@ -112,11 +133,11 @@ class DatatableResponse extends AbstractDatatableResponse
     protected function createDatatableQueryBuilder(): AbstractDatatableQueryBuilder
     {
         if (null === $this->datatable) {
-            throw new UnexpectedValueException('Elastica\DatatableResponse::getDatatableQueryBuilder(): Set a Datatable class with setDatatable().');
+            throw new RuntimeException('Elastica\DatatableResponse::getDatatableQueryBuilder(): Set a Datatable class with setDatatable().');
         }
 
         if (null === $this->datatableQueryBuilderClass) {
-            throw new UnexpectedValueException('Elastica\DatatableResponse::getDatatableQueryBuilder(): Set a datatableQueryBuilderClass first.');
+            throw new RuntimeException('Elastica\DatatableResponse::getDatatableQueryBuilder(): Set a datatableQueryBuilderClass first.');
         }
 
         $this->requestParams = $this->getRequestParams();

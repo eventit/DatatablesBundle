@@ -740,6 +740,11 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
         return strtolower($metadata->getReflectionClass()->getShortName());
     }
 
+    protected function getSafeName($name): string
+    {
+        return $name;
+    }
+
     private function hasCustomDql(ColumnInterface $column): bool
     {
         return true === $this->accessor->getValue($column, 'customDql');

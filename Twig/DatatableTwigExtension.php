@@ -16,6 +16,7 @@ use Sg\DatatablesBundle\Datatable\Extensions;
 use Sg\DatatablesBundle\Datatable\Filter\FilterInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
+use Twig\Environment as Twig_Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;

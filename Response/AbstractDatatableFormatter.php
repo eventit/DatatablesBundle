@@ -16,11 +16,9 @@ use Symfony\Component\PropertyAccess\PropertyAccessor;
 
 abstract class AbstractDatatableFormatter
 {
-    /** @var array */
-    protected $output;
+    protected array $output;
 
-    /** @var PropertyAccessor */
-    protected $accessor;
+    protected PropertyAccessor $accessor;
 
     public function __construct()
     {

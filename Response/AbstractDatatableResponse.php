@@ -68,7 +68,7 @@ abstract class AbstractDatatableResponse
      */
     abstract public function getJsonResponse(): JsonResponse;
 
-    abstract public function resetResponseOptions();
+    abstract public function resetResponseOptions(): void;
 
     /**
      * @throws Exception
@@ -97,11 +97,11 @@ abstract class AbstractDatatableResponse
     protected function checkResponseDependencies()
     {
         if (null === $this->datatable) {
-            throw new UnexpectedValueException('DatatableResponse::getResponse(): Set a Datatable class with setDatatable().');
+            throw new RuntimeException('DatatableResponse::getResponse(): Set a Datatable class with setDatatable().');
         }
 
         if (null === $this->datatableQueryBuilder) {
-            throw new UnexpectedValueException('DatatableResponse::getResponse(): A DatatableQueryBuilder instance is needed. Call getDatatableQueryBuilder().');
+            throw new RuntimeException('DatatableResponse::getResponse(): A DatatableQueryBuilder instance is needed. Call getDatatableQueryBuilder().');
         }
     }
 
