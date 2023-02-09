@@ -3,7 +3,11 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Datatable;
@@ -12,30 +16,21 @@ class Helper
 {
     /**
      * Generate a unique ID.
-     *
-     * @param string $prefix
-     *
-     * @return string
      */
-    public static function generateUniqueID($prefix = '')
+    public static function generateUniqueID(string $prefix = ''): string
     {
-        $id = sha1(microtime(true) . mt_rand(10000, 90000));
+        $id = sha1(microtime(true) . random_int(10000, 90000));
 
-        return $prefix ? $prefix . '-' . $id : $id;
+        return $prefix !== '' && $prefix !== '0' ? $prefix . '-' . $id : $id;
     }
 
     /**
      * Returns a array notated property path for the Accessor.
-     *
-     * @param string      $data
-     * @param string|null $value
-     *
-     * @return string
      */
-    public static function getDataPropertyPath($data, &$value = null)
+    public static function getDataPropertyPath(string $data, ?string &$value = null): string
     {
         // handle nested array case
-        if (true === \is_int(strpos($data, '['))) {
+        if (\is_int(strpos($data, '['))) {
             $before = strstr($data, '[', true);
             $value = strstr($data, ']', false);
 
@@ -44,7 +39,9 @@ class Helper
             // format value
             $value = '[' . str_replace('.', '][', $value) . ']';
 
-            $data = $before;
+            if (false !== $before) {
+                $data = $before;
+            }
         }
 
         // e.g. 'createdBy.allowed' => [createdBy][allowed]
@@ -53,17 +50,10 @@ class Helper
 
     /**
      * Returns object notated property path.
-     *
-     * @param string $path
-     * @param int    $key
-     * @param string $value
-     *
-     * @return string
      */
-    public static function getPropertyPathObjectNotation($path, $key, $value)
+    public static function getPropertyPathObjectNotation(string $path, int $key, string $value): string
     {
-        $objectValue = str_replace('][', '.', $value);
-        $objectValue = str_replace(['[', ']'], '', $objectValue);
+        $objectValue = str_replace(['][', '[', ']'], ['.', '', ''], $value);
 
         return str_replace(['[', ']'], '', $path) . '[' . $key . '].' . $objectValue;
     }

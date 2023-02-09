@@ -3,13 +3,17 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Datatable\Action;
 
 use Closure;
-use Exception;
+use RuntimeException;
 use Sg\DatatablesBundle\Datatable\HtmlContainerTrait;
 use Sg\DatatablesBundle\Datatable\OptionsTrait;
 use Sg\DatatablesBundle\Datatable\RenderIfTrait;
@@ -31,97 +35,66 @@ class Action
     /**
      * The name of the Action route.
      * Default: null.
-     *
-     * @var string|null
      */
-    protected $route;
+    protected ?string $route = null;
 
     /**
      * The route parameters.
      * Default: null.
-     *
-     * @var array|Closure|null
      */
-    protected $routeParameters;
+    protected array|Closure|null $routeParameters = null;
 
     /**
      * An icon for the Action.
      * Default: null.
-     *
-     * @var string|null
      */
-    protected $icon;
+    protected ?string $icon = null;
 
     /**
      * A label for the Action.
      * Default: null.
-     *
-     * @var string|null
      */
-    protected $label;
+    protected ?string $label = null;
 
     /**
      * Show confirm message if true.
      * Default: false.
-     *
-     * @var bool
      */
-    protected $confirm;
+    protected bool $confirm = false;
 
     /**
      * The confirm message.
      * Default: null.
-     *
-     * @var string|null
      */
-    protected $confirmMessage;
+    protected ?string $confirmMessage = null;
 
     /**
      * HTML attributes (except 'href' and 'value').
      * Default: null.
-     *
-     * @var array|Closure|null
      */
-    protected $attributes;
+    protected array|Closure|null $attributes = null;
 
     /**
      * Render a button instead of a link.
      * Default: false.
-     *
-     * @var bool
      */
-    protected $button;
+    protected bool $button = false;
 
     /**
      * The button value.
      * Default: null.
-     *
-     * @var string|null
      */
-    protected $buttonValue;
+    protected ?string $buttonValue = null;
 
     /**
      * Use the Datatable-Name as prefix for the button value.
      * Default: false.
-     *
-     * @var bool
      */
-    protected $buttonValuePrefix;
+    protected bool $buttonValuePrefix = false;
 
-    /**
-     * The name of the associated Datatable.
-     *
-     * @var string
-     */
-    protected $datatableName;
-
-    /**
-     * @param string $datatableName
-     */
-    public function __construct($datatableName)
+    public function __construct(protected string $datatableName)
     {
         $this->initOptions();
-        $this->datatableName = $datatableName;
     }
 
     // -------------------------------------------------
@@ -130,10 +103,8 @@ class Action
 
     /**
      * Configure options.
-     *
-     * @return $this
      */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): static
     {
         $resolver->setDefaults([
             'route' => null,
@@ -172,150 +143,95 @@ class Action
     // Getters && Setters
     // -------------------------------------------------
 
-    /**
-     * @return string|null
-     */
-    public function getRoute()
+    public function getRoute(): ?string
     {
         return $this->route;
     }
 
-    /**
-     * @param string|null $route
-     *
-     * @return $this
-     */
-    public function setRoute($route)
+    public function setRoute(?string $route): static
     {
         $this->route = $route;
 
         return $this;
     }
 
-    /**
-     * @return array|Closure|null
-     */
-    public function getRouteParameters()
+    public function getRouteParameters(): array|Closure|null
     {
         return $this->routeParameters;
     }
 
-    /**
-     * @param array|Closure|null $routeParameters
-     *
-     * @return $this
-     */
-    public function setRouteParameters($routeParameters)
+    public function setRouteParameters(array|Closure|null $routeParameters): static
     {
         $this->routeParameters = $routeParameters;
 
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getIcon()
+    public function getIcon(): ?string
     {
         return $this->icon;
     }
 
-    /**
-     * @param string|null $icon
-     *
-     * @return $this
-     */
-    public function setIcon($icon)
+    public function setIcon(?string $icon): static
     {
         $this->icon = $icon;
 
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getLabel()
+    public function getLabel(): ?string
     {
         return $this->label;
     }
 
-    /**
-     * @param string|null $label
-     *
-     * @return $this
-     */
-    public function setLabel($label)
+    public function setLabel(?string $label): static
     {
         $this->label = $label;
 
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function isConfirm()
+    public function isConfirm(): bool
     {
         return $this->confirm;
     }
 
-    /**
-     * @param bool $confirm
-     *
-     * @return $this
-     */
-    public function setConfirm($confirm)
+    public function setConfirm(bool $confirm): static
     {
         $this->confirm = $confirm;
 
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getConfirmMessage()
+    public function getConfirmMessage(): ?string
     {
         return $this->confirmMessage;
     }
 
-    /**
-     * @param string|null $confirmMessage
-     *
-     * @return $this
-     */
-    public function setConfirmMessage($confirmMessage)
+    public function setConfirmMessage(?string $confirmMessage): static
     {
         $this->confirmMessage = $confirmMessage;
 
         return $this;
     }
 
-    /**
-     * @return array|Closure|null
-     */
-    public function getAttributes()
+    public function getAttributes(): array|Closure|null
     {
         return $this->attributes;
     }
 
     /**
-     * @param array|Closure|null $attributes
-     *
-     * @throws Exception
-     *
-     * @return $this
+     * @throws RuntimeException
      */
-    public function setAttributes($attributes)
+    public function setAttributes(array|Closure|null $attributes): static
     {
         if (\is_array($attributes)) {
             if (\array_key_exists('href', $attributes)) {
-                throw new Exception('Action::setAttributes(): The href attribute is not allowed in this context.');
+                throw new RuntimeException('Action::setAttributes(): The href attribute is not allowed in this context.');
             }
 
             if (\array_key_exists('value', $attributes)) {
-                throw new Exception('Action::setAttributes(): The value attribute is not allowed in this context.');
+                throw new RuntimeException('Action::setAttributes(): The value attribute is not allowed in this context.');
             }
         }
 
@@ -324,80 +240,48 @@ class Action
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function isButton()
+    public function isButton(): bool
     {
         return $this->button;
     }
 
-    /**
-     * @param bool $button
-     *
-     * @return $this
-     */
-    public function setButton($button)
+    public function setButton(bool $button): static
     {
         $this->button = $button;
 
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getButtonValue()
+    public function getButtonValue(): ?string
     {
         return $this->buttonValue;
     }
 
-    /**
-     * @param string|null $buttonValue
-     *
-     * @return $this
-     */
-    public function setButtonValue($buttonValue)
+    public function setButtonValue(?string $buttonValue): static
     {
         $this->buttonValue = $buttonValue;
 
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function isButtonValuePrefix()
+    public function isButtonValuePrefix(): bool
     {
         return $this->buttonValuePrefix;
     }
 
-    /**
-     * @param bool $buttonValuePrefix
-     *
-     * @return $this
-     */
-    public function setButtonValuePrefix($buttonValuePrefix)
+    public function setButtonValuePrefix(bool $buttonValuePrefix): static
     {
         $this->buttonValuePrefix = $buttonValuePrefix;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getDatatableName()
+    public function getDatatableName(): string
     {
         return $this->datatableName;
     }
 
-    /**
-     * @param string $datatableName
-     *
-     * @return $this
-     */
-    public function setDatatableName($datatableName)
+    public function setDatatableName(string $datatableName): static
     {
         $this->datatableName = $datatableName;
 

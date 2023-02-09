@@ -3,13 +3,17 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Datatable\Column;
 
 use Closure;
-use Exception;
+use RuntimeException;
 use Sg\DatatablesBundle\Datatable\Action\Action;
 use Sg\DatatablesBundle\Datatable\Helper;
 use Sg\DatatablesBundle\Datatable\HtmlContainerTrait;
@@ -26,35 +30,24 @@ class ActionColumn extends AbstractColumn
     /**
      * The Actions container.
      * A required option.
-     *
-     * @var array
      */
-    protected $actions;
+    protected array $actions = [];
 
     // -------------------------------------------------
     // ColumnInterface
     // -------------------------------------------------
 
-    /**
-     * {@inheritdoc}
-     */
-    public function dqlConstraint($dql)
+    public function dqlConstraint($dql): bool
     {
-        return null === $dql ? true : false;
+        return null === $dql;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isSelectColumn()
+    public function isSelectColumn(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function addDataToOutputArray(array &$row)
+    public function addDataToOutputArray(array &$row): static
     {
         $actionRowItems = [];
 
@@ -64,12 +57,11 @@ class ActionColumn extends AbstractColumn
         }
 
         $row['sg_datatables_actions'][$this->getIndex()] = $actionRowItems;
+
+        return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function renderSingleField(array &$row)
+    public function renderSingleField(array &$row): static
     {
         $parameters = [];
         $attributes = [];
@@ -86,15 +78,11 @@ class ActionColumn extends AbstractColumn
                         $path = Helper::getDataPropertyPath($value);
                         $entry = $this->accessor->getValue($row, $path);
 
-                        if (! empty($entry)) {
-                            $parameters[$actionKey][$key] = $entry;
-                        } else {
-                            $parameters[$actionKey][$key] = $value;
-                        }
+                        $parameters[$actionKey][$key] = empty($entry) ? $value : $entry;
                     }
                 }
             } elseif ($routeParameters instanceof Closure) {
-                $parameters[$actionKey] = \call_user_func($routeParameters, $row);
+                $parameters[$actionKey] = $routeParameters($row);
             } else {
                 $parameters[$actionKey] = [];
             }
@@ -103,7 +91,7 @@ class ActionColumn extends AbstractColumn
             if (\is_array($actionAttributes)) {
                 $attributes[$actionKey] = $actionAttributes;
             } elseif ($actionAttributes instanceof Closure) {
-                $attributes[$actionKey] = \call_user_func($actionAttributes, $row);
+                $attributes[$actionKey] = $actionAttributes($row);
             } else {
                 $attributes[$actionKey] = [];
             }
@@ -120,7 +108,7 @@ class ActionColumn extends AbstractColumn
                         $values[$actionKey] = (int) $values[$actionKey];
                     }
 
-                    if (true === $action->isButtonValuePrefix()) {
+                    if ($action->isButtonValuePrefix()) {
                         $values[$actionKey] = 'sg-datatables-' . $this->getDatatableName() . '-action-button-' . $actionKey . '-' . $values[$actionKey];
                     }
                 } else {
@@ -141,28 +129,21 @@ class ActionColumn extends AbstractColumn
                 'end_html_container' => $this->endHtml,
             ]
         );
+
+        return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function renderToMany(array &$row)
+    public function renderToMany(array &$row): static
     {
-        throw new Exception('ActionColumn::renderToMany(): This function should never be called.');
+        throw new RuntimeException('ActionColumn::renderToMany(): This function should never be called.');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getCellContentTemplate()
+    public function getCellContentTemplate(): string
     {
         return '@SgDatatables/render/action.html.twig';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getColumnType()
+    public function getColumnType(): string
     {
         return parent::ACTION_COLUMN;
     }
@@ -171,10 +152,7 @@ class ActionColumn extends AbstractColumn
     // Options
     // -------------------------------------------------
 
-    /**
-     * @return $this
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): static
     {
         parent::configureOptions($resolver);
 
@@ -214,24 +192,24 @@ class ActionColumn extends AbstractColumn
     /**
      * @return Action[]
      */
-    public function getActions()
+    public function getActions(): array
     {
         return $this->actions;
     }
 
     /**
-     * @throws Exception
+     * @throws RuntimeException
      *
      * @return $this
      */
-    public function setActions(array $actions)
+    public function setActions(array $actions): static
     {
-        if (\count($actions) > 0) {
+        if ($actions !== []) {
             foreach ($actions as $action) {
                 $this->addAction($action);
             }
         } else {
-            throw new Exception('ActionColumn::setActions(): The actions array should contain at least one element.');
+            throw new RuntimeException('ActionColumn::setActions(): The actions array should contain at least one element.');
         }
 
         return $this;
@@ -239,10 +217,8 @@ class ActionColumn extends AbstractColumn
 
     /**
      * Add action.
-     *
-     * @return $this
      */
-    public function addAction(array $action)
+    public function addAction(array $action): static
     {
         $newAction = new Action($this->datatableName);
         $this->actions[] = $newAction->set($action);
@@ -252,10 +228,8 @@ class ActionColumn extends AbstractColumn
 
     /**
      * Remove action.
-     *
-     * @return $this
      */
-    public function removeAction(Action $action)
+    public function removeAction(Action $action): static
     {
         foreach ($this->actions as $k => $a) {
             if ($action === $a) {
@@ -268,18 +242,12 @@ class ActionColumn extends AbstractColumn
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function getOrderable()
+    public function getOrderable(): bool
     {
         return false;
     }
 
-    /**
-     * @return bool
-     */
-    public function getSearchable()
+    public function getSearchable(): bool
     {
         return false;
     }

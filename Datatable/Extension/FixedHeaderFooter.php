@@ -3,7 +3,11 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Datatable\Extension;
@@ -12,14 +16,11 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class FixedHeaderFooter extends AbstractExtension
 {
-    /** @var bool */
-    protected $header;
+    protected bool $header;
 
-    /** @var bool */
-    protected $footer;
+    protected bool $footer;
 
-    /** @var int */
-    protected $headerOffset;
+    protected int $headerOffset;
 
     public function __construct()
     {
@@ -29,7 +30,7 @@ class FixedHeaderFooter extends AbstractExtension
     /**
      * @return $this
      */
-    public function configureOptions(OptionsResolver $resolver): ExtensionInterface
+    public function configureOptions(OptionsResolver $resolver): static
     {
         $resolver->setDefaults([
             'header' => false,
@@ -44,7 +45,7 @@ class FixedHeaderFooter extends AbstractExtension
         return $this;
     }
 
-    public function setHeader(bool $enabled): self
+    public function setHeader(bool $enabled): static
     {
         $this->header = $enabled;
 
@@ -61,7 +62,7 @@ class FixedHeaderFooter extends AbstractExtension
         return $this->footer;
     }
 
-    public function setFooter(bool $footer): self
+    public function setFooter(bool $footer): static
     {
         $this->footer = $footer;
 
@@ -73,16 +74,13 @@ class FixedHeaderFooter extends AbstractExtension
         return $this->headerOffset;
     }
 
-    public function setHeaderOffset(int $headerOffset): self
+    public function setHeaderOffset(int $headerOffset): static
     {
         $this->headerOffset = $headerOffset;
 
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getJavaScriptConfiguration(array $config = []): array
     {
         $config['header'] = $this->getHeader();

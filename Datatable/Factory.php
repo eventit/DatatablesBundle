@@ -3,12 +3,17 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Datatable;
 
 use Exception;
+use RuntimeException;
 
 class Factory
 {
@@ -19,8 +24,8 @@ class Factory
      */
     public static function create($class, $interface)
     {
-        if (empty($class) || ! \is_string($class) && ! $class instanceof $interface) {
-            throw new Exception("Factory::create(): String or {$interface} expected.");
+        if (empty($class) || (! \is_string($class) && ! $class instanceof $interface)) {
+            throw new RuntimeException("Factory::create(): String or {$interface} expected.");
         }
 
         if ($class instanceof $interface) {
@@ -31,12 +36,12 @@ class Factory
             $instance = new $class();
 
             if (! $instance instanceof $interface) {
-                throw new Exception("Factory::create(): String or {$interface} expected.");
+                throw new RuntimeException("Factory::create(): String or {$interface} expected.");
             }
 
             return $instance;
         }
 
-        throw new Exception("Factory::create(): {$class} is not callable.");
+        throw new RuntimeException("Factory::create(): {$class} is not callable.");
     }
 }

@@ -3,12 +3,17 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Datatable\Column;
 
 use Closure;
+use Doctrine\Common\Annotations\Annotation\Attributes;
 use Exception;
 use Sg\DatatablesBundle\Datatable\Filter\TextFilter;
 use Sg\DatatablesBundle\Datatable\Helper;
@@ -22,22 +27,15 @@ class AttributeColumn extends AbstractColumn
     /**
      * The Attributes container.
      * A required option.
-     *
-     * @var Closure
      */
-    protected $attributes;
+    protected array|Closure|null $attributes = null;
 
     // -------------------------------------------------
     // ColumnInterface
     // -------------------------------------------------
 
-    /**
-     * {@inheritdoc}
-     */
-    public function renderSingleField(array &$row)
+    public function renderSingleField(array &$row): static
     {
-        $renderAttributes = [];
-
         $renderAttributes = \call_user_func($this->attributes, $row);
 
         $path = Helper::getDataPropertyPath($this->data);
@@ -51,65 +49,43 @@ class AttributeColumn extends AbstractColumn
         );
 
         $this->accessor->setValue($row, $path, $content);
+
+        return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function renderToMany(array &$row)
+    public function renderToMany(array &$row): static
     {
         $value = null;
         $path = Helper::getDataPropertyPath($this->data, $value);
 
-        if ($this->accessor->isReadable($row, $path)) {
-            if ($this->isEditableContentRequired($row)) {
-                // e.g. comments[ ].createdBy.username
-                //     => $path = [comments]
-                //     => $value = [createdBy][username]
+        if ($this->accessor->isReadable($row, $path) && $this->isEditableContentRequired($row)) {
+            // e.g. comments[ ].createdBy.username
+            //     => $path = [comments]
+            //     => $value = [createdBy][username]
+            $entries = $this->accessor->getValue($row, $path);
+            if ((is_countable($entries) ? \count($entries) : 0) > 0) {
+                foreach ($entries as $key => $entry) {
+                    $currentPath = Helper::getPropertyPathObjectNotation($path, $key, $value);
 
-                $entries = $this->accessor->getValue($row, $path);
+                    $content = $this->renderTemplate(
+                        $this->accessor->getValue($row, $currentPath)
+                    );
 
-                if (\count($entries) > 0) {
-                    foreach ($entries as $key => $entry) {
-                        $currentPath = $path . '[' . $key . ']' . $value;
-                        $currentObjectPath = Helper::getPropertyPathObjectNotation($path, $key, $value);
-
-                        $content = $this->renderTemplate(
-                            $this->accessor->getValue($row, $currentPath),
-                            $row[$this->editable->getPk()],
-                            $currentObjectPath
-                        );
-
-                        $this->accessor->setValue($row, $currentPath, $content);
-                    }
+                    $this->accessor->setValue($row, $currentPath, $content);
                 }
-                // no placeholder - leave this blank
             }
+            // no placeholder - leave this blank
         }
 
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getCellContentTemplate()
+    public function getCellContentTemplate(): string
     {
         return '@SgDatatables/render/attributeColumn.html.twig';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function renderPostCreateDatatableJsContent()
-    {
-        return null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getColumnType()
+    public function getColumnType(): string
     {
         return parent::ACTION_COLUMN;
     }
@@ -118,10 +94,7 @@ class AttributeColumn extends AbstractColumn
     // Options
     // -------------------------------------------------
 
-    /**
-     * @return $this
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): static
     {
         parent::configureOptions($resolver);
 
@@ -136,22 +109,15 @@ class AttributeColumn extends AbstractColumn
         return $this;
     }
 
-    /**
-     * @return Attributes[]
-     */
-    public function getAttributes()
+    public function getAttributes(): array|Closure|null
     {
         return $this->attributes;
     }
 
     /**
-     * @param Closure $attributes
-     *
      * @throws Exception
-     *
-     * @return $this
      */
-    public function setAttributes($attributes)
+    public function setAttributes(array|Closure|null $attributes): static
     {
         $this->attributes = $attributes;
 
@@ -164,10 +130,8 @@ class AttributeColumn extends AbstractColumn
 
     /**
      * Render template.
-     *
-     * @return mixed|string
      */
-    private function renderTemplate(?string $data)
+    private function renderTemplate(?string $data): string
     {
         return $this->twig->render(
             $this->getCellContentTemplate(),

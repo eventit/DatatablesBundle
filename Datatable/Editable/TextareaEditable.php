@@ -3,7 +3,11 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Datatable\Editable;
@@ -14,31 +18,15 @@ class TextareaEditable extends AbstractEditable
 {
     /**
      * Number of rows in textarea.
-     *
-     * @var int
      */
-    protected $rows;
+    protected int $rows = 7;
 
-    // -------------------------------------------------
-    // FilterInterface
-    // -------------------------------------------------
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getType()
+    public function getType(): string
     {
         return 'textarea';
     }
 
-    // -------------------------------------------------
-    // Options
-    // -------------------------------------------------
-
-    /**
-     * @return $this
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): static
     {
         parent::configureOptions($resolver);
 
@@ -51,24 +39,12 @@ class TextareaEditable extends AbstractEditable
         return $this;
     }
 
-    // -------------------------------------------------
-    // Getters && Setters
-    // -------------------------------------------------
-
-    /**
-     * @return int
-     */
-    public function getRows()
+    public function getRows(): int
     {
         return $this->rows;
     }
 
-    /**
-     * @param int $rows
-     *
-     * @return $this
-     */
-    public function setRows($rows)
+    public function setRows(int $rows): static
     {
         $this->rows = $rows;
 

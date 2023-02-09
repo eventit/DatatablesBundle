@@ -3,7 +3,11 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Datatable\Editable;
@@ -23,74 +27,56 @@ abstract class AbstractEditable implements EditableInterface
     /**
      * Url for submit.
      * Default: 'sg_datatables_edit'.
-     *
-     * @var string
      */
-    protected $url;
+    protected string $url = 'sg_datatables_edit';
 
     /**
      * Additional params for submit It is appended to original ajax data (pk, name and value).
      * Default: null.
-     *
-     * @var array|null
      */
-    protected $params;
+    protected ?array $params = null;
 
     /**
      * Value that will be displayed in input if original field value is empty (null|undefined|'').
      * Default: null.
-     *
-     * @var string|null
      */
-    protected $defaultValue;
+    protected ?string $defaultValue = null;
 
     /**
      * Css class applied when editable text is empty.
      * Default: 'editable-empty'.
-     *
-     * @var string
      */
-    protected $emptyClass;
+    protected string $emptyClass = 'editable-empty';
 
     /**
      * Text shown when element is empty.
      * Default: 'Empty'.
-     *
-     * @var string
      */
-    protected $emptyText;
+    protected string $emptyText = 'Empty';
 
     /**
      * Color used to highlight element after update.
      * Default: '#FFFF80'.
-     *
-     * @var string
      */
-    protected $highlight;
+    protected string $highlight = '#FFFF80';
 
     /**
      * Mode of editable, can be 'popup' or 'inline'.
      * Default: 'popup'.
-     *
-     * @var string
      */
-    protected $mode;
+    protected string $mode = 'popup';
 
     /**
      * Name of field. Will be submitted on server. Can be taken from id attribute.
      * Default: null.
-     *
-     * @var string|null
      */
-    protected $name;
+    protected ?string $name = null;
 
     /**
      * Primary key of editable object.
      * Default: 'id'.
-     *
-     * @var string
      */
-    protected $pk;
+    protected string $pk = 'id';
 
     // -------------------------------------------------
     // Custom Options
@@ -98,10 +84,8 @@ abstract class AbstractEditable implements EditableInterface
 
     /**
      * Editable only if conditions are True.
-     *
-     * @var Closure|null
      */
-    protected $editableIf;
+    protected ?Closure $editableIf = null;
 
     public function __construct()
     {
@@ -112,9 +96,6 @@ abstract class AbstractEditable implements EditableInterface
     // EditableInterface
     // -------------------------------------------------
 
-    /**
-     * {@inheritdoc}
-     */
     public function callEditableIfClosure(array $row = [])
     {
         if ($this->editableIf instanceof Closure) {
@@ -124,18 +105,12 @@ abstract class AbstractEditable implements EditableInterface
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getPk()
+    public function getPk(): string
     {
         return $this->pk;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getEmptyText()
+    public function getEmptyText(): string
     {
         return $this->emptyText;
     }
@@ -144,10 +119,7 @@ abstract class AbstractEditable implements EditableInterface
     // Options
     // -------------------------------------------------
 
-    /**
-     * @return $this
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): static
     {
         $resolver->setDefaults([
             'url' => 'sg_datatables_edit',
@@ -182,184 +154,110 @@ abstract class AbstractEditable implements EditableInterface
     // Getters && Setters
     // -------------------------------------------------
 
-    /**
-     * @return string
-     */
-    public function getUrl()
+    public function getUrl(): string
     {
         return $this->url;
     }
 
-    /**
-     * @param string $url
-     *
-     * @return $this
-     */
-    public function setUrl($url)
+    public function setUrl(string $url): static
     {
         $this->url = $url;
 
         return $this;
     }
 
-    /**
-     * @return array|null
-     */
-    public function getParams()
+    public function getParams(): ?array
     {
         return $this->params;
     }
 
-    /**
-     * @param array|null $params
-     *
-     * @return $this
-     */
-    public function setParams($params)
+    public function setParams(?array $params): static
     {
         $this->params = $params;
 
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getDefaultValue()
+    public function getDefaultValue(): ?string
     {
         return $this->defaultValue;
     }
 
-    /**
-     * @param string|null $defaultValue
-     *
-     * @return $this
-     */
-    public function setDefaultValue($defaultValue)
+    public function setDefaultValue(?string $defaultValue): static
     {
         $this->defaultValue = $defaultValue;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getEmptyClass()
+    public function getEmptyClass(): string
     {
         return $this->emptyClass;
     }
 
-    /**
-     * @param string $emptyClass
-     *
-     * @return $this
-     */
-    public function setEmptyClass($emptyClass)
+    public function setEmptyClass(string $emptyClass): static
     {
         $this->emptyClass = $emptyClass;
 
         return $this;
     }
 
-    /**
-     * @param string $emptyText
-     *
-     * @return $this
-     */
-    public function setEmptyText($emptyText)
+    public function setEmptyText(string $emptyText): static
     {
         $this->emptyText = $emptyText;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getHighlight()
+    public function getHighlight(): string
     {
         return $this->highlight;
     }
 
-    /**
-     * @param string $highlight
-     *
-     * @return $this
-     */
-    public function setHighlight($highlight)
+    public function setHighlight(string $highlight): static
     {
         $this->highlight = $highlight;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getMode()
+    public function getMode(): string
     {
         return $this->mode;
     }
 
-    /**
-     * @param string $mode
-     *
-     * @return $this
-     */
-    public function setMode($mode)
+    public function setMode(string $mode): static
     {
         $this->mode = $mode;
 
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getName()
+    public function getName(): ?string
     {
         return $this->name;
     }
 
-    /**
-     * @param string|null $name
-     *
-     * @return $this
-     */
-    public function setName($name)
+    public function setName(?string $name): static
     {
         $this->name = $name;
 
         return $this;
     }
 
-    /**
-     * @param string $pk
-     *
-     * @return $this
-     */
-    public function setPk($pk)
+    public function setPk(string $pk): static
     {
         $this->pk = $pk;
 
         return $this;
     }
 
-    /**
-     * @return Closure|null
-     */
-    public function getEditableIf()
+    public function getEditableIf(): ?Closure
     {
         return $this->editableIf;
     }
 
-    /**
-     * @param Closure|null $editableIf
-     *
-     * @return $this
-     */
-    public function setEditableIf($editableIf)
+    public function setEditableIf(?Closure $editableIf): static
     {
         $this->editableIf = $editableIf;
 

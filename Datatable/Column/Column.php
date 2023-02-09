@@ -3,7 +3,11 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Datatable\Column;
@@ -24,97 +28,76 @@ class Column extends AbstractColumn
     // ColumnInterface
     // -------------------------------------------------
 
-    /**
-     * {@inheritdoc}
-     */
-    public function renderSingleField(array &$row)
+    public function renderSingleField(array &$row): static
     {
         $path = Helper::getDataPropertyPath($this->data);
 
-        if ($this->accessor->isReadable($row, $path)) {
-            if ($this->isEditableContentRequired($row)) {
-                $content = $this->renderTemplate($this->accessor->getValue($row, $path), $row[$this->editable->getPk()]);
-                $this->accessor->setValue($row, $path, $content);
-            }
+        if ($this->accessor->isReadable($row, $path) && $this->isEditableContentRequired($row)) {
+            $content = $this->renderTemplate($this->accessor->getValue($row, $path), $row[$this->editable->getPk()]);
+            $this->accessor->setValue($row, $path, $content);
         }
 
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function renderToMany(array &$row)
+    public function renderToMany(array &$row): static
     {
         $value = null;
         $path = Helper::getDataPropertyPath($this->data, $value);
 
-        if ($this->accessor->isReadable($row, $path)) {
-            if ($this->isEditableContentRequired($row)) {
-                // e.g. comments[ ].createdBy.username
-                //     => $path = [comments]
-                //     => $value = [createdBy][username]
+        if ($this->accessor->isReadable($row, $path) && $this->isEditableContentRequired($row)) {
+            // e.g. comments[ ].createdBy.username
+            //     => $path = [comments]
+            //     => $value = [createdBy][username]
+            $entries = $this->accessor->getValue($row, $path);
+            if ((is_countable($entries) ? \count($entries) : 0) > 0) {
+                foreach ($entries as $key => $entry) {
+                    $currentPath = $path . '[' . $key . ']' . $value;
+                    $currentObjectPath = Helper::getPropertyPathObjectNotation($path, $key, $value);
 
-                $entries = $this->accessor->getValue($row, $path);
+                    $content = $this->renderTemplate(
+                        $this->accessor->getValue($row, $currentPath),
+                        $row[$this->editable->getPk()],
+                        $currentObjectPath
+                    );
 
-                if (\count($entries) > 0) {
-                    foreach ($entries as $key => $entry) {
-                        $currentPath = $path . '[' . $key . ']' . $value;
-                        $currentObjectPath = Helper::getPropertyPathObjectNotation($path, $key, $value);
-
-                        $content = $this->renderTemplate(
-                            $this->accessor->getValue($row, $currentPath),
-                            $row[$this->editable->getPk()],
-                            $currentObjectPath
-                        );
-
-                        $this->accessor->setValue($row, $currentPath, $content);
-                    }
+                    $this->accessor->setValue($row, $currentPath, $content);
                 }
-                // no placeholder - leave this blank
             }
+            // no placeholder - leave this blank
         }
 
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getCellContentTemplate()
+    public function getCellContentTemplate(): string
     {
         return '@SgDatatables/render/column.html.twig';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function renderPostCreateDatatableJsContent()
+    public function renderPostCreateDatatableJsContent(): ?string
     {
-        if ($this->editable instanceof EditableInterface) {
-            return $this->twig->render(
-                '@SgDatatables/column/column_post_create_dt.js.twig',
-                [
-                    'column_class_editable_selector' => $this->getColumnClassEditableSelector(),
-                    'editable_options' => $this->editable,
-                    'entity_class_name' => $this->getEntityClassName(),
-                    'column_dql' => $this->dql,
-                    'original_type_of_field' => $this->getOriginalTypeOfField(),
-                ]
-            );
+        if (! $this->editable instanceof EditableInterface) {
+            return null;
         }
 
-        return null;
+        return $this->twig->render(
+            '@SgDatatables/column/column_post_create_dt.js.twig',
+            [
+                'column_class_editable_selector' => $this->getColumnClassEditableSelector(),
+                'editable_options' => $this->editable,
+                'entity_class_name' => $this->getEntityClassName(),
+                'column_dql' => $this->dql,
+                'original_type_of_field' => $this->getOriginalTypeOfField(),
+            ]
+        );
     }
 
     // -------------------------------------------------
     // Options
     // -------------------------------------------------
 
-    /**
-     * @return $this
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): static
     {
         parent::configureOptions($resolver);
 
@@ -133,16 +116,7 @@ class Column extends AbstractColumn
     // Helper
     // -------------------------------------------------
 
-    /**
-     * Render template.
-     *
-     * @param string|null $data
-     * @param string      $pk
-     * @param string|null $path
-     *
-     * @return mixed|string
-     */
-    private function renderTemplate($data, $pk, $path = null)
+    private function renderTemplate(?string $data, string $pk, ?string $path = null): string
     {
         return $this->twig->render(
             $this->getCellContentTemplate(),

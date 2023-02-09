@@ -3,7 +3,11 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Datatable\Extension;
@@ -12,48 +16,34 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class Button extends AbstractExtension
 {
-    /** @var array|null */
-    protected $action;
+    protected ?array $action = null;
 
-    /** @var array|null */
-    protected $available;
+    protected ?array $available = null;
 
-    /** @var string|null */
-    protected $className;
+    protected ?string $className = null;
 
-    /** @var array|null */
-    protected $destroy;
+    protected ?array $destroy = null;
 
-    /** @var string|null */
-    protected $extend;
+    protected ?string $extend = null;
 
-    /** @var array|null */
-    protected $init;
+    protected ?array $init = null;
 
-    /** @var string|null */
-    protected $key;
+    protected ?string $key = null;
 
-    /** @var string|null */
-    protected $namespace;
+    protected ?string $namespace = null;
 
-    /** @var string|null */
-    protected $text;
+    protected ?string $text = null;
 
-    /** @var string|null */
-    protected $titleAttr;
+    protected ?string $titleAttr = null;
 
-    /** @var array|null */
-    protected $buttonOptions;
+    protected ?array $buttonOptions = null;
 
     public function __construct()
     {
         parent::__construct('button');
     }
 
-    /**
-     * @return $this
-     */
-    public function configureOptions(OptionsResolver $resolver): ExtensionInterface
+    public function configureOptions(OptionsResolver $resolver): static
     {
         $resolver->setDefaults([
             'action' => null,
@@ -88,20 +78,12 @@ class Button extends AbstractExtension
         return $this;
     }
 
-    /**
-     * @return array|null
-     */
-    public function getAction()
+    public function getAction(): ?array
     {
         return $this->action;
     }
 
-    /**
-     * @param array|null $action
-     *
-     * @return $this
-     */
-    public function setAction($action): self
+    public function setAction(?array $action): static
     {
         if (\is_array($action)) {
             $this->validateArrayForTemplateAndOther($action);
@@ -112,20 +94,12 @@ class Button extends AbstractExtension
         return $this;
     }
 
-    /**
-     * @return array|null
-     */
-    public function getAvailable()
+    public function getAvailable(): ?array
     {
         return $this->available;
     }
 
-    /**
-     * @param array|null $available
-     *
-     * @return $this
-     */
-    public function setAvailable($available): self
+    public function setAvailable(?array $available): static
     {
         if (\is_array($available)) {
             $this->validateArrayForTemplateAndOther($available);
@@ -136,40 +110,24 @@ class Button extends AbstractExtension
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getClassName()
+    public function getClassName(): ?string
     {
         return $this->className;
     }
 
-    /**
-     * @param string|null $className
-     *
-     * @return $this
-     */
-    public function setClassName($className): self
+    public function setClassName(?string $className): static
     {
         $this->className = $className;
 
         return $this;
     }
 
-    /**
-     * @return array|null
-     */
-    public function getDestroy()
+    public function getDestroy(): ?array
     {
         return $this->destroy;
     }
 
-    /**
-     * @param array|null $destroy
-     *
-     * @return $this
-     */
-    public function setDestroy($destroy): self
+    public function setDestroy(?array $destroy): static
     {
         if (\is_array($destroy)) {
             $this->validateArrayForTemplateAndOther($destroy);
@@ -180,40 +138,24 @@ class Button extends AbstractExtension
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getExtend()
+    public function getExtend(): ?string
     {
         return $this->extend;
     }
 
-    /**
-     * @param string|null $extend
-     *
-     * @return $this
-     */
-    public function setExtend($extend): self
+    public function setExtend(?string $extend): static
     {
         $this->extend = $extend;
 
         return $this;
     }
 
-    /**
-     * @return array|null
-     */
-    public function getInit()
+    public function getInit(): ?array
     {
         return $this->init;
     }
 
-    /**
-     * @param array|null $init
-     *
-     * @return $this
-     */
-    public function setInit($init): self
+    public function setInit(?array $init): static
     {
         if (\is_array($init)) {
             $this->validateArrayForTemplateAndOther($init);
@@ -224,109 +166,66 @@ class Button extends AbstractExtension
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getKey()
+    public function getKey(): ?string
     {
         return $this->key;
     }
 
-    /**
-     * @param string|null $key
-     *
-     * @return $this
-     */
-    public function setKey($key): self
+    public function setKey(?string $key): static
     {
         $this->key = $key;
 
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getNamespace()
+    public function getNamespace(): ?string
     {
         return $this->namespace;
     }
 
-    /**
-     * @param string|null $namespace
-     *
-     * @return $this
-     */
-    public function setNamespace($namespace): self
+    public function setNamespace(?string $namespace): static
     {
         $this->namespace = $namespace;
 
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getText()
+    public function getText(): ?string
     {
         return $this->text;
     }
 
-    /**
-     * @param string|null $text
-     *
-     * @return $this
-     */
-    public function setText($text): self
+    public function setText(?string $text): static
     {
         $this->text = $text;
 
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getTitleAttr()
+    public function getTitleAttr(): ?string
     {
         return $this->titleAttr;
     }
 
-    /**
-     * @param string|null $titleAttr
-     *
-     * @return $this
-     */
-    public function setTitleAttr($titleAttr): self
+    public function setTitleAttr(?string $titleAttr): static
     {
         $this->titleAttr = $titleAttr;
 
         return $this;
     }
 
-    /**
-     * @return array|null
-     */
-    public function getButtonOptions()
+    public function getButtonOptions(): ?array
     {
         return $this->buttonOptions;
     }
 
-    /**
-     * @param array|null $buttonOptions
-     *
-     * @return $this
-     */
-    public function setButtonOptions($buttonOptions): self
+    public function setButtonOptions(?array $buttonOptions): static
     {
         $this->buttonOptions = $buttonOptions;
 
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getJavaScriptConfiguration(array $config = []): array
     {
         if (null !== $this->getAction()) {

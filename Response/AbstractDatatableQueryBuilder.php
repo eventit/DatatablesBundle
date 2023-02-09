@@ -3,7 +3,11 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Response;
@@ -13,6 +17,7 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
+use RuntimeException;
 use Sg\DatatablesBundle\Datatable\Ajax;
 use Sg\DatatablesBundle\Datatable\Column\ColumnInterface;
 use Sg\DatatablesBundle\Datatable\DatatableInterface;
@@ -33,63 +38,43 @@ abstract class AbstractDatatableQueryBuilder
      */
     public const INIT_PARAMETER_COUNTER = 100;
 
-    /** @var array */
-    protected $requestParams;
+    protected EntityManagerInterface $em;
 
-    /** @var EntityManagerInterface */
-    protected $em;
+    protected string $entityName;
 
-    /** @var string */
-    protected $entityName;
+    protected string $entityShortName;
 
-    /** @var string */
-    protected $entityShortName;
+    protected ClassMetadata $metadata;
 
-    /** @var ClassMetadata */
-    protected $metadata;
+    protected ?string $rootEntityIdentifier = null;
 
-    protected $rootEntityIdentifier;
+    protected ?QueryBuilder $qb = null;
 
-    /** @var QueryBuilder */
-    protected $qb;
+    protected PropertyAccessor $accessor;
 
-    /** @var PropertyAccessor */
-    protected $accessor;
+    protected array $columns;
 
-    /** @var array */
-    protected $columns;
+    protected array $columnNames;
 
-    /** @var array */
-    protected $columnNames;
+    protected array $selectColumns = [];
 
-    /** @var array */
-    protected $selectColumns = [];
+    protected array $searchColumns = [];
 
-    /** @var array */
-    protected $searchColumns = [];
+    protected array $searchColumnGroups = [];
 
-    /** @var array */
-    protected $searchColumnGroups = [];
+    protected array $orderColumns = [];
 
-    /** @var array */
-    protected $orderColumns = [];
+    protected Options $options;
 
-    /** @var Options */
-    protected $options;
+    protected Features $features;
 
-    /** @var Features */
-    protected $features;
-
-    /** @var Ajax */
-    protected $ajax;
+    protected Ajax $ajax;
 
     /**
      * @throws Exception
      */
-    public function __construct(array $requestParams, DatatableInterface $datatable)
+    public function __construct(protected array $requestParams, DatatableInterface $datatable)
     {
-        $this->requestParams = $requestParams;
-
         $this->em = $datatable->getEntityManager();
         $this->entityName = $datatable->getEntity();
 
@@ -121,16 +106,14 @@ abstract class AbstractDatatableQueryBuilder
     abstract protected function getEntityShortName(ClassMetadata $metadata): string;
 
     /**
-     * @param string $entityName
-     *
      * @throws Exception
      */
-    protected function getMetadata($entityName): ClassMetadata
+    protected function getMetadata(string $entityName): ClassMetadata
     {
         try {
             $metadata = $this->em->getMetadataFactory()->getMetadataFor($entityName);
-        } catch (MappingException $e) {
-            throw new Exception('DatatableQueryBuilder::getMetadata(): Given object ' . $entityName . ' is not a Doctrine Entity.');
+        } catch (MappingException) {
+            throw new RuntimeException('DatatableQueryBuilder::getMetadata(): Given object ' . $entityName . ' is not a Doctrine Entity.');
         }
 
         return $metadata;
@@ -138,7 +121,7 @@ abstract class AbstractDatatableQueryBuilder
 
     abstract protected function getSafeName($name): string;
 
-    protected function getIdentifier(ClassMetadata $metadata)
+    protected function getIdentifier(ClassMetadata $metadata): ?string
     {
         $identifiers = $metadata->getIdentifierFieldNames();
 
@@ -151,7 +134,7 @@ abstract class AbstractDatatableQueryBuilder
             && true === $this->accessor->getValue($column, 'searchable')
         ;
 
-        if (false === $this->options->isSearchInNonVisibleColumns()) {
+        if (! $this->options->isSearchInNonVisibleColumns()) {
             return $searchColumn && true === $this->accessor->getValue($column, 'visible');
         }
 
@@ -169,11 +152,9 @@ abstract class AbstractDatatableQueryBuilder
     }
 
     /**
-     * @param int|string $key
-     *
      * @return $this
      */
-    protected function addSearchColumnGroupEntry(ColumnInterface $column, $key): self
+    protected function addSearchColumnGroupEntry(ColumnInterface $column, int|string $key): static
     {
         /** @var string|null $searchColumnGroup */
         $searchColumnGroup = $this->accessor->getValue($column, 'searchColumnGroup');

@@ -3,7 +3,11 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Datatable\Editable;
@@ -17,27 +21,20 @@ class TextEditable extends AbstractEditable
      * Default: true.
      *
      * Currently not usable: x-editable bug https://github.com/vitalets/x-editable/issues/977
-     *
-     * @var bool
      */
-    protected $clear;
+    protected bool $clear = true;
 
     /**
      * Placeholder attribute of input. Shown when input is empty.
      * Default: null.
-     *
-     * @var string|null
      */
-    protected $placeholder;
+    protected ?string $placeholder = null;
 
     // -------------------------------------------------
     // FilterInterface
     // -------------------------------------------------
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getType()
+    public function getType(): string
     {
         return 'text';
     }
@@ -46,10 +43,7 @@ class TextEditable extends AbstractEditable
     // Options
     // -------------------------------------------------
 
-    /**
-     * @return $this
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): static
     {
         parent::configureOptions($resolver);
 
@@ -68,40 +62,24 @@ class TextEditable extends AbstractEditable
     // Getters && Setters
     // -------------------------------------------------
 
-    /**
-     * @return bool
-     */
-    public function isClear()
+    public function isClear(): bool
     {
         return $this->clear;
     }
 
-    /**
-     * @param bool $clear
-     *
-     * @return $this
-     */
-    public function setClear($clear)
+    public function setClear(bool $clear): static
     {
         $this->clear = $clear;
 
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getPlaceholder()
+    public function getPlaceholder(): ?string
     {
         return $this->placeholder;
     }
 
-    /**
-     * @param string|null $placeholder
-     *
-     * @return $this
-     */
-    public function setPlaceholder($placeholder)
+    public function setPlaceholder(?string $placeholder): static
     {
         $this->placeholder = $placeholder;
 

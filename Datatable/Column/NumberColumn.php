@@ -3,7 +3,11 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Datatable\Column;
@@ -17,40 +21,31 @@ class NumberColumn extends Column
     /**
      * A NumberFormatter instance.
      * A required option.
-     *
-     * @var NumberFormatter
      */
-    protected $formatter;
+    protected ?NumberFormatter $formatter = null;
 
     /**
      * Use NumberFormatter::formatCurrency instead NumberFormatter::format to format the value.
      * Default: false.
-     *
-     * @var bool
      */
-    protected $useFormatCurrency;
+    protected bool $useFormatCurrency = false;
 
     /**
      * The currency code.
      * Default: null => NumberFormatter::INTL_CURRENCY_SYMBOL is used.
-     *
-     * @var string|null
      */
-    protected $currency;
+    protected ?string $currency = null;
 
     // -------------------------------------------------
     // ColumnInterface
     // -------------------------------------------------
 
-    /**
-     * {@inheritdoc}
-     */
-    public function renderSingleField(array &$row)
+    public function renderSingleField(array &$row): static
     {
         $path = Helper::getDataPropertyPath($this->data);
 
         if ($this->accessor->isReadable($row, $path)) {
-            if (true === $this->isEditableContentRequired($row)) {
+            if ($this->isEditableContentRequired($row)) {
                 $content = $this->renderTemplate($this->accessor->getValue($row, $path), $row[$this->editable->getPk()]);
             } else {
                 $content = $this->renderTemplate($this->accessor->getValue($row, $path));
@@ -62,10 +57,7 @@ class NumberColumn extends Column
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function renderToMany(array &$row)
+    public function renderToMany(array &$row): static
     {
         $value = null;
         $path = Helper::getDataPropertyPath($this->data, $value);
@@ -73,12 +65,12 @@ class NumberColumn extends Column
         $entries = $this->accessor->getValue($row, $path);
 
         if ($this->accessor->isReadable($row, $path)) {
-            if (\count($entries) > 0) {
+            if ((is_countable($entries) ? \count($entries) : 0) > 0) {
                 foreach ($entries as $key => $entry) {
                     $currentPath = $path . '[' . $key . ']' . $value;
                     $currentObjectPath = Helper::getPropertyPathObjectNotation($path, $key, $value);
 
-                    if (true === $this->isEditableContentRequired($row)) {
+                    if ($this->isEditableContentRequired($row)) {
                         $content = $this->renderTemplate(
                             $this->accessor->getValue($row, $currentPath),
                             $row[$this->editable->getPk()],
@@ -101,10 +93,7 @@ class NumberColumn extends Column
     // Options
     // -------------------------------------------------
 
-    /**
-     * @return $this
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): static
     {
         parent::configureOptions($resolver);
 
@@ -121,13 +110,7 @@ class NumberColumn extends Column
         $resolver->setAllowedTypes('use_format_currency', ['bool']);
         $resolver->setAllowedTypes('currency', ['null', 'string']);
 
-        $resolver->setAllowedValues('formatter', function ($formatter) {
-            if (! $formatter instanceof NumberFormatter) {
-                return false;
-            }
-
-            return true;
-        });
+        $resolver->setAllowedValues('formatter', fn ($formatter): bool => $formatter instanceof NumberFormatter);
 
         return $this;
     }
@@ -136,58 +119,36 @@ class NumberColumn extends Column
     // Getters && Setters
     // -------------------------------------------------
 
-    /**
-     * @return NumberFormatter
-     */
-    public function getFormatter()
+    public function getFormatter(): ?NumberFormatter
     {
         return $this->formatter;
     }
 
-    /**
-     * @return $this
-     */
-    public function setFormatter(NumberFormatter $formatter)
+    public function setFormatter(NumberFormatter $formatter): static
     {
         $this->formatter = $formatter;
 
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function isUseFormatCurrency()
+    public function isUseFormatCurrency(): bool
     {
         return $this->useFormatCurrency;
     }
 
-    /**
-     * @param bool $useFormatCurrency
-     *
-     * @return $this
-     */
-    public function setUseFormatCurrency($useFormatCurrency)
+    public function setUseFormatCurrency(bool $useFormatCurrency): static
     {
         $this->useFormatCurrency = $useFormatCurrency;
 
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getCurrency()
+    public function getCurrency(): ?string
     {
         return $this->currency;
     }
 
-    /**
-     * @param string|null $currency
-     *
-     * @return $this
-     */
-    public function setCurrency($currency)
+    public function setCurrency(?string $currency): static
     {
         $this->currency = $currency;
 
@@ -201,27 +162,27 @@ class NumberColumn extends Column
     /**
      * Render template.
      *
-     * @param string|null $data
-     * @param string|null $pk
-     * @param string|null $path
-     *
      * @return mixed|string
      */
-    private function renderTemplate($data, $pk = null, $path = null)
+    private function renderTemplate(?string $data, ?string $pk = null, ?string $path = null): string
     {
-        if (true === $this->useFormatCurrency) {
-            if (false === \is_float($data)) {
-                $data = (float) $data;
-            }
-
+        if ($this->useFormatCurrency) {
             if (null === $this->currency) {
                 $this->currency = $this->formatter->getSymbol(NumberFormatter::INTL_CURRENCY_SYMBOL);
             }
 
-            $data = $this->formatter->formatCurrency($data, $this->currency);
+            if (false !== ($formattedData = $this->formatter->formatCurrency((float) $data, $this->currency))) {
+                $data = $formattedData;
+            } else {
+                $data = null;
+            }
         } else {
             // expected number (int or float), other values will be converted to a numeric value
-            $data = $this->formatter->format($data);
+            if (false !== ($formattedData = $this->formatter->format($data))) {
+                $data = $formattedData;
+            } else {
+                $data = null;
+            }
         }
 
         return $this->twig->render(

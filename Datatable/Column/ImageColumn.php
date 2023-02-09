@@ -3,12 +3,16 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Datatable\Column;
 
-use Exception;
+use RuntimeException;
 use Sg\DatatablesBundle\Datatable\Filter\TextFilter;
 use Sg\DatatablesBundle\Datatable\Helper;
 use Symfony\Component\OptionsResolver\Options;
@@ -23,10 +27,8 @@ class ImageColumn extends AbstractColumn
      * Required option.
      *
      * @see https://github.com/liip/LiipImagineBundle#create-thumbnails
-     *
-     * @var string
      */
-    protected $imagineFilter;
+    protected string $imagineFilter = '';
 
     /**
      * The imagine filter used to display the enlarged image's size;
@@ -35,60 +37,45 @@ class ImageColumn extends AbstractColumn
      * Default: null.
      *
      * @see https://github.com/liip/LiipImagineBundle#create-thumbnails
-     *
-     * @var string|null
      */
-    protected $imagineFilterEnlarged;
+    protected ?string $imagineFilterEnlarged = null;
 
     /**
      * The relative path.
      * Required option.
-     *
-     * @var string
      */
-    protected $relativePath;
+    protected string $relativePath = '';
 
     /**
      * The placeholder url.
      * e.g. "http://placehold.it"
      * Default: null.
-     *
-     * @var string|null
      */
-    protected $holderUrl;
+    protected ?string $holderUrl = null;
 
     /**
      * The default width of the placeholder.
      * Default: '50'.
-     *
-     * @var string
      */
-    protected $holderWidth;
+    protected string $holderWidth = '50';
 
     /**
      * The default height of the placeholder.
      * Default: '50'.
-     *
-     * @var string
      */
-    protected $holderHeight;
+    protected string $holderHeight = '50';
 
     /**
      * Enlarge thumbnail.
      * Default: false.
-     *
-     * @var bool
      */
-    protected $enlarge;
+    protected bool $enlarge = false;
 
     // -------------------------------------------------
     // ColumnInterface
     // -------------------------------------------------
 
-    /**
-     * {@inheritdoc}
-     */
-    public function renderSingleField(array &$row)
+    public function renderSingleField(array &$row): static
     {
         $path = Helper::getDataPropertyPath($this->data);
 
@@ -101,10 +88,7 @@ class ImageColumn extends AbstractColumn
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function renderToMany(array &$row)
+    public function renderToMany(array &$row): static
     {
         // e.g. images[ ].fileName
         //     => $path = [images]
@@ -115,7 +99,7 @@ class ImageColumn extends AbstractColumn
         if ($this->accessor->isReadable($row, $path)) {
             $images = $this->accessor->getValue($row, $path);
 
-            if (\count($images) > 0) {
+            if ((is_countable($images) ? \count($images) : 0) > 0) {
                 foreach ($images as $key => $image) {
                     $currentPath = $path . '[' . $key . ']' . $value;
                     $content = $this->renderImageTemplate($this->accessor->getValue($row, $currentPath), '-gallery-image');
@@ -132,10 +116,7 @@ class ImageColumn extends AbstractColumn
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getCellContentTemplate()
+    public function getCellContentTemplate(): string
     {
         return '@SgDatatables/render/thumb.html.twig';
     }
@@ -144,10 +125,7 @@ class ImageColumn extends AbstractColumn
     // Options
     // -------------------------------------------------
 
-    /**
-     * @return $this
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): static
     {
         parent::configureOptions($resolver);
 
@@ -172,12 +150,15 @@ class ImageColumn extends AbstractColumn
         $resolver->setAllowedTypes('holder_height', 'string');
         $resolver->setAllowedTypes('enlarge', 'bool');
 
-        $resolver->setNormalizer('enlarge', function (Options $options, $value) {
-            if (null === $options['imagine_filter_enlarged'] && true === $value) {
-                throw new Exception('ImageColumn::configureOptions(): For the enlarge option, imagine_filter_enlarged should not be null.');
+        $resolver->setNormalizer('enlarge', function (Options $options, $value): bool {
+            if (null !== $options['imagine_filter_enlarged']) {
+                return $value;
+            }
+            if (true !== $value) {
+                return $value;
             }
 
-            return $value;
+            throw new RuntimeException('ImageColumn::configureOptions(): For the enlarge option, imagine_filter_enlarged should not be null.');
         });
 
         return $this;
@@ -187,140 +168,84 @@ class ImageColumn extends AbstractColumn
     // Getters && Setters
     // -------------------------------------------------
 
-    /**
-     * @return string
-     */
-    public function getImagineFilter()
+    public function getImagineFilter(): string
     {
         return $this->imagineFilter;
     }
 
-    /**
-     * @param string $imagineFilter
-     *
-     * @return $this
-     */
-    public function setImagineFilter($imagineFilter)
+    public function setImagineFilter(string $imagineFilter): static
     {
         $this->imagineFilter = $imagineFilter;
 
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getImagineFilterEnlarged()
+    public function getImagineFilterEnlarged(): ?string
     {
         return $this->imagineFilterEnlarged;
     }
 
-    /**
-     * @param string|null $imagineFilterEnlarged
-     *
-     * @return $this
-     */
-    public function setImagineFilterEnlarged($imagineFilterEnlarged)
+    public function setImagineFilterEnlarged(?string $imagineFilterEnlarged): static
     {
         $this->imagineFilterEnlarged = $imagineFilterEnlarged;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getRelativePath()
+    public function getRelativePath(): string
     {
         return $this->relativePath;
     }
 
-    /**
-     * @param string $relativePath
-     *
-     * @return $this
-     */
-    public function setRelativePath($relativePath)
+    public function setRelativePath(string $relativePath): static
     {
         $this->relativePath = $relativePath;
 
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getHolderUrl()
+    public function getHolderUrl(): ?string
     {
         return $this->holderUrl;
     }
 
-    /**
-     * @param string|null $holderUrl
-     *
-     * @return $this
-     */
-    public function setHolderUrl($holderUrl)
+    public function setHolderUrl(?string $holderUrl): static
     {
         $this->holderUrl = $holderUrl;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getHolderWidth()
+    public function getHolderWidth(): string
     {
         return $this->holderWidth;
     }
 
-    /**
-     * @param string $holderWidth
-     *
-     * @return $this
-     */
-    public function setHolderWidth($holderWidth)
+    public function setHolderWidth(string $holderWidth): static
     {
         $this->holderWidth = $holderWidth;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getHolderHeight()
+    public function getHolderHeight(): string
     {
         return $this->holderHeight;
     }
 
-    /**
-     * @param string $holderHeight
-     *
-     * @return $this
-     */
-    public function setHolderHeight($holderHeight)
+    public function setHolderHeight(string $holderHeight): static
     {
         $this->holderHeight = $holderHeight;
 
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function isEnlarge()
+    public function isEnlarge(): bool
     {
         return $this->enlarge;
     }
 
-    /**
-     * @param bool $enlarge
-     *
-     * @return $this
-     */
-    public function setEnlarge($enlarge)
+    public function setEnlarge(bool $enlarge): static
     {
         $this->enlarge = $enlarge;
 
@@ -330,16 +255,10 @@ class ImageColumn extends AbstractColumn
     // -------------------------------------------------
     // Helper
     // -------------------------------------------------
-
     /**
      * Render image template.
-     *
-     * @param string $data
-     * @param string $classSuffix
-     *
-     * @return mixed|string
      */
-    private function renderImageTemplate($data, $classSuffix)
+    private function renderImageTemplate(string $data, string $classSuffix): string
     {
         return $this->twig->render(
             $this->getCellContentTemplate(),

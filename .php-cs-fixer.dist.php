@@ -1,18 +1,13 @@
 <?php
 
-//$header = <<<'EOF'
-//This file is part of the SgDatatablesBundle package.
-//
-//(c) event it AG <https://github.com/eventit/DatatablesBundle>
-//
-//For the full copyright and license information, please view the LICENSE
-//file that was distributed with this source code.
-//EOF;
-
 $header = <<<'EOF'
 This file is part of the SgDatatablesBundle package.
 
-<https://github.com/eventit/DatatablesBundle>
+(c) stwe <https://github.com/stwe/DatatablesBundle>
+(c) event it AG <https://github.com/eventit/DatatablesBundle>
+
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
 EOF;
 
 $finder = PhpCsFixer\Finder::create()

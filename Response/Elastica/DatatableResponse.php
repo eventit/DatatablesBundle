@@ -3,7 +3,11 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Response\Elastica;
@@ -27,28 +31,28 @@ class DatatableResponse extends AbstractDatatableResponse
 
     protected bool $countAllResults = false;
 
-    public function setPaginatedFinder(PaginatedFinderInterface $paginatedFinder): self
+    public function setPaginatedFinder(PaginatedFinderInterface $paginatedFinder): static
     {
         $this->paginatedFinder = $paginatedFinder;
 
         return $this;
     }
 
-    public function setDatatableQueryBuilderClass(string $datatableQueryBuilderClass): self
+    public function setDatatableQueryBuilderClass(string $datatableQueryBuilderClass): static
     {
         $this->datatableQueryBuilderClass = $datatableQueryBuilderClass;
 
         return $this;
     }
 
-    public function setModelDefinition(ModelDefinitionInterface $modelDefinition): self
+    public function setModelDefinition(ModelDefinitionInterface $modelDefinition): static
     {
         $this->modelDefinition = $modelDefinition;
 
         return $this;
     }
 
-    public function setCountAllResults(bool $countAllResults): self
+    public function setCountAllResults(bool $countAllResults): static
     {
         $this->countAllResults = $countAllResults;
 
@@ -90,15 +94,12 @@ class DatatableResponse extends AbstractDatatableResponse
         $outputHeader = [
             'draw' => (int) $this->requestParams['draw'],
             'recordsFiltered' => $entries->getCount(),
-            'recordsTotal' => true === $countAllResults ? $this->datatableQueryBuilder->getCountAllResults() : 0,
+            'recordsTotal' => $countAllResults ? $this->datatableQueryBuilder->getCountAllResults() : 0,
         ];
 
         return array_merge($outputHeader, $formatter->getOutput());
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getJsonResponse(): JsonResponse
     {
         $this->checkResponseDependencies();
@@ -116,7 +117,7 @@ class DatatableResponse extends AbstractDatatableResponse
         $outputHeader = [
             'draw' => (int) $this->requestParams['draw'],
             'recordsFiltered' => $entries->getCount(),
-            'recordsTotal' => true === $this->countAllResults ? $this->datatableQueryBuilder->getCountAllResults() : 0,
+            'recordsTotal' => $this->countAllResults ? $this->datatableQueryBuilder->getCountAllResults() : 0,
         ];
 
         $response = new JsonResponse(array_merge($outputHeader, $formatter->getOutput()));

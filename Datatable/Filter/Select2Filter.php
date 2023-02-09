@@ -3,14 +3,19 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Datatable\Filter;
 
-use Exception;
+use RuntimeException;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use UnexpectedValueException;
 
 class Select2Filter extends SelectFilter
 {
@@ -25,59 +30,44 @@ class Select2Filter extends SelectFilter
     /**
      * Setting this option to true will enable an "x" icon that will reset the selection to the placeholder.
      * Default: null.
-     *
-     * @var bool|null
      */
-    protected $allowClear;
+    protected ?bool $allowClear = null;
 
     /**
      * Tagging support.
      * Default: null.
-     *
-     * @var bool|null
      */
-    protected $tags;
+    protected ?bool $tags = null;
 
     /**
      * i18n language code.
      * Default: null (get locale).
-     *
-     * @var string|null
      */
-    protected $language;
+    protected ?string $language = null;
 
     /**
      * URL to get the results from.
      * Default: null.
-     *
-     * @var string|null
      */
-    protected $url;
+    protected ?string $url = null;
 
     /**
      * Wait some milliseconds before triggering the request.
      * Default: 250.
-     *
-     * @var int
      */
-    protected $delay;
+    protected int $delay = 250;
 
     /**
      * The AJAX cache.
      * Default: true.
-     *
-     * @var bool
      */
-    protected $cache;
+    protected bool $cache = true;
 
     // -------------------------------------------------
     // FilterInterface
     // -------------------------------------------------
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getTemplate()
+    public function getTemplate(): string
     {
         return '@SgDatatables/filter/select2.html.twig';
     }
@@ -86,10 +76,7 @@ class Select2Filter extends SelectFilter
     // OptionsInterface
     // -------------------------------------------------
 
-    /**
-     * {@inheritdoc}
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): static
     {
         parent::configureOptions($resolver);
 
@@ -111,12 +98,14 @@ class Select2Filter extends SelectFilter
         $resolver->setAllowedTypes('delay', 'int');
         $resolver->setAllowedTypes('cache', 'bool');
 
-        $resolver->setNormalizer('allow_clear', function (Options $options, $value) {
-            if (null === $options['placeholder'] && true === $value) {
-                throw new Exception('Select2Filter::configureOptions(): The allow_clear option will only work if a placeholder is set.');
+        $resolver->setNormalizer('allow_clear', function (Options $options, $value): bool {
+            if (null !== $options['placeholder']) {
+                return $value;
             }
-
-            return $value;
+            if (true !== $value) {
+                return $value;
+            }
+            throw new RuntimeException('Select2Filter::configureOptions(): The allow_clear option will only work if a placeholder is set.');
         });
 
         return $this;
@@ -126,140 +115,91 @@ class Select2Filter extends SelectFilter
     // Getters && Setters
     // -------------------------------------------------
 
-    /**
-     * @return string|null
-     */
-    public function getPlaceholder()
+    public function getPlaceholder(): ?string
     {
         return $this->placeholder;
     }
 
     /**
      * @param string|null $placeholder
-     *
-     * @return $this
      */
-    public function setPlaceholder($placeholder)
+    public function setPlaceholder($placeholder): static
     {
+        if (null !== $placeholder && ! \is_string($placeholder)) {
+            throw new UnexpectedValueException('placeholder must be of type string or null');
+        }
+
         $this->placeholder = $placeholder;
 
         return $this;
     }
 
-    /**
-     * @return bool|null
-     */
-    public function getAllowClear()
+    public function getAllowClear(): ?bool
     {
         return $this->allowClear;
     }
 
-    /**
-     * @param bool|null $allowClear
-     *
-     * @return $this
-     */
-    public function setAllowClear($allowClear)
+    public function setAllowClear(?bool $allowClear): static
     {
         $this->allowClear = $allowClear;
 
         return $this;
     }
 
-    /**
-     * @return bool|null
-     */
-    public function getTags()
+    public function getTags(): ?bool
     {
         return $this->tags;
     }
 
-    /**
-     * @param bool|null $tags
-     *
-     * @return $this
-     */
-    public function setTags($tags)
+    public function setTags(?bool $tags): static
     {
         $this->tags = $tags;
 
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getLanguage()
+    public function getLanguage(): ?string
     {
         return $this->language;
     }
 
-    /**
-     * @param string|null $language
-     *
-     * @return $this
-     */
-    public function setLanguage($language)
+    public function setLanguage(?string $language): static
     {
         $this->language = $language;
 
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getUrl()
+    public function getUrl(): ?string
     {
         return $this->url;
     }
 
-    /**
-     * @param string|null $url
-     *
-     * @return $this
-     */
-    public function setUrl($url)
+    public function setUrl(?string $url): static
     {
         $this->url = $url;
 
         return $this;
     }
 
-    /**
-     * @return int
-     */
-    public function getDelay()
+    public function getDelay(): int
     {
         return $this->delay;
     }
 
-    /**
-     * @param int $delay
-     *
-     * @return $this
-     */
-    public function setDelay($delay)
+    public function setDelay(int $delay): static
     {
         $this->delay = $delay;
 
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function isCache()
+    public function isCache(): bool
     {
         return $this->cache;
     }
 
-    /**
-     * @param bool $cache
-     *
-     * @return $this
-     */
-    public function setCache($cache)
+    public function setCache(bool $cache): static
     {
         $this->cache = $cache;
 

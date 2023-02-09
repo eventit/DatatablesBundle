@@ -3,7 +3,11 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Response\Elastica;
@@ -14,18 +18,16 @@ use Traversable;
 
 class ElasticaEntries implements IteratorAggregate
 {
-    /** @var int */
-    protected $count = 0;
+    protected int $count = 0;
 
-    /** @var array */
-    protected $entries = [];
+    protected array $entries = [];
 
     public function getCount(): int
     {
         return $this->count;
     }
 
-    public function setCount(int $count): self
+    public function setCount(int $count): static
     {
         $this->count = $count;
 
@@ -37,17 +39,14 @@ class ElasticaEntries implements IteratorAggregate
         return $this->entries;
     }
 
-    public function setEntries(array $entries): self
+    public function setEntries(array $entries): static
     {
         $this->entries = $entries;
 
         return $this;
     }
 
-    /**
-     * @return ArrayIterator|Traversable
-     */
-    public function getIterator()
+    public function getIterator(): ArrayIterator|Traversable
     {
         return new ArrayIterator($this->getEntries());
     }

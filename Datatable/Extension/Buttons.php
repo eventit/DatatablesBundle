@@ -3,22 +3,24 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Datatable\Extension;
 
-use Exception;
+use RuntimeException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use UnexpectedValueException;
 
 class Buttons extends AbstractExtension
 {
-    /** @var array|null */
-    protected $showButtons;
+    protected ?array $showButtons = null;
 
-    /** @var array|Button[]|null */
-    protected $createButtons;
+    /** @var Button[]|null */
+    protected ?array $createButtons = null;
 
     public function __construct()
     {
@@ -28,7 +30,7 @@ class Buttons extends AbstractExtension
     /**
      * @return $this
      */
-    public function configureOptions(OptionsResolver $resolver): ExtensionInterface
+    public function configureOptions(OptionsResolver $resolver): static
     {
         $resolver->setDefaults([
             'show_buttons' => null,
@@ -41,10 +43,7 @@ class Buttons extends AbstractExtension
         return $this;
     }
 
-    /**
-     * @return array|null
-     */
-    public function getShowButtons()
+    public function getShowButtons(): ?array
     {
         if (\is_array($this->showButtons)) {
             return $this->optionToJson($this->showButtons);
@@ -53,12 +52,7 @@ class Buttons extends AbstractExtension
         return $this->showButtons;
     }
 
-    /**
-     * @param array|null $showButtons
-     *
-     * @return $this
-     */
-    public function setShowButtons($showButtons): self
+    public function setShowButtons(?array $showButtons): static
     {
         $this->showButtons = $showButtons;
 
@@ -66,17 +60,17 @@ class Buttons extends AbstractExtension
     }
 
     /**
-     * @return array|Button[]|null
+     * @return Button[]|null
      */
-    public function getCreateButtons()
+    public function getCreateButtons(): ?array
     {
         return $this->createButtons;
     }
 
     /**
-     * @return array|null
+     * @return array<int, array[]>
      */
-    public function getCreateButtonsForJavaScriptConfiguration()
+    public function getCreateButtonsForJavaScriptConfiguration(): array
     {
         $createButtons = [];
         if (\is_array($this->getCreateButtons())) {
@@ -89,23 +83,16 @@ class Buttons extends AbstractExtension
         return $createButtons;
     }
 
-    /**
-     * @param array|null $createButtons
-     *
-     * @throws Exception
-     *
-     * @return $this
-     */
-    public function setCreateButtons($createButtons): self
+    public function setCreateButtons(?array $createButtons): static
     {
         if (\is_array($createButtons)) {
-            if (\count($createButtons) > 0) {
+            if ($createButtons !== []) {
                 foreach ($createButtons as $button) {
                     $newButton = new Button();
                     $this->createButtons[] = $newButton->set($button);
                 }
             } else {
-                throw new UnexpectedValueException('Buttons::setCreateButtons(): The createButtons array should contain at least one element.');
+                throw new RuntimeException('Buttons::setCreateButtons(): The createButtons array should contain at least one element.');
             }
         } else {
             $this->createButtons = $createButtons;

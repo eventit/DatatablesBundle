@@ -3,7 +3,11 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Datatable\Column;
@@ -12,6 +16,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Exception;
+use RuntimeException;
 use Sg\DatatablesBundle\Datatable\Factory;
 use Symfony\Component\Routing\RouterInterface;
 use Twig\Environment as Twig_Environment;
@@ -19,101 +24,45 @@ use Twig\Environment as Twig_Environment;
 class ColumnBuilder
 {
     /**
-     * The class metadata.
-     *
-     * @var ClassMetadata
-     */
-    private $metadata;
-
-    /**
-     * The Twig Environment.
-     *
-     * @var Twig_Environment
-     */
-    private $twig;
-
-    /**
-     * The router.
-     *
-     * @var RouterInterface
-     */
-    private $router;
-
-    /**
-     * The name of the associated Datatable.
-     *
-     * @var string
-     */
-    private $datatableName;
-
-    /**
-     * The doctrine orm entity manager service.
-     *
-     * @var EntityManagerInterface
-     */
-    private $em;
-
-    /**
      * The generated Columns.
-     *
-     * @var array
      */
-    private $columns;
+    private array $columns = [];
 
     /**
      * This variable stores the array of column names as keys and column ids as values
      * in order to perform search column id by name.
-     *
-     * @var array
      */
-    private $columnNames;
+    private array $columnNames = [];
 
     /**
      * Unique Columns.
-     *
-     * @var array
      */
-    private $uniqueColumns;
+    private array $uniqueColumns = [];
 
     /**
      * The fully-qualified class name of the entity (e.g. AppBundle\Entity\Post).
-     *
-     * @var string
      */
-    private $entityClassName;
+    private string $entityClassName;
 
-    /**
-     * @param string $datatableName
-     */
-    public function __construct(ClassMetadata $metadata, Twig_Environment $twig, RouterInterface $router, $datatableName, EntityManagerInterface $em)
-    {
-        $this->metadata = $metadata;
-        $this->twig = $twig;
-        $this->router = $router;
-        $this->datatableName = $datatableName;
-        $this->em = $em;
-
-        $this->columns = [];
-        $this->columnNames = [];
-        $this->uniqueColumns = [];
+    public function __construct(
+        private ClassMetadata $metadata,
+        private Twig_Environment $twig,
+        private RouterInterface $router,
+        private string $datatableName,
+        private EntityManagerInterface $em
+    ) {
         $this->entityClassName = $metadata->getName();
     }
 
     // -------------------------------------------------
     // Builder
     // -------------------------------------------------
-
     /**
      * Add Column.
      *
-     * @param string|null            $dql
-     * @param ColumnInterface|string $class
-     *
      * @throws Exception
-     *
-     * @return $this
      */
-    public function add($dql, $class, array $options = [])
+    public function add(?string $dql, ColumnInterface|string $class, array $options = []): static
     {
         $column = Factory::create($class, ColumnInterface::class);
         $column->initOptions();
@@ -132,12 +81,8 @@ class ColumnBuilder
 
     /**
      * Remove Column.
-     *
-     * @param string|null $dql
-     *
-     * @return $this
      */
-    public function remove($dql)
+    public function remove(?string $dql): static
     {
         foreach ($this->columns as $column) {
             if ($column->getDql() === $dql) {
@@ -150,36 +95,22 @@ class ColumnBuilder
         return $this;
     }
 
-    // -------------------------------------------------
-    // Getters && Setters
-    // -------------------------------------------------
-
-    /**
-     * @return array
-     */
-    public function getColumns()
+    public function getColumns(): array
     {
         return $this->columns;
     }
 
-    /**
-     * @return array
-     */
-    public function getColumnNames()
+    public function getColumnNames(): array
     {
         return $this->columnNames;
     }
 
     /**
      * Get a unique Column by his type.
-     *
-     * @param string $columnType
-     *
-     * @return mixed|null
      */
-    public function getUniqueColumn($columnType)
+    public function getUniqueColumn(string $columnType): ?AbstractColumn
     {
-        return \array_key_exists($columnType, $this->uniqueColumns) ? $this->uniqueColumns[$columnType] : null;
+        return $this->uniqueColumns[$columnType] ?? null;
     }
 
     // -------------------------------------------------
@@ -187,18 +118,14 @@ class ColumnBuilder
     // -------------------------------------------------
 
     /**
-     * @param string $entityName
-     *
      * @throws Exception
-     *
-     * @return ClassMetadata
      */
-    private function getMetadata($entityName)
+    private function getMetadata(?string $entityName): ClassMetadata
     {
         try {
             $metadata = $this->em->getMetadataFactory()->getMetadataFor($entityName);
-        } catch (MappingException $e) {
-            throw new Exception('DatatableQueryBuilder::getMetadata(): Given object ' . $entityName . ' is not a Doctrine Entity.');
+        } catch (MappingException) {
+            throw new RuntimeException('DatatableQueryBuilder::getMetadata(): Given object ' . $entityName . ' is not a Doctrine Entity.');
         }
 
         return $metadata;
@@ -206,24 +133,15 @@ class ColumnBuilder
 
     /**
      * Get metadata from association.
-     *
-     * @param string $association
-     *
-     * @return ClassMetadata
      */
-    private function getMetadataFromAssociation($association, ClassMetadata $metadata)
+    private function getMetadataFromAssociation(string $association, ClassMetadata $metadata): ClassMetadata
     {
         $targetClass = $metadata->getAssociationTargetClass($association);
 
         return $this->getMetadata($targetClass);
     }
 
-    /**
-     * @param string $field
-     *
-     * @return $this
-     */
-    private function setTypeOfField(ClassMetadata $metadata, AbstractColumn $column, $field)
+    private function setTypeOfField(ClassMetadata $metadata, AbstractColumn $column, string $field): static
     {
         if (null === $column->getTypeOfField()) {
             $column->setTypeOfField($metadata->getTypeOfField($field));
@@ -236,12 +154,8 @@ class ColumnBuilder
 
     /**
      * Handle dql properties.
-     *
-     * @param string $dql
-     *
-     * @return $this
      */
-    private function handleDqlProperties($dql, array $options, AbstractColumn $column)
+    private function handleDqlProperties(?string $dql, array $options, AbstractColumn $column): void
     {
         // the Column 'data' property has normally the same value as 'dql'
         $column->setData($dql);
@@ -252,39 +166,29 @@ class ColumnBuilder
         } else {
             $column->setCustomDql(true);
         }
-
-        return $this;
     }
 
     /**
      * Set environment properties.
-     *
-     * @return $this
      */
-    private function setEnvironmentProperties(AbstractColumn $column)
+    private function setEnvironmentProperties(AbstractColumn $column): void
     {
         $column->setDatatableName($this->datatableName);
         $column->setEntityClassName($this->entityClassName);
         $column->setTwig($this->twig);
         $column->setRouter($this->router);
-
-        return $this;
     }
 
     /**
      * Sets some types.
-     *
-     * @param string $dql
-     *
-     * @return $this
      */
-    private function setTypeProperties($dql, AbstractColumn $column)
+    private function setTypeProperties(?string $dql, AbstractColumn $column): void
     {
-        if (true === $column->isSelectColumn() && false === $column->isCustomDql()) {
+        if (null !== $dql && $column->isSelectColumn() && ! $column->isCustomDql()) {
             $metadata = $this->metadata;
             $parts = explode('.', $dql);
             // add associations types
-            if (true === $column->isAssociation()) {
+            if ($column->isAssociation()) {
                 while (\count($parts) > 1) {
                     $currentPart = array_shift($parts);
 
@@ -302,20 +206,14 @@ class ColumnBuilder
             $column->setTypeOfAssociation(null);
             $column->setOriginalTypeOfField(null);
         }
-
-        return $this;
     }
 
     /**
      * Adds a Column.
-     *
-     * @param string $dql
-     *
-     * @return $this
      */
-    private function addColumn($dql, AbstractColumn $column)
+    private function addColumn(?string $dql, AbstractColumn $column): void
     {
-        if (true === $column->callAddIfClosure()) {
+        if (null !== $dql && $column->callAddIfClosure()) {
             $this->columns[] = $column;
             $index = \count($this->columns) - 1;
             $this->columnNames[$dql] = $index;
@@ -326,22 +224,16 @@ class ColumnBuilder
                 $column->setData($index);
             }
 
-            if (true === $column->isUnique()) {
+            if ($column->isUnique()) {
                 $this->uniqueColumns[$column->getColumnType()] = $column;
             }
         }
-
-        return $this;
     }
 
     /**
      * Removes a Column.
-     *
-     * @param string $dql
-     *
-     * @return $this
      */
-    private function removeColumn($dql, AbstractColumn $column)
+    private function removeColumn(string $dql, AbstractColumn $column): void
     {
         // Remove column from columns
         foreach ($this->columns as $k => $c) {
@@ -372,25 +264,19 @@ class ColumnBuilder
                 break;
             }
         }
-
-        return $this;
     }
 
     /**
      * Check unique.
      *
      * @throws Exception
-     *
-     * @return $this
      */
-    private function checkUnique(): self
+    private function checkUnique(): void
     {
         $unique = $this->uniqueColumns;
 
         if (\count(array_unique($unique)) < \count($unique)) {
-            throw new Exception('ColumnBuilder::checkUnique(): Unique columns are only allowed once.');
+            throw new RuntimeException('ColumnBuilder::checkUnique(): Unique columns are only allowed once.');
         }
-
-        return $this;
     }
 }

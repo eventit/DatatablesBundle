@@ -3,7 +3,11 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\DependencyInjection;
@@ -14,10 +18,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('sg_datatables');
         if (method_exists($treeBuilder, 'getRootNode')) {
@@ -35,7 +36,7 @@ class Configuration implements ConfigurationInterface
     /**
      * Add datatable section.
      */
-    private function addDatatableSection(ArrayNodeDefinition $rootNode)
+    private function addDatatableSection(ArrayNodeDefinition $rootNode): void
     {
         $rootNode
             ->children()

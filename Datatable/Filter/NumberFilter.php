@@ -3,7 +3,11 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Datatable\Filter;
@@ -15,59 +19,44 @@ class NumberFilter extends TextFilter
     /**
      * Minimum value.
      * Default: '0'.
-     *
-     * @var string
      */
-    protected $min;
+    protected string $min = '0';
 
     /**
      * Maximum value.
      * Default: '100'.
-     *
-     * @var string
      */
-    protected $max;
+    protected string $max = '100';
 
     /**
      * The Step scale factor of the slider.
      * Default: '1'.
-     *
-     * @var string
      */
-    protected $step;
+    protected string $step = '1';
 
     /**
      * Determines whether a label with the current value is displayed.
      * Default: false.
-     *
-     * @var bool
      */
-    protected $showLabel;
+    protected bool $showLabel = false;
 
     /**
      * Pre-defined values.
      * Default: null.
-     *
-     * @var array|null
      */
-    protected $datalist;
+    protected ?array $datalist = null;
 
     /**
      * The <input> type.
      * Default: 'number'.
-     *
-     * @var string
      */
-    protected $type;
+    protected string $type = 'number';
 
     // -------------------------------------------------
     // Options
     // -------------------------------------------------
 
-    /**
-     * @return $this
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): static
     {
         parent::configureOptions($resolver);
 
@@ -99,120 +88,72 @@ class NumberFilter extends TextFilter
     // Getters && Setters
     // -------------------------------------------------
 
-    /**
-     * @return string
-     */
-    public function getMin()
+    public function getMin(): string
     {
         return $this->min;
     }
 
-    /**
-     * @param string $min
-     *
-     * @return $this
-     */
-    public function setMin($min)
+    public function setMin(string $min): static
     {
         $this->min = $min;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getMax()
+    public function getMax(): string
     {
         return $this->max;
     }
 
-    /**
-     * @param string $max
-     *
-     * @return $this
-     */
-    public function setMax($max)
+    public function setMax(string $max): static
     {
         $this->max = $max;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getStep()
+    public function getStep(): string
     {
         return $this->step;
     }
 
-    /**
-     * @param string $step
-     *
-     * @return $this
-     */
-    public function setStep($step)
+    public function setStep(string $step): static
     {
         $this->step = $step;
 
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function isShowLabel()
+    public function isShowLabel(): bool
     {
         return $this->showLabel;
     }
 
-    /**
-     * @param bool $showLabel
-     *
-     * @return $this
-     */
-    public function setShowLabel($showLabel)
+    public function setShowLabel(bool $showLabel): static
     {
         $this->showLabel = $showLabel;
 
         return $this;
     }
 
-    /**
-     * @return array|null
-     */
-    public function getDatalist()
+    public function getDatalist(): ?array
     {
         return $this->datalist;
     }
 
-    /**
-     * @param array|null $datalist
-     *
-     * @return $this
-     */
-    public function setDatalist($datalist)
+    public function setDatalist(?array $datalist): static
     {
         $this->datalist = $datalist;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
 
-    /**
-     * @param string $type
-     *
-     * @return $this
-     */
-    public function setType($type)
+    public function setType(string $type): static
     {
         $this->type = $type;
 

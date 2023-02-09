@@ -3,13 +3,17 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Datatable\Column;
 
 use Doctrine\DBAL\Types\Type as DoctrineType;
-use Exception;
+use RuntimeException;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -17,33 +21,24 @@ class VirtualColumn extends Column
 {
     /**
      * Order field.
-     *
-     * @var string|null
      */
-    protected $orderColumn;
+    protected ?string $orderColumn = null;
 
     /**
      * Search field.
-     *
-     * @var string|null
      */
-    protected $searchColumn;
+    protected ?string $searchColumn = null;
 
     /**
      * Order field type.
-     *
-     * @var string|null
      */
-    protected $orderColumnTypeOfField;
+    protected ?string $orderColumnTypeOfField = null;
 
     // -------------------------------------------------
     // Options
     // -------------------------------------------------
 
-    /**
-     * @return $this
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): static
     {
         parent::configureOptions($resolver);
 
@@ -62,22 +57,26 @@ class VirtualColumn extends Column
         $resolver->setAllowedTypes('order_column', ['null', 'string', 'array']);
         $resolver->setAllowedTypes('search_column', ['null', 'string', 'array']);
 
-        $resolver->setAllowedValues('order_column_type_of_field', array_merge([null], array_keys(DoctrineType::getTypesMap())));
+        $resolver->setAllowedValues('order_column_type_of_field', [...[null], ...array_keys(DoctrineType::getTypesMap())]);
 
-        $resolver->setNormalizer('orderable', function (Options $options, $value) {
-            if (null === $options['order_column'] && true === $value) {
-                throw new Exception('VirtualColumn::configureOptions(): For the orderable option, order_column should not be null.');
+        $resolver->setNormalizer('orderable', function (Options $options, $value): bool {
+            if (null !== $options['order_column']) {
+                return $value;
             }
-
-            return $value;
+            if (true !== $value) {
+                return $value;
+            }
+            throw new RuntimeException('VirtualColumn::configureOptions(): For the orderable option, order_column should not be null.');
         });
 
-        $resolver->setNormalizer('searchable', function (Options $options, $value) {
-            if (null === $options['search_column'] && true === $value) {
-                throw new Exception('VirtualColumn::configureOptions(): For the searchable option, search_column should not be null.');
+        $resolver->setNormalizer('searchable', function (Options $options, $value): bool {
+            if (null !== $options['search_column']) {
+                return $value;
             }
-
-            return $value;
+            if (true !== $value) {
+                return $value;
+            }
+            throw new RuntimeException('VirtualColumn::configureOptions(): For the searchable option, search_column should not be null.');
         });
 
         return $this;
@@ -87,18 +86,12 @@ class VirtualColumn extends Column
     // ColumnInterface
     // -------------------------------------------------
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isSelectColumn()
+    public function isSelectColumn(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getColumnType()
+    public function getColumnType(): string
     {
         return parent::VIRTUAL_COLUMN;
     }
@@ -107,40 +100,24 @@ class VirtualColumn extends Column
     // Getters && Setters
     // -------------------------------------------------
 
-    /**
-     * @return string|null
-     */
-    public function getOrderColumn()
+    public function getOrderColumn(): ?string
     {
         return $this->orderColumn;
     }
 
-    /**
-     * @param string|null $orderColumn
-     *
-     * @return $this
-     */
-    public function setOrderColumn($orderColumn)
+    public function setOrderColumn(?string $orderColumn): static
     {
         $this->orderColumn = $orderColumn;
 
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getSearchColumn()
+    public function getSearchColumn(): ?string
     {
         return $this->searchColumn;
     }
 
-    /**
-     * @param string|null $searchColumn
-     *
-     * @return $this
-     */
-    public function setSearchColumn($searchColumn)
+    public function setSearchColumn(?string $searchColumn): static
     {
         $this->searchColumn = $searchColumn;
 
@@ -149,20 +126,16 @@ class VirtualColumn extends Column
 
     /**
      * Get orderColumnTypeOfField.
-     *
-     * @return string|null
      */
-    public function getOrderColumnTypeOfField()
+    public function getOrderColumnTypeOfField(): ?string
     {
         return $this->orderColumnTypeOfField;
     }
 
     /**
      * Set orderColumnTypeOfField.
-     *
-     * @param string|null $orderColumnTypeOfField
      */
-    public function setOrderColumnTypeOfField($orderColumnTypeOfField): self
+    public function setOrderColumnTypeOfField(?string $orderColumnTypeOfField): static
     {
         $this->orderColumnTypeOfField = $orderColumnTypeOfField;
 

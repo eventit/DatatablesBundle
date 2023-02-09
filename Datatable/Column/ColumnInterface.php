@@ -3,7 +3,11 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Datatable\Column;
@@ -20,114 +24,86 @@ interface ColumnInterface
 
     /**
      * Validates $dql. Normally a non-empty string is expected.
-     *
-     * @return bool
      */
-    public function dqlConstraint($dql);
+    public function dqlConstraint($dql): bool;
 
     /**
      * Specifies whether only a single column of this type is allowed (example: MultiselectColumn).
-     *
-     * @return bool
      */
-    public function isUnique();
+    public function isUnique(): bool;
 
     /**
      * Checks whether an association is given.
-     *
-     * @return bool
      */
-    public function isAssociation();
+    public function isAssociation(): bool;
 
     /**
      * Checks whether a toMany association is given.
-     *
-     * @return bool
      */
-    public function isToManyAssociation();
+    public function isToManyAssociation(): bool;
 
     /**
      * Use the column data value in SELECT statement.
      * Normally is it true. In case of virtual Column, multi select column or data is null is it false.
-     *
-     * @return bool
      */
-    public function isSelectColumn();
+    public function isSelectColumn(): bool;
 
     /**
      * Get the template, in which all DataTables-Columns-Options set.
-     *
-     * @return string
      */
-    public function getOptionsTemplate();
+    public function getOptionsTemplate(): string;
 
     /**
      * Sometimes it is necessary to add some special data to the output array.
      * For example, the visibility of actions.
-     *
-     * @return $this
      */
-    public function addDataToOutputArray(array &$row);
+    public function addDataToOutputArray(array &$row): static;
 
     /**
      * Render images or any other special content.
      * This function works similar to the DataTables Plugin 'columns.render'.
      */
-    public function renderCellContent(array &$row);
+    public function renderCellContent(array &$row): static;
 
     /**
      * Render single field.
-     *
-     * @return $this
      */
-    public function renderSingleField(array &$row);
+    public function renderSingleField(array &$row): static;
 
     /**
      * Render toMany.
-     *
-     * @return $this
      */
-    public function renderToMany(array &$row);
+    public function renderToMany(array &$row): static;
 
     /**
      * Get the template for the 'renderCellContent' function.
-     *
-     * @return string
      */
-    public function getCellContentTemplate();
+    public function getCellContentTemplate(): string;
 
     /**
      * Implementation of the 'Draw Event' - fired once the table has completed a draw.
      * With this function can javascript execute after drawing the whole table.
      * Used - for example - for the Editable function.
      */
-    public function renderPostCreateDatatableJsContent();
+    public function renderPostCreateDatatableJsContent(): ?string;
 
     /**
      * The allowed Column positions as array.
-     *
-     * @return array|null
      */
-    public function allowedPositions();
+    public function allowedPositions(): ?array;
 
     /**
      * Returns the Column type.
-     *
-     * @return string
      */
-    public function getColumnType();
+    public function getColumnType(): string;
 
     /**
      * Does special content need to be rendered for editable?
-     *
-     * @return bool
      */
-    public function isEditableContentRequired(array $row);
+    public function isEditableContentRequired(array $row): bool;
 
     /**
      * Get type of field.
-     *
-     * @return string|null
      */
-    public function getTypeOfField();
+    public function getTypeOfField(): ?string;
 }

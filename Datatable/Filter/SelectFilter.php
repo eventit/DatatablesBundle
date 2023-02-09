@@ -3,14 +3,20 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Datatable\Filter;
 
 use Doctrine\ORM\Query\Expr\Andx;
+use Doctrine\ORM\Query\Expr\Composite;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
+use RuntimeException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class SelectFilter extends AbstractFilter
@@ -18,51 +24,42 @@ class SelectFilter extends AbstractFilter
     /**
      * This allows to define a search type (e.g. 'like' or 'isNull') for each item in 'selectOptions'.
      * Default: array() - The default value of searchType is used.
-     *
-     * @var array
      */
-    protected $selectSearchTypes;
+    protected array $selectSearchTypes = [];
 
     /**
      * Select options for this filter type (e.g. for boolean column: '1' => 'Yes', '0' => 'No').
      * Default: array().
-     *
-     * @var array
      */
-    protected $selectOptions;
+    protected array $selectOptions = [];
 
     /**
      * Lets the user select more than one option in the select list.
      * Default: false.
-     *
-     * @var bool
      */
-    protected $multiple;
+    protected bool $multiple = false;
 
     // -------------------------------------------------
     // FilterInterface
     // -------------------------------------------------
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getTemplate()
+    public function getTemplate(): string
     {
         return '@SgDatatables/filter/select.html.twig';
     }
 
     /**
-     * {@inheritdoc}
+     * @throws Exception
      */
-    public function addAndExpression(Andx $andExpr, QueryBuilder $qb, $searchField, $searchValue, $searchTypeOfField, &$parameterCounter)
+    public function addAndExpression(Andx $andExpr, QueryBuilder $qb, $searchField, $searchValue, $searchTypeOfField, &$parameterCounter): Composite
     {
         $searchValues = explode(',', $searchValue);
-        if (true === $this->multiple && \is_array($searchValues) && \count($searchValues) > 1) {
+        if ($this->multiple && \is_array($searchValues) && \count($searchValues) > 1) {
             $orExpr = $qb->expr()->orX();
 
-            foreach ($searchValues as $searchValue) {
-                $this->setSelectSearchType($searchValue);
-                $orExpr->add($this->getExpression($qb->expr()->andX(), $qb, $this->searchType, $searchField, $searchValue, $searchTypeOfField, $parameterCounter));
+            foreach ($searchValues as $searchValueElem) {
+                $this->setSelectSearchType($searchValueElem);
+                $orExpr->add($this->getExpression($qb->expr()->andX(), $qb, $this->searchType, $searchField, $searchValueElem, $searchTypeOfField, $parameterCounter));
             }
 
             return $andExpr->add($orExpr);
@@ -80,7 +77,7 @@ class SelectFilter extends AbstractFilter
     /**
      * @return $this
      */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): static
     {
         parent::configureOptions($resolver);
 
@@ -105,56 +102,36 @@ class SelectFilter extends AbstractFilter
     // Getters && Setters
     // -------------------------------------------------
 
-    /**
-     * @return array
-     */
-    public function getSelectSearchTypes()
+    public function getSelectSearchTypes(): array
     {
         return $this->selectSearchTypes;
     }
 
-    /**
-     * @return $this
-     */
-    public function setSelectSearchTypes(array $selectSearchTypes)
+    public function setSelectSearchTypes(array $selectSearchTypes): static
     {
         $this->selectSearchTypes = $selectSearchTypes;
 
         return $this;
     }
 
-    /**
-     * @return array
-     */
-    public function getSelectOptions()
+    public function getSelectOptions(): array
     {
         return $this->selectOptions;
     }
 
-    /**
-     * @return $this
-     */
-    public function setSelectOptions(array $selectOptions)
+    public function setSelectOptions(array $selectOptions): static
     {
         $this->selectOptions = $selectOptions;
 
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function isMultiple()
+    public function isMultiple(): bool
     {
         return $this->multiple;
     }
 
-    /**
-     * @param bool $multiple
-     *
-     * @return $this
-     */
-    public function setMultiple($multiple)
+    public function setMultiple(bool $multiple): static
     {
         $this->multiple = $multiple;
 
@@ -176,7 +153,7 @@ class SelectFilter extends AbstractFilter
             if ($searchTypesCount === \count($this->selectOptions)) {
                 $this->searchType = $this->selectSearchTypes[$searchValue];
             } else {
-                throw new Exception('SelectFilter::setSelectSearchType(): The search types array is not valid.');
+                throw new RuntimeException('SelectFilter::setSelectSearchType(): The search types array is not valid.');
             }
         }
     }

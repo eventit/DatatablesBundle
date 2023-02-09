@@ -3,7 +3,11 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Response;
@@ -15,27 +19,18 @@ use Sg\DatatablesBundle\Datatable\DatatableInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use UnexpectedValueException;
 
 abstract class AbstractDatatableResponse
 {
-    /**
-     * @var Request
-     */
-    protected $request;
+    protected ?Request $request;
 
-    /**
-     * @var array
-     */
-    protected $requestParams;
+    protected array $requestParams = [];
 
     /**
      * A DatatableInterface instance.
      * Default: null.
-     *
-     * @var DatatableInterface|null
      */
-    protected $datatable;
+    protected ?DatatableInterface $datatable = null;
 
     /**
      * A DatatableQueryBuilder instance.
@@ -47,8 +42,6 @@ abstract class AbstractDatatableResponse
     public function __construct(RequestStack $requestStack)
     {
         $this->request = $requestStack->getCurrentRequest();
-        $this->datatable = null;
-        $this->datatableQueryBuilder = null;
     }
 
     abstract public function getResponse(
@@ -73,7 +66,7 @@ abstract class AbstractDatatableResponse
     /**
      * @throws Exception
      */
-    public function setDatatable(DatatableInterface $datatable): self
+    public function setDatatable(DatatableInterface $datatable): static
     {
         $val = $this->validateColumnsPositions($datatable);
         if (\is_int($val)) {
@@ -94,7 +87,7 @@ abstract class AbstractDatatableResponse
         return $this->datatableQueryBuilder ?: $this->createDatatableQueryBuilder();
     }
 
-    protected function checkResponseDependencies()
+    protected function checkResponseDependencies(): void
     {
         if (null === $this->datatable) {
             throw new RuntimeException('DatatableResponse::getResponse(): Set a Datatable class with setDatatable().');
@@ -146,7 +139,7 @@ abstract class AbstractDatatableResponse
                     unset($allowedPositions[ColumnInterface::LAST_POSITION]);
                 }
 
-                if (false === \array_key_exists($index, $allowedPositions)) {
+                if (! \array_key_exists($index, $allowedPositions)) {
                     return $index;
                 }
             }

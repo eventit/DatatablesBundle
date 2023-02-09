@@ -3,7 +3,11 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Controller;
@@ -12,6 +16,7 @@ use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -84,10 +89,8 @@ class DatatableController extends AbstractController
 
     /**
      * Finds an object by its primary key / identifier.
-     *
-     * @param string $entityClassName
      */
-    private function getEntityByPk($entityClassName, $pk, EntityManagerInterface $entityManager): object
+    private function getEntityByPk(string $entityClassName, $pk, EntityManagerInterface $entityManager): object
     {
         $entity = $entityManager->getRepository($entityClassName)->find($pk);
         if (! $entity) {
@@ -99,10 +102,8 @@ class DatatableController extends AbstractController
 
     /**
      * @throws Exception
-     *
-     * @return bool|DateTime|float|int|string|null
      */
-    private function normalizeValue(string $originalTypeOfField, $value)
+    private function normalizeValue(string $originalTypeOfField, $value): float|DateTime|bool|int|string|null
     {
         switch ($originalTypeOfField) {
             case Types::DATETIME_MUTABLE:
@@ -131,7 +132,7 @@ class DatatableController extends AbstractController
 
                 break;
             default:
-                throw new Exception("DatatableController::prepareValue(): The field type {$originalTypeOfField} is not editable.");
+                throw new RuntimeException("DatatableController::prepareValue(): The field type {$originalTypeOfField} is not editable.");
         }
 
         return $value;
@@ -147,15 +148,19 @@ class DatatableController extends AbstractController
         if ('null' === $str) {
             return null;
         }
-
-        if ('true' === $str || '1' === $str) {
+        if ('true' === $str) {
             return true;
         }
-
-        if ('false' === $str || '0' === $str) {
+        if ('1' === $str) {
+            return true;
+        }
+        if ('false' === $str) {
+            return false;
+        }
+        if ('0' === $str) {
             return false;
         }
 
-        throw new Exception('DatatableController::strToBool(): Cannot convert string to boolean, expected string "true" or "false".');
+        throw new RuntimeException('DatatableController::strToBool(): Cannot convert string to boolean, expected string "true" or "false".');
     }
 }

@@ -173,9 +173,6 @@ use Sg\DatatablesBundle\Datatable\Style;
 */
 class PostDatatable extends AbstractDatatable
 {
-    /**
-     * {@inheritdoc}
-     */
     public function getLineFormatter()
     {
         $formatter = function($row) {
@@ -187,9 +184,6 @@ class PostDatatable extends AbstractDatatable
         return $formatter;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function buildDatatable(array $options = array())
     {
         $this->ajax->set(array(
@@ -341,17 +335,11 @@ class PostDatatable extends AbstractDatatable
         ;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getEntity()
     {
         return 'AppBundle\Entity\Post';
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getName()
     {
         return 'post_datatable';

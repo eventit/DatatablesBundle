@@ -3,7 +3,11 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Response\Doctrine;
@@ -23,21 +27,21 @@ class DatatableResponse extends AbstractDatatableResponse
 
     protected bool $fetchJoinCollection = false;
 
-    public function setCountAllResults(bool $countAllResults): self
+    public function setCountAllResults(bool $countAllResults): static
     {
         $this->countAllResults = $countAllResults;
 
         return $this;
     }
 
-    public function setOutputWalkers(bool $outputWalkers): self
+    public function setOutputWalkers(bool $outputWalkers): static
     {
         $this->outputWalkers = $outputWalkers;
 
         return $this;
     }
 
-    public function setFetchJoinCollection(bool $fetchJoinCollection): self
+    public function setFetchJoinCollection(bool $fetchJoinCollection): static
     {
         $this->fetchJoinCollection = $fetchJoinCollection;
 
@@ -46,14 +50,12 @@ class DatatableResponse extends AbstractDatatableResponse
 
     /**
      * @throws Exception
-     *
-     * @return $this
      */
-    public function setDatatable(DatatableInterface $datatable): AbstractDatatableResponse
+    public function setDatatable(DatatableInterface $datatable): static
     {
         $val = $this->validateColumnsPositions($datatable);
         if (\is_int($val)) {
-            throw new RuntimeException("Doctrine\DatatableResponse::setDatatable(): The Column with the index {$val} is on a not allowed position.");
+            throw new RuntimeException("Doctrine\\DatatableResponse::setDatatable(): The Column with the index {$val} is on a not allowed position.");
         }
 
         $this->datatable = $datatable;
@@ -102,15 +104,12 @@ class DatatableResponse extends AbstractDatatableResponse
         $outputHeader = [
             'draw' => (int) $this->requestParams['draw'],
             'recordsFiltered' => \count($paginator),
-            'recordsTotal' => true === $countAllResults ? (int) $this->datatableQueryBuilder->getCountAllResults() : 0,
+            'recordsTotal' => $countAllResults ? (int) $this->datatableQueryBuilder->getCountAllResults() : 0,
         ];
 
         return array_merge($outputHeader, $formatter->getOutput());
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getJsonResponse(): JsonResponse
     {
         $this->checkResponseDependencies();
@@ -124,7 +123,7 @@ class DatatableResponse extends AbstractDatatableResponse
         $outputHeader = [
             'draw' => (int) $this->requestParams['draw'],
             'recordsFiltered' => \count($paginator),
-            'recordsTotal' => true === $this->countAllResults ? (int) $this->datatableQueryBuilder->getCountAllResults() : 0,
+            'recordsTotal' => $this->countAllResults ? (int) $this->datatableQueryBuilder->getCountAllResults() : 0,
         ];
 
         $response = new JsonResponse(array_merge($outputHeader, $formatter->getOutput()));

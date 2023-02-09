@@ -3,7 +3,11 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Datatable;
@@ -25,43 +29,34 @@ class Extensions
     /**
      * The Buttons extension.
      * Default: null.
-     *
-     * @var array|bool|Buttons|null
      */
-    protected $buttons;
+    protected array|bool|null|Buttons $buttons = null;
 
     /**
      * The Responsive Extension.
      * Automatically optimise the layout for different screen sizes.
      * Default: null.
-     *
-     * @var array|bool|Responsive|null
      */
-    protected $responsive;
+    protected Responsive|bool|array|null $responsive = null;
 
     /**
      * The Select Extension.
      * Select adds item selection capabilities to a DataTable.
      * Default: null.
-     *
-     * @var array|bool|Select|null
      */
-    protected $select;
+    protected Select|array|bool|null $select = null;
 
     /**
      * The RowGroup Extension.
      * Automatically group rows.
      * Default: null.
-     *
-     * @var array|bool|RowGroup|null
      */
-    protected $rowGroup;
+    protected array|bool|null|RowGroup $rowGroup = null;
 
-    /** @var array|ExtensionInterface[] */
-    protected $extensions = [];
+    /** @var ExtensionInterface[] */
+    protected array $extensions = [];
 
-    /** @var FixedHeaderFooter */
-    protected $fixedHeaderFooter;
+    protected ?FixedHeaderFooter $fixedHeaderFooter = null;
 
     public function __construct()
     {
@@ -71,7 +66,7 @@ class Extensions
     /**
      * @return $this
      */
-    public function configureOptions(OptionsResolver $resolver): self
+    public function configureOptions(OptionsResolver $resolver): static
     {
         $resolver->setDefaults([
             'buttons' => null,
@@ -85,7 +80,7 @@ class Extensions
         $resolver->setAllowedTypes('select', ['null', 'array', 'bool']);
         $resolver->setAllowedTypes('row_group', ['null', 'array', 'bool']);
 
-        foreach ($this->extensions as $name => $extension) {
+        foreach (array_keys($this->extensions) as $name) {
             $resolver->setDefault($name, null);
             $resolver->addAllowedTypes($name, ['null', 'array', 'bool']);
         }
@@ -93,22 +88,15 @@ class Extensions
         return $this;
     }
 
-    /**
-     * @return array|bool|Buttons|null
-     */
-    public function getButtons()
+    public function getButtons(): Buttons|bool|array|null
     {
         return $this->buttons;
     }
 
     /**
-     * @param array|bool|null $buttons
-     *
      * @throws Exception
-     *
-     * @return $this
      */
-    public function setButtons($buttons)
+    public function setButtons(bool|array|null $buttons): static
     {
         if (\is_array($buttons)) {
             $newButton = new Buttons();
@@ -120,20 +108,12 @@ class Extensions
         return $this;
     }
 
-    /**
-     * @return array|bool|Responsive|null
-     */
-    public function getResponsive()
+    public function getResponsive(): array|bool|Responsive|null
     {
         return $this->responsive;
     }
 
-    /**
-     * @param array|bool|null $responsive
-     *
-     * @return $this
-     */
-    public function setResponsive($responsive)
+    public function setResponsive(bool|array|null $responsive): static
     {
         if (\is_array($responsive)) {
             $newResponsive = new Responsive();
@@ -148,7 +128,7 @@ class Extensions
     /**
      * @throws Exception
      */
-    public function addExtension(ExtensionInterface $extension): self
+    public function addExtension(ExtensionInterface $extension): static
     {
         $extName = $extension->getName();
         if ($this->hasExtension($extName)) {
@@ -185,19 +165,17 @@ class Extensions
     /**
      * @throws Exception
      */
-    public function enableExtension(string $name)
+    public function enableExtension(string $name): void
     {
         $this->getExtension($name)->setEnabled(true);
     }
 
     /**
-     * @param array|bool $options
-     *
      * @throws Exception
      *
      * @return $this
      */
-    public function setExtensionOptions(string $name, array $options): self
+    public function setExtensionOptions(string $name, array|bool $options): static
     {
         $extension = $this->getExtension($name);
         $extension->setEnabled(true);
@@ -212,27 +190,19 @@ class Extensions
     }
 
     /**
-     * @return array|ExtensionInterface[]
+     * @return ExtensionInterface[]
      */
     public function getExtensions(): array
     {
         return $this->extensions;
     }
 
-    /**
-     * @return array|bool|Select|null
-     */
-    public function getSelect()
+    public function getSelect(): bool|array|Select|null
     {
         return $this->select;
     }
 
-    /**
-     * @param array|bool|null $select
-     *
-     * @return $this
-     */
-    public function setSelect($select)
+    public function setSelect(bool|array|null $select): static
     {
         if (\is_array($select)) {
             $newSelect = new Select();
@@ -244,22 +214,15 @@ class Extensions
         return $this;
     }
 
-    /**
-     * @return array|bool|RowGroup|null
-     */
-    public function getRowGroup()
+    public function getRowGroup(): RowGroup|bool|array|null
     {
         return $this->rowGroup;
     }
 
     /**
-     * @param array|bool|null $rowGroup
-     *
      * @throws Exception
-     *
-     * @return $this
      */
-    public function setRowGroup($rowGroup)
+    public function setRowGroup(bool|array|null $rowGroup): static
     {
         if (\is_array($rowGroup)) {
             $newRowGroup = new RowGroup();
