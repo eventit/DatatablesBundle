@@ -12,6 +12,7 @@
 
 namespace Sg\DatatablesBundle\Datatable;
 
+use Closure;
 use Doctrine\ORM\EntityManagerInterface;
 use Sg\DatatablesBundle\Datatable\Column\ColumnBuilder;
 
@@ -30,7 +31,7 @@ interface DatatableInterface
     /**
      * Returns a callable that modify the data row.
      */
-    public function getLineFormatter(): ?callable;
+    public function getLineFormatter(): ?Closure;
 
     public function getColumnBuilder(): ColumnBuilder;
 

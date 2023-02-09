@@ -12,6 +12,7 @@
 
 namespace Sg\DatatablesBundle\Datatable;
 
+use Closure;
 use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
 use LogicException;
@@ -90,7 +91,7 @@ abstract class AbstractDatatable implements DatatableInterface
         $this->accessor = PropertyAccess::createPropertyAccessor();
     }
 
-    public function getLineFormatter(): ?callable
+    public function getLineFormatter(): ?Closure
     {
         return null;
     }
