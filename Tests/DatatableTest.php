@@ -3,7 +3,11 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Tests;
@@ -26,7 +30,7 @@ use Twig\Environment;
  */
 final class DatatableTest extends \PHPUnit\Framework\TestCase
 {
-    public function testCreate()
+    public function testCreate(): void
     {
         $tableClass = PostDatatable::class;
 
@@ -56,7 +60,7 @@ final class DatatableTest extends \PHPUnit\Framework\TestCase
             ->willReturn($this->getClassMetadataMock())
         ;
 
-        /** @var \Sg\DatatablesBundle\Tests\Datatables\PostDatatable $table */
+        /** @var PostDatatable $table */
         $table = new $tableClass($authorizationChecker, $securityToken, $translator, $router, $em, $twig);
 
         /* @noinspection PhpUndefinedMethodInspection */
@@ -65,7 +69,7 @@ final class DatatableTest extends \PHPUnit\Framework\TestCase
         $table->buildDatatable();
     }
 
-    public function testInvalidName()
+    public function testInvalidName(): void
     {
         /** @noinspection PhpUndefinedMethodInspection */
         $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
@@ -112,16 +116,16 @@ final class DatatableTest extends \PHPUnit\Framework\TestCase
     public function getClassMetadataMock()
     {
         /** @noinspection PhpUndefinedMethodInspection */
-        $mock = $this->getMockBuilder('Doctrine\ORM\Mapping\ClassMetadata')
+        $mock = $this->getMockBuilder(\Doctrine\ORM\Mapping\ClassMetadata::class)
             ->disableOriginalConstructor()
-            ->setMethods(['getEntityShortName'])
+            ->setMethods(['getName'])
             ->getMock()
         ;
 
         // @noinspection PhpUndefinedMethodInspection
         $mock->expects(static::any())
-            ->method('getEntityShortName')
-            ->willReturn('{entityShortName}')
+            ->method('getName')
+            ->willReturn('{Name}')
         ;
 
         return $mock;

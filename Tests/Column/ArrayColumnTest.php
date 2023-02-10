@@ -3,12 +3,17 @@
 /*
  * This file is part of the SgDatatablesBundle package.
  *
- * <https://github.com/eventit/DatatablesBundle>
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sg\DatatablesBundle\Tests\Column;
 
 use DateTime;
+use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use ReflectionException;
 use Sg\DatatablesBundle\Datatable\Column\ArrayColumn;
@@ -18,16 +23,16 @@ use Sg\DatatablesBundle\Datatable\Column\ArrayColumn;
  *
  * @coversNothing
  */
-final class ArrayColumnTest extends \PHPUnit\Framework\TestCase
+final class ArrayColumnTest extends TestCase
 {
-    public function testIsAssociative()
+    public function testIsAssociative(): void
     {
         $arrayColumn = new ArrayColumn();
         static::assertFalse($this->callMethod($arrayColumn, 'isAssociative', [['a', 'b']]));
         static::assertTrue($this->callMethod($arrayColumn, 'isAssociative', [['a' => 1, 'b' => 1]]));
     }
 
-    public function testArrayToString()
+    public function testArrayToString(): void
     {
         $arrayColumn = new ArrayColumn();
         $result = $this->callMethod($arrayColumn, 'arrayToString', [['a', 'b' => ['d' => new DateTime()]]]);
