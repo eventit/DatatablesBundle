@@ -19,27 +19,29 @@
     },
     "require": {
         "php": ">=8.0",
+        "ext-intl": "*",
         "ext-json": ">=1.4",
         "doctrine/orm": "^2.5",
-        "friendsofsymfony/jsrouting-bundle": "^2.0|^3.0",
         "friendsofsymfony/elastica-bundle": "^5.1|^6.0|dev-php8|dev-pelikan-elastica-6.8",
+        "friendsofsymfony/jsrouting-bundle": "^2.0|^3.0",
         "symfony/config": "^4.4|^5.4|^6.0",
         "symfony/dependency-injection": "^4.4|^5.4|^6.0",
+        "symfony/framework-bundle": "^4.4|^5.4|^6.0",
         "symfony/http-foundation": "^4.4|^5.4|^6.0",
         "symfony/http-kernel": "^4.4|^5.4|^6.0",
-        "symfony/framework-bundle": "^4.4|^5.4|^6.0",
         "symfony/options-resolver": "^4.4|^5.4|^6.0",
         "symfony/property-access": "^4.4|^5.4|^6.0",
         "symfony/routing": "^4.4|^5.4|^6.0",
         "symfony/security-core": "^4.4|^5.4|^6.0",
         "symfony/translation": "^4.4|^5.4|^6.0",
         "twig/extra-bundle": "^3.4",
-        "twig/twig": "^2.9|^3.0",
-        "ext-intl": "*"
+        "twig/twig": "^2.9|^3.0"
     },
     "require-dev": {
+        "doctrine/dbal": "^3.6",
         "friendsofphp/php-cs-fixer": "^3.6",
         "phpspec/prophecy": "^1.17",
+        "phpspec/prophecy-phpunit": "^2.0",
         "phpunit/phpunit": "^9.5",
         "rector/rector": "^0.14",
         "roave/security-advisories": "dev-latest"

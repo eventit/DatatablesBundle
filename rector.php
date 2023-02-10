@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 use Rector\CodeQuality\Rector\Class_\InlineConstructorDefaultToPropertyRector;
 use Rector\Config\RectorConfig;
+use Rector\PHPUnit\Rector\Class_\AddProphecyTraitRector;
+use Rector\PHPUnit\Set\PHPUnitSetList;
 use Rector\Set\ValueObject\LevelSetList;
 use Rector\Set\ValueObject\SetList;
 
@@ -31,6 +33,7 @@ return static function (RectorConfig $rectorConfig): void {
 
     // register a single rule
     $rectorConfig->rule(InlineConstructorDefaultToPropertyRector::class);
+    $rectorConfig->rule(AddProphecyTraitRector::class);
 
     // define sets of rules
     $rectorConfig->sets([
@@ -38,5 +41,6 @@ return static function (RectorConfig $rectorConfig): void {
         SetList::CODE_QUALITY,
         SetList::EARLY_RETURN,
         SetList::TYPE_DECLARATION_STRICT,
+        PHPUnitSetList::PHPUNIT_91,
     ]);
 };
