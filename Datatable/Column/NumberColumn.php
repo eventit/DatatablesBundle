@@ -170,19 +170,15 @@ class NumberColumn extends Column
             if (null === $this->currency) {
                 $this->currency = $this->formatter->getSymbol(NumberFormatter::INTL_CURRENCY_SYMBOL);
             }
-
             if (false !== ($formattedData = $this->formatter->formatCurrency((float) $data, $this->currency))) {
                 $data = $formattedData;
             } else {
                 $data = null;
             }
+        } elseif (false !== ($formattedData = $this->formatter->format($data))) {
+            $data = $formattedData;
         } else {
-            // expected number (int or float), other values will be converted to a numeric value
-            if (false !== ($formattedData = $this->formatter->format($data))) {
-                $data = $formattedData;
-            } else {
-                $data = null;
-            }
+            $data = null;
         }
 
         return $this->twig->render(

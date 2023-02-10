@@ -150,7 +150,7 @@ class LinkColumn extends AbstractColumn
                             $content .= \call_user_func($this->text, $entry);
                         }
                         $content .= '</a>';
-                        if ($i < \count($entries) - 1) {
+                        if ($i < (is_countable($entries) ? \count($entries) : 0) - 1) {
                             $content .= $this->separator;
                         }
                     }

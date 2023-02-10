@@ -423,10 +423,12 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
         string $conditionType,
         array $searchValues
     ): ?AbstractQuery {
-        if ('' === $columnAlias || empty($searchValues)) {
+        if ('' === $columnAlias) {
             return null;
         }
-
+        if (empty($searchValues)) {
+            return null;
+        }
         $filterQueries = new BoolQuery();
 
         foreach ($searchValues as $searchValue) {
