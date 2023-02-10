@@ -332,10 +332,32 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
         /** @var AbstractQuery|null $filterSubQuery */
         $filterSubQuery = null;
 
+        /** @var FilterInterface $filter */
+        $filter = $this->accessor->getValue($column, 'filter');
+
+        /** @var array|null $searchValues */
+        $searchValues = null;
+
+        if (($filter instanceof SelectFilter) && $filter->isMultiple()) {
+            $searchValues = explode(',', $searchValue);
+        }
+
         switch ($column->getTypeOfField()) {
             case 'boolean':
+                if (\is_numeric($searchValue) || \is_bool($searchValue)) {
+                    $filterSubQuery = $this->createIntegerFilterTerm(
+                        $columnAlias,
+                        (int) $searchValue
+                    );
+                }
+                break;
             case 'integer':
-                if (is_numeric($searchValue) || \is_bool($searchValue)) {
+                if (\is_array($searchValues) && \count($searchValues) > 1) {
+                    $filterSubQuery = $this->createIntegerMultiFilterTerm(
+                        $columnAlias,
+                        $searchValues
+                    );
+                } elseif (\is_numeric($searchValue) || \is_bool($searchValue)) {
                     $filterSubQuery = $this->createIntegerFilterTerm(
                         $columnAlias,
                         (int) $searchValue
@@ -343,20 +365,10 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
                 }
                 break;
             case 'string':
-                /** @var array|null $searchValues */
-                $searchValues = null;
-
                 $queryType = self::QUERY_TYPE_MATCH;
-
-                /** @var FilterInterface $filter */
-                $filter = $this->accessor->getValue($column, 'filter');
 
                 if ($filter instanceof SelectFilter) {
                     $queryType = self::QUERY_TYPE_EXACT_MATCH;
-
-                    if ($filter->isMultiple()) {
-                        $searchValues = explode(',', $searchValue);
-                    }
                 }
 
                 if (\is_array($searchValues) && \count($searchValues) > 1) {
@@ -390,28 +402,73 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
         return $this;
     }
 
+    protected function createIntegerMultiFilterTerm(
+        string $columnAlias,
+        array $searchValues
+    ): ?AbstractQuery {
+        if ('' === $columnAlias) {
+            return null;
+        }
+
+        $searchValues = array_filter($searchValues, static function ($v, $k) {
+            return is_numeric($v) || \is_bool($v);
+        }, ARRAY_FILTER_USE_BOTH);
+
+        if (empty($searchValues)) {
+            return null;
+        }
+
+        if (\count($searchValues) === 1) {
+            return $this->createIntegerFilterTerm(
+                $columnAlias,
+                (int) array_shift($searchValues)
+            );
+        }
+
+        $filterQueries = new BoolQuery();
+
+        foreach ($searchValues as $searchValue) {
+            $filterSubQuery = $this->createIntegerFilterTerm(
+                $columnAlias,
+                (int) $searchValue
+            );
+
+            if ($this->isQueryValid($filterSubQuery)) {
+                $filterQueries->addShould($filterSubQuery);
+            }
+        }
+
+        if ($this->isQueryValid($filterQueries)) {
+            return $filterQueries;
+        }
+
+        return null;
+    }
+
     protected function createIntegerFilterTerm(
         string $columnAlias,
         int $searchValue
     ): ?AbstractQuery {
-        if ('' !== $columnAlias) {
-            $integerTerm = $this->createFilterTerm($columnAlias, $searchValue);
+        if ('' === $columnAlias) {
+            return null;
+        }
 
-            if ($this->isQueryValid($integerTerm)) {
-                /** @var string|null $nestedPath */
-                $nestedPath = $this->getNestedPath($columnAlias);
-                if (null !== $nestedPath) {
-                    $nested = new Nested();
-                    $nested->setPath($nestedPath);
-                    $boolQuery = new BoolQuery();
-                    $boolQuery->addMust($integerTerm);
-                    $nested->setQuery($boolQuery);
+        $integerTerm = $this->createFilterTerm($columnAlias, $searchValue);
 
-                    return $nested;
-                }
+        if ($this->isQueryValid($integerTerm)) {
+            /** @var string|null $nestedPath */
+            $nestedPath = $this->getNestedPath($columnAlias);
+            if (null !== $nestedPath) {
+                $nested = new Nested();
+                $nested->setPath($nestedPath);
+                $boolQuery = new BoolQuery();
+                $boolQuery->addMust($integerTerm);
+                $nested->setQuery($boolQuery);
 
-                return $integerTerm;
+                return $nested;
             }
+
+            return $integerTerm;
         }
 
         return null;
@@ -426,9 +483,11 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
         if ('' === $columnAlias) {
             return null;
         }
+
         if (empty($searchValues)) {
             return null;
         }
+
         $filterQueries = new BoolQuery();
 
         foreach ($searchValues as $searchValue) {
@@ -456,31 +515,38 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
         string $conditionType,
         string $searchValue
     ): ?AbstractQuery {
+        if ('' === $columnAlias) {
+            return null;
+        }
+
         $searchValue = trim($searchValue);
-        if ('' !== $columnAlias && '' !== $searchValue && 'null' !== $searchValue) {
-            if (self::QUERY_TYPE_MATCH === $queryType) {
-                $fieldQuery = $this->createFilterMatchTerm($columnAlias, $searchValue, $conditionType);
-            } elseif (self::QUERY_TYPE_EXACT_MATCH === $queryType) {
-                $fieldQuery = $this->createFilterExactMatchTerm($columnAlias, $searchValue, $conditionType);
-            } elseif (self::QUERY_TYPE_REGEXP === $queryType) {
-                $fieldQuery = $this->createFilterRegexpTerm($columnAlias . '.raw', $searchValue, $conditionType);
-            } else {
-                $fieldQuery = $this->createFilterTerm($columnAlias . '.raw', $searchValue, $conditionType);
+
+        if ('' !== $searchValue && 'null' !== $searchValue) {
+            return null;
+        }
+
+        if (self::QUERY_TYPE_MATCH === $queryType) {
+            $fieldQuery = $this->createFilterMatchTerm($columnAlias, $searchValue, $conditionType);
+        } elseif (self::QUERY_TYPE_EXACT_MATCH === $queryType) {
+            $fieldQuery = $this->createFilterExactMatchTerm($columnAlias, $searchValue, $conditionType);
+        } elseif (self::QUERY_TYPE_REGEXP === $queryType) {
+            $fieldQuery = $this->createFilterRegexpTerm($columnAlias . '.raw', $searchValue, $conditionType);
+        } else {
+            $fieldQuery = $this->createFilterTerm($columnAlias . '.raw', $searchValue, $conditionType);
+        }
+
+        if (null !== $fieldQuery && $this->isQueryValid($fieldQuery)) {
+            /** @var string|null $nestedPath */
+            $nestedPath = $this->getNestedPath($columnAlias);
+            if (null !== $nestedPath) {
+                $nested = new Nested();
+                $nested->setPath($nestedPath);
+                $nested->setQuery($fieldQuery);
+
+                return $nested;
             }
 
-            if (null !== $fieldQuery && $this->isQueryValid($fieldQuery)) {
-                /** @var string|null $nestedPath */
-                $nestedPath = $this->getNestedPath($columnAlias);
-                if (null !== $nestedPath) {
-                    $nested = new Nested();
-                    $nested->setPath($nestedPath);
-                    $nested->setQuery($fieldQuery);
-
-                    return $nested;
-                }
-
-                return $fieldQuery;
-            }
+            return $fieldQuery;
         }
 
         return null;
