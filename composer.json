@@ -1,14 +1,11 @@
 {
-    "name": "eventit/datatablesbundle",
+    "name": "sg/datatablesbundle",
     "type": "symfony-bundle",
     "description": "Symfony Datatable Bundle For Doctrine2 Entities with additional Elasticsearch functionality",
     "keywords": ["symfony", "datatable", "datatables", "data-table", "grid", "table", "datagrid", "pagination"],
     "homepage": "https://github.com/eventit/DatatablesBundle",
     "license": "MIT",
     "authors": [
-        {
-            "name": "eventit"
-        },
         {
             "name": "SgDatatablesBundle contributors",
             "homepage": "https://github.com/eventit/DatatablesBundle/graphs/contributors"

@@ -1,5 +1,4 @@
 # Version 2.0
-* [BC] changed packagename to eventit/datatablesbundle but keep namespaces
 * [BC] changed namespace of datatable and querybuilder classes which were only used in combination with doctrine
 * Support Elasticsearch - This is not totally done yet. It is just a kind of way to use the elasticabundle with this datatablesbundle. Primarly to use this to visualize tables and simple filtering
 * Extensions are changed to be quicker adding a new extension to the bundle
