@@ -1,51 +1,32 @@
 <?php
 
+/*
+ * This file is part of the SgDatatablesBundle package.
+ *
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Sg\DatatablesBundle\Datatable\Extension;
 
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 interface ExtensionInterface
 {
-    /**
-     * @return string
-     */
-    public function setName(string $name): self;
+    public function setName(string $name): static;
 
-    /**
-     * @return string
-     */
     public function getName(): string;
 
-    /**
-     * @return bool
-     */
     public function isEnabled(): bool;
 
-    /**
-     * @param bool $enabled
-     *
-     * @return ExtensionInterface
-     */
-    public function setEnabled(bool $enabled): self;
+    public function setEnabled(bool $enabled): static;
 
-    /**
-     * @param array $options
-     *
-     * @return ExtensionInterface
-     */
-    public function setOptions(array $options): self;
+    public function setOptions(array $options): static;
 
-    /**
-     * @param OptionsResolver $resolver
-     *
-     * @return ExtensionInterface
-     */
-    public function configureOptions(OptionsResolver $resolver): self;
+    public function configureOptions(OptionsResolver $resolver): static;
 
-    /**
-     * @param array $config
-     *
-     * @return array
-     */
     public function getJavaScriptConfiguration(array $config = []): array;
 }

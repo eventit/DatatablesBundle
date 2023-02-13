@@ -1,9 +1,10 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
  * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,22 +12,16 @@
 
 namespace Sg\DatatablesBundle\Datatable\Column;
 
+use Closure;
+use RuntimeException;
 use Sg\DatatablesBundle\Datatable\Action\Action;
 use Sg\DatatablesBundle\Datatable\Helper;
 use Sg\DatatablesBundle\Datatable\HtmlContainerTrait;
-
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Closure;
-use Exception;
 
-/**
- * Class ActionColumn
- *
- * @package Sg\DatatablesBundle\Datatable\Column
- */
 class ActionColumn extends AbstractColumn
 {
-    /**
+    /*
      * This Column has a 'start_html' and a 'end_html' option.
      * <startHtml> action1 action2 actionX </endHtml>
      */
@@ -35,37 +30,26 @@ class ActionColumn extends AbstractColumn
     /**
      * The Actions container.
      * A required option.
-     *
-     * @var array
      */
-    protected $actions;
+    protected array $actions = [];
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // ColumnInterface
-    //-------------------------------------------------
+    // -------------------------------------------------
 
-    /**
-     * {@inheritdoc}
-     */
-    public function dqlConstraint($dql)
+    public function dqlConstraint($dql): bool
     {
-        return null === $dql ? true : false;
+        return null === $dql;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isSelectColumn()
+    public function isSelectColumn(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function addDataToOutputArray(array &$row)
+    public function addDataToOutputArray(array &$row): static
     {
-        $actionRowItems = array();
+        $actionRowItems = [];
 
         /** @var Action $action */
         foreach ($this->actions as $actionKey => $action) {
@@ -73,21 +57,20 @@ class ActionColumn extends AbstractColumn
         }
 
         $row['sg_datatables_actions'][$this->getIndex()] = $actionRowItems;
+
+        return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function renderSingleField(array &$row)
+    public function renderSingleField(array &$row): static
     {
-        $parameters = array();
-        $attributes = array();
-        $values = array();
+        $parameters = [];
+        $attributes = [];
+        $values = [];
 
         /** @var Action $action */
         foreach ($this->actions as $actionKey => $action) {
             $routeParameters = $action->getRouteParameters();
-            if (is_array($routeParameters)) {
+            if (\is_array($routeParameters)) {
                 foreach ($routeParameters as $key => $value) {
                     if (isset($row[$value])) {
                         $parameters[$actionKey][$key] = $row[$value];
@@ -95,26 +78,22 @@ class ActionColumn extends AbstractColumn
                         $path = Helper::getDataPropertyPath($value);
                         $entry = $this->accessor->getValue($row, $path);
 
-                        if (!empty($entry)) {
-                            $parameters[$actionKey][$key] = $entry;
-                        } else {
-                            $parameters[$actionKey][$key] = $value;
-                        }
+                        $parameters[$actionKey][$key] = empty($entry) ? $value : $entry;
                     }
                 }
             } elseif ($routeParameters instanceof Closure) {
-                $parameters[$actionKey] = call_user_func($routeParameters, $row);
+                $parameters[$actionKey] = $routeParameters($row);
             } else {
-                $parameters[$actionKey] = array();
+                $parameters[$actionKey] = [];
             }
 
             $actionAttributes = $action->getAttributes();
-            if (is_array($actionAttributes)) {
+            if (\is_array($actionAttributes)) {
                 $attributes[$actionKey] = $actionAttributes;
             } elseif ($actionAttributes instanceof Closure) {
-                $attributes[$actionKey] = call_user_func($actionAttributes, $row);
+                $attributes[$actionKey] = $actionAttributes($row);
             } else {
-                $attributes[$actionKey] = array();
+                $attributes[$actionKey] = [];
             }
 
             if ($action->isButton()) {
@@ -125,12 +104,12 @@ class ActionColumn extends AbstractColumn
                         $values[$actionKey] = $action->getButtonValue();
                     }
 
-                    if (is_bool($values[$actionKey])) {
+                    if (\is_bool($values[$actionKey])) {
                         $values[$actionKey] = (int) $values[$actionKey];
                     }
 
-                    if (true === $action->isButtonValuePrefix()) {
-                        $values[$actionKey] = 'sg-datatables-'.$this->getDatatableName().'-action-button-'.$actionKey.'-'.$values[$actionKey];
+                    if ($action->isButtonValuePrefix()) {
+                        $values[$actionKey] = 'sg-datatables-' . $this->getDatatableName() . '-action-button-' . $actionKey . '-' . $values[$actionKey];
                     }
                 } else {
                     $values[$actionKey] = null;
@@ -140,7 +119,7 @@ class ActionColumn extends AbstractColumn
 
         $row[$this->getIndex()] = $this->twig->render(
             $this->getCellContentTemplate(),
-            array(
+            [
                 'actions' => $this->actions,
                 'route_parameters' => $parameters,
                 'attributes' => $attributes,
@@ -148,46 +127,32 @@ class ActionColumn extends AbstractColumn
                 'render_if_actions' => $row['sg_datatables_actions'][$this->index],
                 'start_html_container' => $this->startHtml,
                 'end_html_container' => $this->endHtml,
-            )
+            ]
         );
+
+        return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function renderToMany(array &$row)
+    public function renderToMany(array &$row): static
     {
-        throw new Exception('ActionColumn::renderToMany(): This function should never be called.');
+        throw new RuntimeException('ActionColumn::renderToMany(): This function should never be called.');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getCellContentTemplate()
+    public function getCellContentTemplate(): string
     {
         return '@SgDatatables/render/action.html.twig';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getColumnType()
+    public function getColumnType(): string
     {
         return parent::ACTION_COLUMN;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
-    /**
-     * Config options.
-     *
-     * @param OptionsResolver $resolver
-     *
-     * @return $this
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): static
     {
         parent::configureOptions($resolver);
 
@@ -206,50 +171,45 @@ class ActionColumn extends AbstractColumn
         $resolver->remove('join_type');
         $resolver->remove('type_of_field');
 
-        $resolver->setRequired(array('actions'));
+        $resolver->setRequired(['actions']);
 
-        $resolver->setDefaults(array(
+        $resolver->setDefaults([
             'start_html' => null,
             'end_html' => null,
-        ));
+        ]);
 
         $resolver->setAllowedTypes('actions', 'array');
-        $resolver->setAllowedTypes('start_html', array('null', 'string'));
-        $resolver->setAllowedTypes('end_html', array('null', 'string'));
+        $resolver->setAllowedTypes('start_html', ['null', 'string']);
+        $resolver->setAllowedTypes('end_html', ['null', 'string']);
 
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Getters && Setters
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
-     * Get actions.
-     *
      * @return Action[]
      */
-    public function getActions()
+    public function getActions(): array
     {
         return $this->actions;
     }
 
     /**
-     * Set actions.
-     *
-     * @param array $actions
+     * @throws RuntimeException
      *
      * @return $this
-     * @throws Exception
      */
-    public function setActions(array $actions)
+    public function setActions(array $actions): static
     {
-        if (count($actions) > 0) {
+        if ($actions !== []) {
             foreach ($actions as $action) {
                 $this->addAction($action);
             }
         } else {
-            throw new Exception('ActionColumn::setActions(): The actions array should contain at least one element.');
+            throw new RuntimeException('ActionColumn::setActions(): The actions array should contain at least one element.');
         }
 
         return $this;
@@ -257,12 +217,8 @@ class ActionColumn extends AbstractColumn
 
     /**
      * Add action.
-     *
-     * @param array $action
-     *
-     * @return $this
      */
-    public function addAction(array $action)
+    public function addAction(array $action): static
     {
         $newAction = new Action($this->datatableName);
         $this->actions[] = $newAction->set($action);
@@ -272,16 +228,13 @@ class ActionColumn extends AbstractColumn
 
     /**
      * Remove action.
-     *
-     * @param Action $action
-     *
-     * @return $this
      */
-    public function removeAction(Action $action)
+    public function removeAction(Action $action): static
     {
         foreach ($this->actions as $k => $a) {
-            if ($action == $a) {
+            if ($action === $a) {
                 unset($this->actions[$k]);
+
                 break;
             }
         }
@@ -289,22 +242,12 @@ class ActionColumn extends AbstractColumn
         return $this;
     }
 
-    /**
-     * Get orderable.
-     *
-     * @return bool
-     */
-    public function getOrderable()
+    public function getOrderable(): bool
     {
         return false;
     }
 
-    /**
-     * Get searchable.
-     *
-     * @return bool
-     */
-    public function getSearchable()
+    public function getSearchable(): bool
     {
         return false;
     }

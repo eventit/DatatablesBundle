@@ -1,7 +1,18 @@
 <?php
 
+/*
+ * This file is part of the SgDatatablesBundle package.
+ *
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Sg\DatatablesBundle\Response;
 
+use IteratorAggregate;
 use Sg\DatatablesBundle\Datatable\Column\ColumnInterface;
 use Sg\DatatablesBundle\Datatable\DatatableInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -9,29 +20,16 @@ use Symfony\Component\PropertyAccess\PropertyAccessor;
 
 abstract class AbstractDatatableFormatter
 {
-    /** @var array */
-    protected $output;
+    protected array $output = ['data' => []];
 
-    /** @var PropertyAccessor */
-    protected $accessor;
+    protected PropertyAccessor $accessor;
 
     public function __construct()
     {
-        $this->output = ['data' => []];
-
         $this->accessor = PropertyAccess::createPropertyAccessor();
     }
 
-    /**
-     * @param array $row
-     */
-    abstract protected function doCustomFormatterForRow(array &$row);
-
-    /**
-     * @param \IteratorAggregate $entries
-     * @param DatatableInterface $datatable
-     */
-    public function runFormatter(\IteratorAggregate $entries, DatatableInterface $datatable)
+    public function runFormatter(IteratorAggregate $entries, DatatableInterface $datatable): void
     {
         $lineFormatter = $datatable->getLineFormatter();
         $columns = $datatable->getColumnBuilder()->getColumns();
@@ -41,13 +39,13 @@ abstract class AbstractDatatableFormatter
 
             // Format custom DQL fields output ('custom.dql.name' => $row['custom']['dql']['name'] = 'value')
             foreach ($columns as $column) {
-                /** @noinspection PhpUndefinedMethodInspection */
+                /* @noinspection PhpUndefinedMethodInspection */
                 if (true === $column->isCustomDql()) {
                     /** @noinspection PhpUndefinedMethodInspection */
                     $columnAlias = str_replace('.', '_', $column->getData());
                     /** @noinspection PhpUndefinedMethodInspection */
                     $columnPath = '[' . str_replace('.', '][', $column->getData()) . ']';
-                    /** @noinspection PhpUndefinedMethodInspection */
+                    /* @noinspection PhpUndefinedMethodInspection */
                     if ($columnAlias !== $column->getData()) {
                         $this->accessor->setValue($row, $columnPath, $row[$columnAlias]);
                         unset($row[$columnAlias]);
@@ -62,18 +60,16 @@ abstract class AbstractDatatableFormatter
                 /** @noinspection PhpUndefinedMethodInspection */
                 $data = $column->getData();
 
-                /** @noinspection PhpUndefinedMethodInspection */
-                if (false === $column->isAssociation()) {
-                    if (null !== $dql && $dql !== $data && false === array_key_exists($data, $row)) {
-                        $row[$data] = $row[$dql];
-                        unset($row[$dql]);
-                    }
+                /* @noinspection PhpUndefinedMethodInspection */
+                if (false === $column->isAssociation() && (null !== $dql && $dql !== $data && ! \array_key_exists($data, $row))) {
+                    $row[$data] = $row[$dql];
+                    unset($row[$dql]);
                 }
             }
 
             // 2. Call the the lineFormatter to format row items
-            if (null !== $lineFormatter && is_callable($lineFormatter)) {
-                $row = call_user_func($datatable->getLineFormatter(), $row);
+            if (null !== $lineFormatter && \is_callable($lineFormatter)) {
+                $row = \call_user_func($datatable->getLineFormatter(), $row);
             }
 
             /** @var ColumnInterface $column */
@@ -84,15 +80,20 @@ abstract class AbstractDatatableFormatter
                 $column->renderCellContent($row);
             }
 
+            foreach ($columns as $column) {
+                if (! $column->getSentInResponse()) {
+                    unset($row[$column->getDql()]);
+                }
+            }
+
             $this->output['data'][] = $row;
         }
     }
 
-    /**
-     * @return array
-     */
-    public function getOutput()
+    public function getOutput(): array
     {
         return $this->output;
     }
+
+    abstract protected function doCustomFormatterForRow(array &$row): void;
 }

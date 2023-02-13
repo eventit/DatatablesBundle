@@ -46,10 +46,10 @@
                 {% include '@SgDatatables/datatable/initial_search.html.twig' %}
             };
 
-            function postCreateDatatable(pipeline) {
-                {% for column in sg_datatables_view.columnBuilder.columns %}
-                {% if column.renderPostCreateDatatableJsContent is not null %}
-                {{ column.renderPostCreateDatatableJsContent|raw }}
+        function postCreateDatatable(pipeline) {
+            {% for column in sg_datatables_view.columnBuilder.columns %}
+                {% if column.sentInResponse and column.renderPostCreateDatatableJsContent is not null %}
+                    {{ column.renderPostCreateDatatableJsContent|raw }}
                 {% endif %}
                 {% endfor %}
             }

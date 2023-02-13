@@ -1,60 +1,53 @@
 <?php
 
+/*
+ * This file is part of the SgDatatablesBundle package.
+ *
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Sg\DatatablesBundle\Response\Elastica;
 
+use ArrayIterator;
+use IteratorAggregate;
 use Traversable;
 
-class ElasticaEntries implements \IteratorAggregate
+class ElasticaEntries implements IteratorAggregate
 {
-    /** @var int */
-    protected $count = 0;
+    protected int $count = 0;
 
-    /** @var array */
-    protected $entries = [];
+    protected array $entries = [];
 
-    /** @return int */
     public function getCount(): int
     {
         return $this->count;
     }
 
-    /**
-     * @param int $count
-     *
-     * @return ElasticaEntries
-     */
-    public function setCount(int $count): ElasticaEntries
+    public function setCount(int $count): static
     {
         $this->count = $count;
 
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getEntries(): array
     {
         return $this->entries;
     }
 
-    /**
-     * @param array $entries
-     *
-     * @return ElasticaEntries
-     */
-    public function setEntries(array $entries): ElasticaEntries
+    public function setEntries(array $entries): static
     {
         $this->entries = $entries;
 
         return $this;
     }
 
-    /**
-     * @return \ArrayIterator|Traversable
-     */
-    public function getIterator()
+    public function getIterator(): ArrayIterator|Traversable
     {
-        return new \ArrayIterator($this->getEntries());
+        return new ArrayIterator($this->getEntries());
     }
 }

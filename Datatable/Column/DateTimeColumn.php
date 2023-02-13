@@ -1,9 +1,10 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
  * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,92 +12,68 @@
 
 namespace Sg\DatatablesBundle\Datatable\Column;
 
-use Sg\DatatablesBundle\Datatable\Filter\TextFilter;
-use Sg\DatatablesBundle\Datatable\Editable\EditableInterface;
-use Sg\DatatablesBundle\Datatable\Helper;
-
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use Exception;
+use RuntimeException;
+use Sg\DatatablesBundle\Datatable\Editable\EditableInterface;
+use Sg\DatatablesBundle\Datatable\Filter\TextFilter;
+use Sg\DatatablesBundle\Datatable\Helper;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
-/**
- * Class DateTimeColumn
- *
- * @package Sg\DatatablesBundle\Datatable\Column
- */
 class DateTimeColumn extends AbstractColumn
 {
-    /**
-     * This Column is editable.
-     */
     use EditableTrait;
 
-    /**
-     * The Column is filterable.
-     */
     use FilterableTrait;
 
     /**
      * Moment.js date format.
-     * Default: 'lll'
+     * Default: 'lll'.
      *
-     * @link http://momentjs.com/
-     *
-     * @var string
+     * @see http://momentjs.com/
      */
-    protected $dateFormat;
+    protected string $dateFormat = 'lll';
 
     /**
      * Use the time ago format.
-     * Default: false
-     *
-     * @var bool
+     * Default: false.
      */
-    protected $timeago;
+    protected bool $timeago = false;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // ColumnInterface
-    //-------------------------------------------------
+    // -------------------------------------------------
 
-    /**
-     * {@inheritdoc}
-     */
-    public function renderSingleField(array &$row)
+    public function renderSingleField(array &$row): static
     {
         $path = Helper::getDataPropertyPath($this->data);
 
         if ($this->accessor->isReadable($row, $path)) {
-
-            if (true === $this->isEditableContentRequired($row)) {
+            if ($this->isEditableContentRequired($row)) {
                 $content = $this->renderTemplate($this->accessor->getValue($row, $path), $row[$this->editable->getPk()]);
             } else {
                 $content = $this->renderTemplate($this->accessor->getValue($row, $path));
             }
 
             $this->accessor->setValue($row, $path, $content);
-
         }
 
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function renderToMany(array &$row)
+    public function renderToMany(array &$row): static
     {
         $value = null;
         $path = Helper::getDataPropertyPath($this->data, $value);
 
         if ($this->accessor->isReadable($row, $path)) {
-
             $entries = $this->accessor->getValue($row, $path);
 
-            if (count($entries) > 0) {
+            if (null !== $entries && (is_countable($entries) ? \count($entries) : 0) > 0) {
                 foreach ($entries as $key => $entry) {
                     $currentPath = $path . '[' . $key . ']' . $value;
                     $currentObjectPath = Helper::getPropertyPathObjectNotation($path, $key, $value);
 
-                    if (true === $this->isEditableContentRequired($row)) {
+                    if ($this->isEditableContentRequired($row)) {
                         $content = $this->renderTemplate(
                             $this->accessor->getValue($row, $currentPath),
                             $row[$this->editable->getPk()],
@@ -108,84 +85,67 @@ class DateTimeColumn extends AbstractColumn
 
                     $this->accessor->setValue($row, $currentPath, $content);
                 }
-            } else {
-                // no placeholder - leave this blank
             }
-
+            // no placeholder - leave this blank
         }
 
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getCellContentTemplate()
+    public function getCellContentTemplate(): string
     {
         return '@SgDatatables/render/datetime.html.twig';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function renderPostCreateDatatableJsContent()
+    public function renderPostCreateDatatableJsContent(): ?string
     {
-        if ($this->editable instanceof EditableInterface) {
-            return $this->twig->render(
-                '@SgDatatables/column/column_post_create_dt.js.twig',
-                array(
-                    'column_class_editable_selector' => $this->getColumnClassEditableSelector(),
-                    'editable_options' => $this->editable,
-                    'entity_class_name' => $this->getEntityClassName(),
-                    'column_dql' => $this->dql,
-                    'original_type_of_field' => $this->getOriginalTypeOfField(),
-                )
-            );
+        if (! $this->editable instanceof EditableInterface) {
+            return null;
         }
 
-        return null;
+        return $this->twig->render(
+            '@SgDatatables/column/column_post_create_dt.js.twig',
+            [
+                'column_class_editable_selector' => $this->getColumnClassEditableSelector(),
+                'editable_options' => $this->editable,
+                'entity_class_name' => $this->getEntityClassName(),
+                'column_dql' => $this->dql,
+                'original_type_of_field' => $this->getOriginalTypeOfField(),
+            ]
+        );
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
-    /**
-     * Config options.
-     *
-     * @param OptionsResolver $resolver
-     *
-     * @return $this
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): static
     {
         parent::configureOptions($resolver);
 
-        $resolver->setDefaults(array(
+        $resolver->setDefaults([
             'date_format' => 'lll',
             'timeago' => false,
-            'filter' => array(TextFilter::class, array()),
+            'filter' => [TextFilter::class, []],
             'editable' => null,
-        ));
+        ]);
 
         $resolver->setAllowedTypes('date_format', 'string');
         $resolver->setAllowedTypes('timeago', 'bool');
         $resolver->setAllowedTypes('filter', 'array');
-        $resolver->setAllowedTypes('editable', array('null', 'array'));
+        $resolver->setAllowedTypes('editable', ['null', 'array']);
 
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Getters && Setters
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Get date format.
-     *
-     * @return string
      */
-    public function getDateFormat()
+    public function getDateFormat(): string
     {
         return $this->dateFormat;
     }
@@ -193,15 +153,12 @@ class DateTimeColumn extends AbstractColumn
     /**
      * Set date format.
      *
-     * @param string $dateFormat
-     *
-     * @return $this
      * @throws Exception
      */
-    public function setDateFormat($dateFormat)
+    public function setDateFormat(string $dateFormat): static
     {
-        if (empty($dateFormat) || !is_string($dateFormat)) {
-            throw new Exception('DateTimeColumn::setDateFormat(): A non-empty string is expected.');
+        if (empty($dateFormat) || ! \is_string($dateFormat)) {
+            throw new RuntimeException('DateTimeColumn::setDateFormat(): A non-empty string is expected.');
         }
 
         $this->dateFormat = $dateFormat;
@@ -209,61 +166,43 @@ class DateTimeColumn extends AbstractColumn
         return $this;
     }
 
-    /**
-     * Get timeago.
-     *
-     * @return bool
-     */
-    public function isTimeago()
+    public function isTimeago(): bool
     {
         return $this->timeago;
     }
 
-    /**
-     * Set timeago.
-     *
-     * @param bool $timeago
-     *
-     * @return $this
-     */
-    public function setTimeago($timeago)
+    public function setTimeago(bool $timeago): static
     {
         $this->timeago = $timeago;
 
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Helper
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Render template.
-     *
-     * @param string|null $data
-     * @param string|null $pk
-     * @param string|null $path
-     *
-     * @return mixed|string
      */
-    private function renderTemplate($data, $pk = null, $path = null)
+    private function renderTemplate(?string $data, ?string $pk = null, ?string $path = null): string
     {
-        $renderVars = array(
+        $renderVars = [
             'data' => $data,
             'default_content' => $this->getDefaultContent(),
             'date_format' => $this->dateFormat,
             'timeago' => $this->timeago,
             'datatable_name' => $this->getDatatableName(),
             'row_id' => Helper::generateUniqueID(),
-        );
+        ];
 
         // editable vars
         if (null !== $pk) {
-            $renderVars = array_merge($renderVars, array(
+            $renderVars = array_merge($renderVars, [
                 'column_class_editable_selector' => $this->getColumnClassEditableSelector(),
                 'pk' => $pk,
                 'path' => $path,
-            ));
+            ]);
         }
 
         return $this->twig->render(

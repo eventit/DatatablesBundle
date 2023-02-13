@@ -1,9 +1,10 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
  * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,115 +14,72 @@ namespace Sg\DatatablesBundle\Datatable\Editable;
 
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-/**
- * Class TextEditable
- *
- * @package Sg\DatatablesBundle\Datatable\Editable
- */
 class TextEditable extends AbstractEditable
 {
     /**
      * Whether to show clear button.
-     * Default: true
+     * Default: true.
      *
      * Currently not usable: x-editable bug https://github.com/vitalets/x-editable/issues/977
-     *
-     * @var bool
      */
-    protected $clear;
+    protected bool $clear = true;
 
     /**
      * Placeholder attribute of input. Shown when input is empty.
-     * Default: null
-     *
-     * @var null|string
+     * Default: null.
      */
-    protected $placeholder;
+    protected ?string $placeholder = null;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // FilterInterface
-    //-------------------------------------------------
+    // -------------------------------------------------
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getType()
+    public function getType(): string
     {
         return 'text';
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
-    /**
-     * Config options.
-     *
-     * @param OptionsResolver $resolver
-     *
-     * @return $this
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): static
     {
         parent::configureOptions($resolver);
 
-        $resolver->setDefaults(array(
+        $resolver->setDefaults([
             'clear' => true,
             'placeholder' => null,
-        ));
+        ]);
 
         $resolver->setAllowedTypes('clear', 'bool');
-        $resolver->setAllowedTypes('placeholder', array('null', 'string'));
+        $resolver->setAllowedTypes('placeholder', ['null', 'string']);
 
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Getters && Setters
-    //-------------------------------------------------
+    // -------------------------------------------------
 
-    /**
-     * Get clear.
-     *
-     * @return bool
-     */
-    public function isClear()
+    public function isClear(): bool
     {
         return $this->clear;
     }
 
-    /**
-     * Set clear.
-     *
-     * @param bool $clear
-     *
-     * @return $this
-     */
-    public function setClear($clear)
+    public function setClear(bool $clear): static
     {
         $this->clear = $clear;
 
         return $this;
     }
 
-    /**
-     * Get placeholder.
-     *
-     * @return null|string
-     */
-    public function getPlaceholder()
+    public function getPlaceholder(): ?string
     {
         return $this->placeholder;
     }
 
-    /**
-     * Set placeholder.
-     *
-     * @param null|string $placeholder
-     *
-     * @return $this
-     */
-    public function setPlaceholder($placeholder)
+    public function setPlaceholder(?string $placeholder): static
     {
         $this->placeholder = $placeholder;
 

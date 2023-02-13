@@ -173,9 +173,6 @@ use Sg\DatatablesBundle\Datatable\Style;
 */
 class PostDatatable extends AbstractDatatable
 {
-    /**
-     * {@inheritdoc}
-     */
     public function getLineFormatter()
     {
         $formatter = function($row) {
@@ -187,9 +184,6 @@ class PostDatatable extends AbstractDatatable
         return $formatter;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function buildDatatable(array $options = array())
     {
         $this->ajax->set(array(
@@ -341,23 +335,22 @@ class PostDatatable extends AbstractDatatable
         ;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getEntity()
     {
         return 'AppBundle\Entity\Post';
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getName()
     {
         return 'post_datatable';
     }
 }
 ```
+
+**Important:**
+When declaring datatable "by hand" as extending `AbstractDatatable` class watch out for datatable name as returned from
+`getName()` method. Valid datatable name may contains only letters ([a-zA-Z]), digits (0-9), dashes (-) and underscores 
+(_). Putting any other character in name will cause `\LogicException` to be thrown.
 
 ### Step 2: (Optional) Registering your Datatable as a Service
 

@@ -1,9 +1,10 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
  * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,36 +12,27 @@
 
 namespace Sg\DatatablesBundle\Datatable\Column;
 
-use Sg\DatatablesBundle\Datatable\Filter\FilterInterface;
-use Sg\DatatablesBundle\Datatable\Factory;
-
 use Exception;
+use RuntimeException;
+use Sg\DatatablesBundle\Datatable\Factory;
+use Sg\DatatablesBundle\Datatable\Filter\FilterInterface;
 
-/**
- * Class FilterableTrait
- *
- * @package Sg\DatatablesBundle\Datatable\Column
- */
 trait FilterableTrait
 {
     /**
      * A FilterInterface instance for individual filtering.
      * Default: See the column type.
-     *
-     * @var FilterInterface
      */
-    protected $filter;
+    protected ?FilterInterface $filter = null;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Getters && Setters
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Get Filter instance.
-     *
-     * @return FilterInterface
      */
-    public function getFilter()
+    public function getFilter(): FilterInterface
     {
         return $this->filter;
     }
@@ -48,23 +40,22 @@ trait FilterableTrait
     /**
      * Set Filter instance.
      *
-     * @param array $filterClassAndOptions
+     * @throws Exception
      *
      * @return $this
-     * @throws Exception
      */
-    public function setFilter(array $filterClassAndOptions)
+    public function setFilter(array $filterClassAndOptions): static
     {
-        if (count($filterClassAndOptions) != 2) {
-            throw new Exception('AbstractColumn::setFilter(): Two arguments expected.');
+        if (2 !== \count($filterClassAndOptions)) {
+            throw new RuntimeException('AbstractColumn::setFilter(): Two arguments expected.');
         }
 
-        if (!isset($filterClassAndOptions[0]) || !is_string($filterClassAndOptions[0]) && !$filterClassAndOptions[0] instanceof FilterInterface) {
-            throw new Exception('AbstractColumn::setFilter(): Set a Filter class.');
+        if (! isset($filterClassAndOptions[0]) || (! \is_string($filterClassAndOptions[0]) && ! $filterClassAndOptions[0] instanceof FilterInterface)) {
+            throw new RuntimeException('AbstractColumn::setFilter(): Set a Filter class.');
         }
 
-        if (!isset($filterClassAndOptions[1]) || !is_array($filterClassAndOptions[1])) {
-            throw new Exception('AbstractColumn::setFilter(): Set an options array.');
+        if (! isset($filterClassAndOptions[1]) || ! \is_array($filterClassAndOptions[1])) {
+            throw new RuntimeException('AbstractColumn::setFilter(): Set an options array.');
         }
 
         $newFilter = Factory::create($filterClassAndOptions[0], FilterInterface::class);

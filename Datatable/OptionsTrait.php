@@ -1,9 +1,10 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
  * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,53 +12,43 @@
 
 namespace Sg\DatatablesBundle\Datatable;
 
+use Exception;
+use JsonException;
+use RuntimeException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
-use Exception;
 
-/**
- * Class OptionsTrait
- *
- * @package Sg\DatatablesBundle\Datatable
- */
 trait OptionsTrait
 {
     /**
      * Options container.
-     *
-     * @var array
      */
-    protected $options;
+    protected array $options = [];
 
     /**
      * The PropertyAccessor.
-     *
-     * @var PropertyAccessor
      */
-    protected $accessor;
+    protected ?PropertyAccessor $accessor = null;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Public
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Init optionsTrait.
-     *
-     * @param bool $resolve
-     *
-     * @return $this
      */
-    public function initOptions($resolve = false)
+    public function initOptions(bool $resolve = false): static
     {
-        $this->options = array();
+        $this->options = [];
 
-        /** @noinspection PhpUndefinedMethodInspection */
+        // @noinspection PhpUndefinedMethodInspection
         $this->accessor = PropertyAccess::createPropertyAccessorBuilder()
             ->enableMagicCall()
-            ->getPropertyAccessor();
+            ->getPropertyAccessor()
+        ;
 
-        if (true === $resolve) {
+        if ($resolve) {
             $this->set($this->options);
         }
 
@@ -65,14 +56,9 @@ trait OptionsTrait
     }
 
     /**
-     * Set options.
-     *
-     * @param array $options
-     *
-     * @return $this
      * @throws Exception
      */
-    public function set(array $options)
+    public function set(array $options): static
     {
         $resolver = new OptionsResolver();
         $this->configureOptions($resolver);
@@ -83,37 +69,15 @@ trait OptionsTrait
         return $this;
     }
 
-    //-------------------------------------------------
-    // Helper
-    //-------------------------------------------------
-
-    /**
-     * Calls the setters.
-     *
-     * @param array $options
-     *
-     * @return $this
-     */
-    private function callingSettersWithOptions(array $options)
-    {
-        foreach ($options as $setter => $value) {
-            $this->accessor->setValue($this, $setter, $value);
-        }
-
-        return $this;
-    }
-
     /**
      * Option to JSON.
      *
-     * @param mixed $value
-     *
-     * @return mixed
+     * @throws JsonException
      */
-    protected function optionToJson($value)
+    protected function optionToJson(mixed $value): mixed
     {
-        if (is_array($value)) {
-            return json_encode($value);
+        if (\is_array($value)) {
+            return json_encode($value, JSON_THROW_ON_ERROR);
         }
 
         return $value;
@@ -122,28 +86,36 @@ trait OptionsTrait
     /**
      * Validates an array whether the "template" and "vars" options are set.
      *
-     * @param array $array
-     * @param array $other
-     *
-     * @return bool
-     * @throws Exception
+     * @throws RuntimeException
      */
-    protected function validateArrayForTemplateAndOther(array $array, array $other = array('template', 'vars'))
+    protected function validateArrayForTemplateAndOther(array $array, array $other = ['template', 'vars']): bool
     {
-        if (false === array_key_exists('template', $array)) {
-            throw new Exception(
-                'OptionsTrait::validateArrayForTemplateAndOther(): The "template" option is required.'
-            );
+        if (! \array_key_exists('template', $array)) {
+            throw new RuntimeException('OptionsTrait::validateArrayForTemplateAndOther(): The "template" option is required.');
         }
 
-        foreach ($array as $key => $value) {
-            if (false === in_array($key, $other)) {
-                throw new Exception(
-                    "OptionsTrait::validateArrayForTemplateAndOther(): $key is not an valid option."
-                );
+        foreach (array_keys($array) as $key) {
+            if (! \in_array($key, $other, true)) {
+                throw new RuntimeException("OptionsTrait::validateArrayForTemplateAndOther(): {$key} is not an valid option.");
             }
         }
 
         return true;
+    }
+
+    // -------------------------------------------------
+    // Helper
+    // -------------------------------------------------
+
+    /**
+     * Calls the setters.
+     */
+    private function callingSettersWithOptions(array $options): static
+    {
+        foreach ($options as $setter => $value) {
+            $this->accessor->setValue($this, $setter, $value);
+        }
+
+        return $this;
     }
 }
