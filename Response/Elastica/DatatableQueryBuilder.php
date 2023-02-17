@@ -231,58 +231,67 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
 
     protected function addIndividualFilteringSearchTerms(BoolQuery $query): static
     {
-        if ($this->isIndividualFiltering()) {
-            $filterQueries = new BoolQuery();
+        if (!$this->isIndividualFiltering()) {
+            return $this;
+        }
 
-            /**
-             * @var int|string      $key
-             * @var ColumnInterface $column
-             */
-            foreach ($this->columns as $key => $column) {
-                if ($this->isSearchableColumn($column)) {
-                    if (! \array_key_exists('columns', $this->requestParams)) {
-                        continue;
-                    }
-                    if (! \array_key_exists($key, $this->requestParams['columns'])) {
-                        continue;
-                    }
+        if (! \array_key_exists('columns', $this->requestParams)) {
+            return $this;
+        }
 
-                    /** @var string $columnAlias */
-                    $columnAlias = $this->searchColumns[$key];
-                    if ('' === $columnAlias) {
-                        continue;
-                    }
-                    if (null === $columnAlias) {
-                        continue;
-                    }
+        $filterQueries = new BoolQuery();
 
-                    $searchValue = $this->requestParams['columns'][$key]['search']['value'];
-
-                    if ('' !== $searchValue && 'null' !== $searchValue) {
-                        $searchColumnGroup = $this->getColumnSearchColumnGroup($column);
-
-                        if ('' !== $searchColumnGroup) {
-                            $this->addColumnGroupSearchTerm(
-                                $filterQueries,
-                                $searchColumnGroup,
-                                $searchValue
-                            );
-                        } else {
-                            $this->addColumnSearchTerm(
-                                $filterQueries,
-                                self::CONDITION_TYPE_MUST,
-                                $column,
-                                $columnAlias,
-                                $searchValue
-                            );
-                        }
-                    }
-                }
+        /**
+         * @var int|string      $key
+         * @var ColumnInterface $column
+         */
+        foreach ($this->columns as $key => $column) {
+            if (!$this->isSearchableColumn($column)) {
+                continue;
             }
 
-            if ($this->isQueryValid($filterQueries)) {
-                $query->addFilter($filterQueries);
+            if (! \array_key_exists($key, $this->requestParams['columns'])) {
+                continue;
             }
+
+            /** @var string $columnAlias */
+            $columnAlias = $this->searchColumns[$key];
+            if ('' === $columnAlias) {
+                continue;
+            }
+            if (null === $columnAlias) {
+                continue;
+            }
+
+            $searchValue = $this->requestParams['columns'][$key]['search']['value'];
+
+            if ('null' === $searchValue || '' === trim($searchValue)) {
+                continue;
+            }
+
+            $searchColumnGroup = $this->getColumnSearchColumnGroup($column);
+
+            if ('' !== $searchColumnGroup) {
+                $this->addColumnGroupSearchTerm(
+                    $filterQueries,
+                    $searchColumnGroup,
+                    $searchValue
+                );
+
+                continue;
+            }
+
+            $this->addColumnSearchTerm(
+                $filterQueries,
+                self::CONDITION_TYPE_MUST,
+                $column,
+                $columnAlias,
+                $searchValue
+            );
+        }
+
+        if ($this->isQueryValid($filterQueries)) {
+            $query->addFilter($filterQueries);
         }
 
         return $this;
@@ -521,7 +530,7 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
 
         $searchValue = trim($searchValue);
 
-        if ('' !== $searchValue && 'null' !== $searchValue) {
+        if ('' === $searchValue || 'null' === $searchValue) {
             return null;
         }
 

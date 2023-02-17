@@ -338,14 +338,16 @@ class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
 
                     $searchValue = $this->requestParams['columns'][$key]['search']['value'];
 
-                    if ('' !== $searchValue && 'null' !== $searchValue) {
-                        /** @var FilterInterface $filter */
-                        $filter = $this->accessor->getValue($column, 'filter');
-                        $searchFields = (array) $this->searchColumns[$key];
+                    if ('null' === $searchValue || '' === trim($searchValue)) {
+                        continue;
+                    }
+
+                    /** @var FilterInterface $filter */
+                    $filter = $this->accessor->getValue($column, 'filter');
+                    $searchFields = (array) $this->searchColumns[$key];
                         $searchTypeOfField = $column->getTypeOfField();
-                        foreach ($searchFields as $searchField) {
-                            $andExpr = $filter->addAndExpression($andExpr, $qb, $searchField, $searchValue, $searchTypeOfField, $parameterCounter);
-                        }
+                    foreach ($searchFields as $searchField) {
+                        $andExpr = $filter->addAndExpression($andExpr, $qb, $searchField, $searchValue, $searchTypeOfField, $parameterCounter);
                     }
                 }
             }
