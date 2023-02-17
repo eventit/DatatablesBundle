@@ -14,7 +14,7 @@ namespace Sg\DatatablesBundle\Datatable\Column;
 
 class TextColumn extends Column
 {
-    public function getTypeOfField(): string
+    public function getTypeOfField(): ?string
     {
         return 'string';
     }
