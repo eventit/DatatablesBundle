@@ -157,7 +157,7 @@ class DateTimeColumn extends AbstractColumn
      */
     public function setDateFormat(string $dateFormat): static
     {
-        if (empty($dateFormat) || ! \is_string($dateFormat)) {
+        if (empty($dateFormat)) {
             throw new RuntimeException('DateTimeColumn::setDateFormat(): A non-empty string is expected.');
         }
 
@@ -185,7 +185,7 @@ class DateTimeColumn extends AbstractColumn
     /**
      * Render template.
      */
-    private function renderTemplate(?string $data, ?string $pk = null, ?string $path = null): string
+    private function renderTemplate(mixed $data, ?string $pk = null, ?string $path = null): string
     {
         $renderVars = [
             'data' => $data,

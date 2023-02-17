@@ -88,14 +88,14 @@ abstract class AbstractColumn implements ColumnInterface
      * This property has normally the same value as $this->dql.
      * Is set in the ColumnBuilder.
      */
-    protected ?string $data = null;
+    protected mixed $data = null;
 
     /**
      * Set default, static, content for a column.
      * Show an information message for a field that can have a 'null' or 'undefined' value.
      * Default: null.
      */
-    protected ?string $defaultContent = null;
+    protected mixed $defaultContent = null;
 
     /**
      * Set a descriptive name for a column. Only needed when working with DataTables' API.
@@ -424,24 +424,24 @@ abstract class AbstractColumn implements ColumnInterface
         return $this;
     }
 
-    public function getData(): ?string
+    public function getData(): mixed
     {
         return $this->data;
     }
 
-    public function setData(?string $data): static
+    public function setData(mixed $data): static
     {
         $this->data = $data;
 
         return $this;
     }
 
-    public function getDefaultContent(): ?string
+    public function getDefaultContent(): mixed
     {
         return $this->defaultContent;
     }
 
-    public function setDefaultContent(?string $defaultContent): static
+    public function setDefaultContent(mixed $defaultContent): static
     {
         $this->defaultContent = $defaultContent;
 

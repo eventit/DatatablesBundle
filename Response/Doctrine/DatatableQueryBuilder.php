@@ -345,7 +345,7 @@ class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
                     /** @var FilterInterface $filter */
                     $filter = $this->accessor->getValue($column, 'filter');
                     $searchFields = (array) $this->searchColumns[$key];
-                        $searchTypeOfField = $column->getTypeOfField();
+                    $searchTypeOfField = $column->getTypeOfField();
                     foreach ($searchFields as $searchField) {
                         $andExpr = $filter->addAndExpression($andExpr, $qb, $searchField, $searchValue, $searchTypeOfField, $parameterCounter);
                     }

@@ -231,7 +231,7 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
 
     protected function addIndividualFilteringSearchTerms(BoolQuery $query): static
     {
-        if (!$this->isIndividualFiltering()) {
+        if (! $this->isIndividualFiltering()) {
             return $this;
         }
 
@@ -246,7 +246,7 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
          * @var ColumnInterface $column
          */
         foreach ($this->columns as $key => $column) {
-            if (!$this->isSearchableColumn($column)) {
+            if (! $this->isSearchableColumn($column)) {
                 continue;
             }
 
@@ -353,7 +353,7 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
 
         switch ($column->getTypeOfField()) {
             case 'boolean':
-                if (\is_numeric($searchValue) || \is_bool($searchValue)) {
+                if (is_numeric($searchValue) || \is_bool($searchValue)) {
                     $filterSubQuery = $this->createIntegerFilterTerm(
                         $columnAlias,
                         (int) $searchValue
@@ -366,7 +366,7 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
                         $columnAlias,
                         $searchValues
                     );
-                } elseif (\is_numeric($searchValue) || \is_bool($searchValue)) {
+                } elseif (is_numeric($searchValue) || \is_bool($searchValue)) {
                     $filterSubQuery = $this->createIntegerFilterTerm(
                         $columnAlias,
                         (int) $searchValue

@@ -321,7 +321,7 @@ class LinkColumn extends AbstractColumn
     /**
      * Render template.
      */
-    private function renderTemplate(?string $data): string
+    private function renderTemplate(mixed $data): string
     {
         return $this->twig->render(
             $this->getCellContentTemplate(),

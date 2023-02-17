@@ -15,6 +15,9 @@ namespace Sg\DatatablesBundle\Datatable\Column;
 use NumberFormatter;
 use Sg\DatatablesBundle\Datatable\Helper;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
 class NumberColumn extends Column
 {
@@ -162,9 +165,16 @@ class NumberColumn extends Column
     /**
      * Render template.
      *
-     * @return mixed|string
+     * @param mixed       $data
+     * @param string|null $pk
+     * @param string|null $path
+     *
+     * @throws LoaderError
+     * @throws RuntimeError
+     * @throws SyntaxError
+     * @return string
      */
-    private function renderTemplate(?string $data, ?string $pk = null, ?string $path = null): string
+    private function renderTemplate(mixed $data, ?string $pk = null, ?string $path = null): string
     {
         if ($this->useFormatCurrency) {
             if (null === $this->currency) {

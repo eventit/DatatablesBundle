@@ -241,7 +241,7 @@ class BooleanColumn extends AbstractColumn
     // Helper
     // -------------------------------------------------
 
-    private function renderTemplate(?string $data, ?string $pk = null, ?string $path = null): string
+    private function renderTemplate(mixed $data, ?string $pk = null, ?string $path = null): string
     {
         $renderVars = [
             'data' => $this->isCustomDql() && \in_array($data, [0, 1, '0', '1'], true) ? (bool) $data : $data,

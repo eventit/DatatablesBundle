@@ -116,7 +116,7 @@ class Column extends AbstractColumn
     // Helper
     // -------------------------------------------------
 
-    private function renderTemplate(?string $data, string $pk, ?string $path = null): string
+    private function renderTemplate(mixed $data, string $pk, ?string $path = null): string
     {
         return $this->twig->render(
             $this->getCellContentTemplate(),
