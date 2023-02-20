@@ -213,7 +213,7 @@ class ColumnBuilder
      */
     private function addColumn(?string $dql, AbstractColumn $column): void
     {
-        if (null !== $dql && $column->callAddIfClosure()) {
+        if ($column->callAddIfClosure()) {
             $this->columns[] = $column;
             $index = \count($this->columns) - 1;
             $this->columnNames[$dql] = $index;
