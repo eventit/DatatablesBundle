@@ -40,7 +40,7 @@
         "phpspec/prophecy": "^1.17",
         "phpspec/prophecy-phpunit": "^2.0",
         "phpunit/phpunit": "^9.5",
-        "rector/rector": "^0.14",
+        "rector/rector": "^0.17",
         "roave/security-advisories": "dev-latest"
     },
     "scripts": {
