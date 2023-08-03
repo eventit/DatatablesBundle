@@ -165,14 +165,9 @@ class NumberColumn extends Column
     /**
      * Render template.
      *
-     * @param mixed       $data
-     * @param string|null $pk
-     * @param string|null $path
-     *
      * @throws LoaderError
      * @throws RuntimeError
      * @throws SyntaxError
-     * @return string
      */
     private function renderTemplate(mixed $data, ?string $pk = null, ?string $path = null): string
     {

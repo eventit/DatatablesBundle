@@ -134,9 +134,9 @@ class LinkColumn extends AbstractColumn
                         $this->accessor->setValue($row, $currentPath, $content);
                     }
                 }
-            // no placeholder - leave this blank
+                // no placeholder - leave this blank
             } else {
-                if (null !== $this->getFilterFunction()) {
+                if ($this->getFilterFunction() instanceof Closure) {
                     $entries = array_values(array_filter($entries, $this->getFilterFunction()));
                 }
 

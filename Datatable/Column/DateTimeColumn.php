@@ -157,7 +157,7 @@ class DateTimeColumn extends AbstractColumn
      */
     public function setDateFormat(string $dateFormat): static
     {
-        if (empty($dateFormat)) {
+        if ($dateFormat === '') {
             throw new RuntimeException('DateTimeColumn::setDateFormat(): A non-empty string is expected.');
         }
 

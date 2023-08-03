@@ -12,6 +12,7 @@
 
 namespace Sg\DatatablesBundle\Response;
 
+use Closure;
 use IteratorAggregate;
 use Sg\DatatablesBundle\Datatable\Column\ColumnInterface;
 use Sg\DatatablesBundle\Datatable\DatatableInterface;
@@ -68,7 +69,7 @@ abstract class AbstractDatatableFormatter
             }
 
             // 2. Call the the lineFormatter to format row items
-            if (null !== $lineFormatter && \is_callable($lineFormatter)) {
+            if ($lineFormatter instanceof Closure && \is_callable($lineFormatter)) {
                 $row = \call_user_func($datatable->getLineFormatter(), $row);
             }
 

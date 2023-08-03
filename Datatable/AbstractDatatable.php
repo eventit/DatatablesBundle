@@ -151,9 +151,13 @@ abstract class AbstractDatatable implements DatatableInterface
         $options = [];
 
         foreach ($entities as $entity) {
-            if ($this->accessor->isReadable($entity, $keyFrom) && $this->accessor->isReadable($entity, $valueFrom)) {
-                $options[$this->accessor->getValue($entity, $keyFrom)] = $this->accessor->getValue($entity, $valueFrom);
+            if (! $this->accessor->isReadable($entity, $keyFrom)) {
+                continue;
             }
+            if (! $this->accessor->isReadable($entity, $valueFrom)) {
+                continue;
+            }
+            $options[$this->accessor->getValue($entity, $keyFrom)] = $this->accessor->getValue($entity, $valueFrom);
         }
 
         return $options;

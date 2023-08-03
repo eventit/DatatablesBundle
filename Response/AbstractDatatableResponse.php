@@ -89,11 +89,11 @@ abstract class AbstractDatatableResponse
 
     protected function checkResponseDependencies(): void
     {
-        if (null === $this->datatable) {
+        if (! $this->datatable instanceof DatatableInterface) {
             throw new RuntimeException('DatatableResponse::getResponse(): Set a Datatable class with setDatatable().');
         }
 
-        if (null === $this->datatableQueryBuilder) {
+        if (! $this->datatableQueryBuilder instanceof AbstractDatatableQueryBuilder) {
             throw new RuntimeException('DatatableResponse::getResponse(): A DatatableQueryBuilder instance is needed. Call getDatatableQueryBuilder().');
         }
     }

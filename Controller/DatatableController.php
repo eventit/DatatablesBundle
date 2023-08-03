@@ -103,7 +103,7 @@ class DatatableController extends AbstractController
     /**
      * @throws Exception
      */
-    private function normalizeValue(string $originalTypeOfField, $value): float|DateTime|bool|int|string|null
+    private function normalizeValue(string $originalTypeOfField, string $value): float|DateTime|bool|int|string|null
     {
         switch ($originalTypeOfField) {
             case Types::DATETIME_MUTABLE:

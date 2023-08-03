@@ -28,16 +28,16 @@ final class ArrayColumnTest extends TestCase
     public function testIsAssociative(): void
     {
         $arrayColumn = new ArrayColumn();
-        static::assertFalse($this->callMethod($arrayColumn, 'isAssociative', [['a', 'b']]));
-        static::assertTrue($this->callMethod($arrayColumn, 'isAssociative', [['a' => 1, 'b' => 1]]));
+        self::assertFalse($this->callMethod($arrayColumn, 'isAssociative', [['a', 'b']]));
+        self::assertTrue($this->callMethod($arrayColumn, 'isAssociative', [['a' => 1, 'b' => 1]]));
     }
 
     public function testArrayToString(): void
     {
         $arrayColumn = new ArrayColumn();
         $result = $this->callMethod($arrayColumn, 'arrayToString', [['a', 'b' => ['d' => new DateTime()]]]);
-        static::assertNotEmpty($result);
-        static::assertIsString($result);
+        self::assertNotEmpty($result);
+        self::assertIsString($result);
     }
 
     /**

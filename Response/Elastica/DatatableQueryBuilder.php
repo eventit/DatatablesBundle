@@ -16,7 +16,10 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use Elastica\Query;
 use Elastica\Query\AbstractQuery;
 use Elastica\Query\BoolQuery;
+use Elastica\Query\MatchQuery;
 use Elastica\Query\Nested;
+use Elastica\Query\Regexp;
+use Elastica\Query\Term;
 use FOS\ElasticaBundle\Finder\PaginatedFinderInterface;
 use FOS\ElasticaBundle\HybridResult;
 use FOS\ElasticaBundle\Paginator\PartialResultsInterface;
@@ -264,8 +267,10 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
             }
 
             $searchValue = $this->requestParams['columns'][$key]['search']['value'];
-
-            if ('null' === $searchValue || '' === trim($searchValue)) {
+            if ('null' === $searchValue) {
+                continue;
+            }
+            if ('' === trim($searchValue)) {
                 continue;
             }
 
@@ -419,11 +424,9 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
             return null;
         }
 
-        $searchValues = array_filter($searchValues, static function ($v, $k) {
-            return is_numeric($v) || \is_bool($v);
-        }, ARRAY_FILTER_USE_BOTH);
+        $searchValues = array_filter($searchValues, static fn ($v, $k): bool => is_numeric($v) || \is_bool($v), ARRAY_FILTER_USE_BOTH);
 
-        if (empty($searchValues)) {
+        if ($searchValues === []) {
             return null;
         }
 
@@ -493,7 +496,7 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
             return null;
         }
 
-        if (empty($searchValues)) {
+        if ($searchValues === []) {
             return null;
         }
 
@@ -544,7 +547,7 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
             $fieldQuery = $this->createFilterTerm($columnAlias . '.raw', $searchValue, $conditionType);
         }
 
-        if (null !== $fieldQuery && $this->isQueryValid($fieldQuery)) {
+        if ($fieldQuery instanceof AbstractQuery && $this->isQueryValid($fieldQuery)) {
             /** @var string|null $nestedPath */
             $nestedPath = $this->getNestedPath($columnAlias);
             if (null !== $nestedPath) {
@@ -564,10 +567,10 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
     protected function createFilterTerm(
         string $columnAlias,
         string|int $searchValue,
-        string $conditionType = null
+        ?string $conditionType = null
     ): ?AbstractQuery {
         if ('' !== $columnAlias) {
-            $query = new Query\Term();
+            $query = new Term();
             $query->setTerm($columnAlias, $searchValue);
 
             return $query;
@@ -579,14 +582,14 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
     protected function createFilterMatchTerm(
         string $columnAlias,
         string|int $searchValue,
-        string $conditionType = null
+        ?string $conditionType = null
     ): ?AbstractQuery {
         if ('' !== $columnAlias) {
-            $query = new Query\MatchQuery();
+            $query = new MatchQuery();
             $query->setFieldQuery($columnAlias, $searchValue);
             $query->setFieldMinimumShouldMatch($columnAlias, 1);
             if ($conditionType === self::CONDITION_TYPE_MUST) {
-                $query->setFieldOperator($columnAlias, Query\MatchQuery::OPERATOR_AND);
+                $query->setFieldOperator($columnAlias, MatchQuery::OPERATOR_AND);
             }
 
             return $query;
@@ -598,11 +601,11 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
     protected function createFilterExactMatchTerm(
         string $columnAlias,
         string|int $searchValue,
-        string $conditionType = null
+        ?string $conditionType = null
     ): ?AbstractQuery {
         $query = $this->createFilterMatchTerm($columnAlias, $searchValue, $conditionType);
 
-        if (null !== $query && $this->isQueryValid($query) && method_exists($query, 'setFieldMinimumShouldMatch')) {
+        if ($query instanceof AbstractQuery && $this->isQueryValid($query) && method_exists($query, 'setFieldMinimumShouldMatch')) {
             $query->setFieldMinimumShouldMatch($columnAlias, '100%');
         }
 
@@ -612,10 +615,10 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
     protected function createFilterRegexpTerm(
         string $columnAlias,
         string|int $searchValue,
-        string $conditionType = null
+        ?string $conditionType = null
     ): ?AbstractQuery {
         if ('' !== $columnAlias) {
-            return new Query\Regexp($columnAlias, '.*' . $searchValue . '.*');
+            return new Regexp($columnAlias, '.*' . $searchValue . '.*');
         }
 
         return null;
@@ -639,7 +642,8 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
                 $typeOfField = $this
                     ->accessor
                     ->getValue($column, 'orderColumnTypeOfField') ??
-                    $column->getTypeOfField();
+                    $column->getTypeOfField()
+                ;
             }
 
             $col = $typeOfField === 'string' ? $data . '.' . $this->getSortFieldSuffix() : $data;
@@ -725,7 +729,7 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
             $this->setOrderBy($query);
         }
 
-        if (! empty($this->sourceFields)) {
+        if ($this->sourceFields !== []) {
             $query->setSource($this->sourceFields);
         }
 

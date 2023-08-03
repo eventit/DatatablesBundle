@@ -76,7 +76,7 @@ class RowGroup extends AbstractExtension
      */
     public function setDataSrc(string $dataSrc): static
     {
-        if (empty($dataSrc)) {
+        if ($dataSrc === '') {
             throw new UnexpectedValueException(
                 'RowGroup::setDataSrc(): the column name is empty.'
             );
@@ -146,7 +146,7 @@ class RowGroup extends AbstractExtension
 
     public function setClassName(string $className): static
     {
-        if (empty($className)) {
+        if ($className === '') {
             throw new UnexpectedValueException(
                 'RowGroup::setClassName(): the class name is empty.'
             );
@@ -164,7 +164,7 @@ class RowGroup extends AbstractExtension
 
     public function setEmptyDataGroup(string $emptyDataGroup): static
     {
-        if (empty($emptyDataGroup)) {
+        if ($emptyDataGroup === '') {
             throw new UnexpectedValueException(
                 'RowGroup::setEmptyDataGroup(): the empty data group text is empty.'
             );
@@ -182,7 +182,7 @@ class RowGroup extends AbstractExtension
 
     public function setEndClassName(string $endClassName): static
     {
-        if (empty($endClassName)) {
+        if ($endClassName === '') {
             throw new UnexpectedValueException(
                 'RowGroup::setEndClassName(): the end class name is empty.'
             );
@@ -200,7 +200,7 @@ class RowGroup extends AbstractExtension
 
     public function setStartClassName(string $startClassName): static
     {
-        if (empty($startClassName)) {
+        if ($startClassName === '') {
             throw new UnexpectedValueException(
                 'RowGroup::setStartClassName(): the start class name is empty.'
             );

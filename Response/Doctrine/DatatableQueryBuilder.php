@@ -123,7 +123,7 @@ class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
         \call_user_func_array(static fn (bool $useCache, ?int $lifetime = null, ?string $resultCacheId = null): Query => $query->useResultCache($useCache, $lifetime, $resultCacheId), $this->useCountResultCacheArgs);
 
         return $qb->getDQLPart('groupBy')
-            ? \count($query->getResult())
+            ? is_countable($query->getResult()) ? \count($query->getResult()) : 0
             : (int) $query->getSingleScalarResult();
     }
 
@@ -275,7 +275,7 @@ class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
     protected function setSelectFrom(QueryBuilder $qb): static
     {
         foreach ($this->selectColumns as $key => $value) {
-            if (! empty($key)) {
+            if ($key !== 0 && $key !== '') {
                 $qb->addSelect('partial ' . $key . '.{' . implode(',', $value) . '}');
             } else {
                 $qb->addSelect($value);
@@ -337,8 +337,10 @@ class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
                     }
 
                     $searchValue = $this->requestParams['columns'][$key]['search']['value'];
-
-                    if ('null' === $searchValue || '' === trim($searchValue)) {
+                    if ('null' === $searchValue) {
+                        continue;
+                    }
+                    if ('' === trim($searchValue)) {
                         continue;
                     }
 
@@ -406,7 +408,7 @@ class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
      */
     protected function setIdentifierFromAssociation(array|string $association, string $key, ?ClassMetadata $metadata = null): ClassMetadata
     {
-        if (null === $metadata) {
+        if (! $metadata instanceof ClassMetadata) {
             $metadata = $this->metadata;
         }
 

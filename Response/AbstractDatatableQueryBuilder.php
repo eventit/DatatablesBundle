@@ -131,8 +131,7 @@ abstract class AbstractDatatableQueryBuilder
     protected function isSearchableColumn(ColumnInterface $column): bool
     {
         $searchColumn = null !== $this->accessor->getValue($column, 'dql')
-            && true === $this->accessor->getValue($column, 'searchable')
-        ;
+            && true === $this->accessor->getValue($column, 'searchable');
 
         if (! $this->options->isSearchInNonVisibleColumns()) {
             return $searchColumn && true === $this->accessor->getValue($column, 'visible');

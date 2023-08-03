@@ -285,11 +285,10 @@ abstract class AbstractFilter implements FilterInterface
      * @param string $searchType
      * @param string $searchField
      * @param string $searchTypeOfField
-     * @param int    $parameterCounter
      *
      * @return Composite
      */
-    protected function getExpression(Composite $expr, QueryBuilder $qb, $searchType, $searchField, $searchValue, $searchTypeOfField, &$parameterCounter)
+    protected function getExpression(Composite $expr, QueryBuilder $qb, $searchType, $searchField, string $searchValue, $searchTypeOfField, string &$parameterCounter)
     {
         // Prevent doctrine issue with "?0" (https://github.com/doctrine/doctrine2/issues/6699)
         ++$parameterCounter;
@@ -348,8 +347,7 @@ abstract class AbstractFilter implements FilterInterface
                     // No result found
                     ? $expr->add($qb->expr()->eq(1, 0))
                     // Column skipped from search
-                    : $expr
-            ;
+                    : $expr;
         }
 
         switch ($searchType) {
@@ -430,11 +428,8 @@ abstract class AbstractFilter implements FilterInterface
      * Get a betweenAndExpression.
      *
      * @param string $searchField
-     * @param int    $parameterCounter
-     *
-     * @return Andx
      */
-    protected function getBetweenAndExpression(Andx $andExpr, QueryBuilder $qb, $searchField, $from, $to, $parameterCounter)
+    protected function getBetweenAndExpression(Andx $andExpr, QueryBuilder $qb, $searchField, $from, $to, string $parameterCounter): Andx
     {
         ++$parameterCounter;
 

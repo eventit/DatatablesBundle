@@ -137,7 +137,7 @@ class DatatableResponse extends AbstractDatatableResponse
      */
     protected function createDatatableQueryBuilder(): DatatableQueryBuilder
     {
-        if (null === $this->datatable) {
+        if (! $this->datatable instanceof DatatableInterface) {
             throw new RuntimeException('Doctrine\DatatableResponse::getDatatableQueryBuilder(): Set a Datatable class with setDatatable().');
         }
 

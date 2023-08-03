@@ -15,6 +15,7 @@ namespace Sg\DatatablesBundle\Response\Elastica;
 use Exception;
 use FOS\ElasticaBundle\Finder\PaginatedFinderInterface;
 use RuntimeException;
+use Sg\DatatablesBundle\Datatable\DatatableInterface;
 use Sg\DatatablesBundle\Model\ModelDefinitionInterface;
 use Sg\DatatablesBundle\Response\AbstractDatatableQueryBuilder;
 use Sg\DatatablesBundle\Response\AbstractDatatableResponse;
@@ -133,7 +134,7 @@ class DatatableResponse extends AbstractDatatableResponse
      */
     protected function createDatatableQueryBuilder(): AbstractDatatableQueryBuilder
     {
-        if (null === $this->datatable) {
+        if (! $this->datatable instanceof DatatableInterface) {
             throw new RuntimeException('Elastica\DatatableResponse::getDatatableQueryBuilder(): Set a Datatable class with setDatatable().');
         }
 

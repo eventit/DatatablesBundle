@@ -19,6 +19,7 @@ use Sg\DatatablesBundle\Datatable\Column\ColumnInterface;
 use Sg\DatatablesBundle\Datatable\DatatableInterface;
 use Sg\DatatablesBundle\Datatable\Filter\FilterInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Twig\Environment as Twig_Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -26,7 +27,7 @@ use Twig\TwigFunction;
 
 class DatatableTwigExtension extends AbstractExtension
 {
-    protected \Symfony\Component\PropertyAccess\PropertyAccessor $accessor;
+    protected PropertyAccessor $accessor;
 
     public function __construct()
     {
@@ -43,32 +44,32 @@ class DatatableTwigExtension extends AbstractExtension
         return [
             new TwigFunction(
                 'sg_datatables_render',
-                fn (\Twig\Environment $twig, DatatableInterface $datatable): string => $this->datatablesRender($twig, $datatable),
+                fn (Twig_Environment $twig, DatatableInterface $datatable): string => $this->datatablesRender($twig, $datatable),
                 ['is_safe' => ['html'], 'needs_environment' => true]
             ),
             new TwigFunction(
                 'sg_datatables_render_html',
-                fn (\Twig\Environment $twig, DatatableInterface $datatable): string => $this->datatablesRenderHtml($twig, $datatable),
+                fn (Twig_Environment $twig, DatatableInterface $datatable): string => $this->datatablesRenderHtml($twig, $datatable),
                 ['is_safe' => ['html'], 'needs_environment' => true]
             ),
             new TwigFunction(
                 'sg_datatables_render_js',
-                fn (\Twig\Environment $twig, DatatableInterface $datatable): string => $this->datatablesRenderJs($twig, $datatable),
+                fn (Twig_Environment $twig, DatatableInterface $datatable): string => $this->datatablesRenderJs($twig, $datatable),
                 ['is_safe' => ['html'], 'needs_environment' => true]
             ),
             new TwigFunction(
                 'sg_datatable_extensions_render',
-                fn (\Twig\Environment $twig, DatatableInterface $datatable): string => $this->datatablesRenderExtensions($twig, $datatable),
+                fn (Twig_Environment $twig, DatatableInterface $datatable): string => $this->datatablesRenderExtensions($twig, $datatable),
                 ['is_safe' => ['html'], 'needs_environment' => true]
             ),
             new TwigFunction(
                 'sg_datatables_render_filter',
-                fn (\Twig\Environment $twig, DatatableInterface $datatable, ColumnInterface $column, string $position): string => $this->datatablesRenderFilter($twig, $datatable, $column, $position),
+                fn (Twig_Environment $twig, DatatableInterface $datatable, ColumnInterface $column, string $position): string => $this->datatablesRenderFilter($twig, $datatable, $column, $position),
                 ['is_safe' => ['html'], 'needs_environment' => true]
             ),
             new TwigFunction(
                 'sg_datatables_render_multiselect_actions',
-                fn (\Twig\Environment $twig, ColumnInterface $multiselectColumn, int $pipeline): string => $this->datatablesRenderMultiselectActions($twig, $multiselectColumn, $pipeline),
+                fn (Twig_Environment $twig, ColumnInterface $multiselectColumn, int $pipeline): string => $this->datatablesRenderMultiselectActions($twig, $multiselectColumn, $pipeline),
                 ['is_safe' => ['html'], 'needs_environment' => true]
             ),
         ];

@@ -62,7 +62,7 @@ class SelectEditable extends AbstractEditable
      */
     public function setSource(array $source): static
     {
-        if (empty($source)) {
+        if ($source === []) {
             throw new RuntimeException('SelectEditable::setSource(): The source array should contain at least one element.');
         }
 

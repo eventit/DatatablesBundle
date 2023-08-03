@@ -57,7 +57,7 @@ class ArrayColumn extends Column
 
     protected function isAssociative(array $array): bool
     {
-        if (empty($array)) {
+        if ($array === []) {
             return false;
         }
 
