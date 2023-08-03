@@ -63,5 +63,6 @@ return (new PhpCsFixer\Config())
         'single_line_throw' => false,
         'yoda_style' => ['equal' => null, 'identical' => null, 'less_and_greater' => null],
         'phpdoc_var_without_name' => true,
+        'nullable_type_declaration_for_default_null_value' => ['use_nullable_type_declaration' => true],
     ])
     ->setFinder($finder);
