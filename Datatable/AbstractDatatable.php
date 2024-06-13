@@ -1,9 +1,10 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
  * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,97 +12,57 @@
 
 namespace Sg\DatatablesBundle\Datatable;
 
+use Closure;
+use Doctrine\ORM\EntityManagerInterface;
+use InvalidArgumentException;
+use LogicException;
 use Sg\DatatablesBundle\Datatable\Column\ColumnBuilder;
-
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Translation\TranslatorInterface;
-use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
-use Doctrine\ORM\EntityManagerInterface;
-use Twig_Environment;
-use Exception;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Translation\TranslatorInterface as LegacyTranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
+use Twig\Environment as Twig_Environment;
 
-/**
- * Class AbstractDatatable
- *
- * @package Sg\DatatablesBundle\Datatable
- */
 abstract class AbstractDatatable implements DatatableInterface
 {
-    /** @var AuthorizationCheckerInterface */
-    protected $authorizationChecker;
+    protected TranslatorInterface $translator;
 
-    /** @var TokenStorageInterface */
-    protected $securityToken;
+    protected ColumnBuilder $columnBuilder;
 
-    /** @var TranslatorInterface */
-    protected $translator;
+    protected Ajax $ajax;
 
-    /** @var RouterInterface */
-    protected $router;
+    protected Options $options;
 
-    /** @var EntityManagerInterface */
-    protected $em;
+    protected Features $features;
 
-    /** @var Twig_Environment */
-    protected $twig;
+    protected Callbacks $callbacks;
 
-    /** @var ColumnBuilder */
-    protected $columnBuilder;
+    protected Events $events;
 
-    /** @var Ajax */
-    protected $ajax;
+    protected Extensions $extensions;
 
-    /** @var Options */
-    protected $options;
+    protected Language $language;
 
-    /** @var Features */
-    protected $features;
+    protected int $uniqueId;
 
-    /** @var Callbacks */
-    protected $callbacks;
+    protected PropertyAccessor $accessor;
 
-    /** @var Events */
-    protected $events;
-
-    /** @var Extensions */
-    protected $extensions;
-
-    /** @var Language */
-    protected $language;
-
-    /** @var int */
-    protected $uniqueId;
-
-    /** @var PropertyAccessor */
-    protected $accessor;
+    protected static array $uniqueCounter = [];
 
     /**
-     * @var array
-     */
-    protected static $uniqueCounter = [];
-
-    /**
-     * @param AuthorizationCheckerInterface $authorizationChecker
-     * @param TokenStorageInterface $securityToken
-     * @param TranslatorInterface $translator
-     * @param RouterInterface $router
-     * @param EntityManagerInterface $em
-     * @param Twig_Environment $twig
-     * @param Extensions|null $registry
-     *
-     * @throws Exception
+     * @throws LogicException
      */
     public function __construct(
-        AuthorizationCheckerInterface $authorizationChecker,
-        TokenStorageInterface $securityToken,
-        TranslatorInterface $translator,
-        RouterInterface $router,
-        EntityManagerInterface $em,
-        Twig_Environment $twig,
-        Extensions $registry = null
+        protected AuthorizationCheckerInterface $authorizationChecker,
+        protected TokenStorageInterface $securityToken,
+        $translator,
+        protected RouterInterface $router,
+        protected EntityManagerInterface $em,
+        protected Twig_Environment $twig,
+        ?Extensions $registry = null
     ) {
         $this->validateName();
 
@@ -111,15 +72,13 @@ abstract class AbstractDatatable implements DatatableInterface
             $this->uniqueId = self::$uniqueCounter[$this->getName()] = 1;
         }
 
-        $this->authorizationChecker = $authorizationChecker;
-        $this->securityToken = $securityToken;
+        if (! ($translator instanceof LegacyTranslatorInterface) && ! ($translator instanceof TranslatorInterface)) {
+            throw new InvalidArgumentException(sprintf('The $translator argument of %s must be an instance of %s or %s, a %s was given.', static::class, LegacyTranslatorInterface::class, TranslatorInterface::class, $translator::class));
+        }
         $this->translator = $translator;
-        $this->router = $router;
-        $this->em = $em;
-        $this->twig = $twig;
 
         $metadata = $em->getClassMetadata($this->getEntity());
-        $this->columnBuilder = new ColumnBuilder($metadata, $twig, $this->getName(), $em);
+        $this->columnBuilder = new ColumnBuilder($metadata, $twig, $router, $this->getName(), $em);
 
         $this->ajax = new Ajax();
         $this->options = new Options();
@@ -132,96 +91,67 @@ abstract class AbstractDatatable implements DatatableInterface
         $this->accessor = PropertyAccess::createPropertyAccessor();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getLineFormatter()
+    public function getLineFormatter(): ?Closure
     {
         return null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getColumnBuilder()
+    public function getColumnBuilder(): ColumnBuilder
     {
         return $this->columnBuilder;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getAjax()
+    public function getAjax(): Ajax
     {
         return $this->ajax;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getOptions()
+    public function getOptions(): Options
     {
         return $this->options;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getFeatures()
+    public function getFeatures(): Features
     {
         return $this->features;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getCallbacks()
+    public function getCallbacks(): Callbacks
     {
         return $this->callbacks;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getEvents()
+    public function getEvents(): Events
     {
         return $this->events;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getExtensions()
+    public function getExtensions(): Extensions
     {
         return $this->extensions;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getLanguage()
+    public function getLanguage(): Language
     {
         return $this->language;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getEntityManager()
+    public function getEntityManager(): EntityManagerInterface
     {
         return $this->em;
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @return array<int|string, mixed>
      */
-    public function getOptionsArrayFromEntities($entities, $keyFrom = 'id', $valueFrom = 'name')
+    public function getOptionsArrayFromEntities(array $entities, string $keyFrom = 'id', string $valueFrom = 'name'): array
     {
         $options = [];
 
         foreach ($entities as $entity) {
-            if (true === $this->accessor->isReadable($entity, $keyFrom) && true === $this->accessor->isReadable($entity,
-                    $valueFrom)) {
+            if ($this->accessor->isReadable($entity, $keyFrom) && $this->accessor->isReadable($entity, $valueFrom)) {
                 $options[$this->accessor->getValue($entity, $keyFrom)] = $this->accessor->getValue($entity, $valueFrom);
             }
         }
@@ -229,29 +159,26 @@ abstract class AbstractDatatable implements DatatableInterface
         return $options;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getUniqueId()
+    public function getUniqueId(): int
     {
         return $this->uniqueId;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getUniqueName()
+    public function getUniqueName(): string
     {
         return $this->getName() . ($this->getUniqueId() > 1 ? '-' . $this->getUniqueId() : '');
     }
 
     /**
-     * @throws Exception
+     * Checks the name only contains letters, numbers, underscores or dashes.
+     *
+     * @throws LogicException
      */
-    protected function validateName()
+    protected function validateName(): void
     {
-        if (1 !== preg_match(self::NAME_REGEX, $this->getName())) {
-            throw new Exception('AbstractDatatable::validateName(): The result of the getName method can only contain letters, numbers, underscore and dashes.');
+        $name = $this->getName();
+        if (1 !== preg_match(self::NAME_REGEX, $name)) {
+            throw new LogicException(sprintf('AbstractDatatable::validateName(): "%s" is invalid Datatable Name. Name can only contain letters, numbers, underscore and dashes.', $name));
         }
     }
 }

@@ -1,5 +1,15 @@
 <?php
 
+/*
+ * This file is part of the SgDatatablesBundle package.
+ *
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Sg\DatatablesBundle\Datatable\Extension;
 
 use Sg\DatatablesBundle\Datatable\OptionsTrait;
@@ -8,76 +18,48 @@ abstract class AbstractExtension implements ExtensionInterface
 {
     use OptionsTrait;
 
-    /** @var string */
-    protected $name;
+    protected bool $enabled = false;
 
-    /** @var bool */
-    protected $enabled;
-
-    /**
-     * @param $name
-     */
-    public function __construct($name)
+    public function __construct(protected string $name)
     {
-        $this->name = $name;
-        $this->enabled = false;
-
         $this->initOptions();
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function setName(string $name): ExtensionInterface
+    public function setName(string $name): static
     {
         $this->name = $name;
 
         return $this;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function setOptions(array $options): ExtensionInterface
+    public function setOptions(array $options): static
     {
         $this->set($options);
 
         return $this;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function isEnabled(): bool
     {
         return $this->enabled;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function setEnabled(bool $enabled): ExtensionInterface
+    public function setEnabled(bool $enabled): static
     {
         $this->enabled = $enabled;
 
         return $this;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getJavaScriptConfiguration(array $config = []): array
     {
         return [
-            $this->getName() => \count($config) > 0 ? $config : true,
+            $this->getName() => $config !== [] ? $config : true,
         ];
     }
 }

@@ -1,76 +1,73 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
  * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
-namespace Sg\DatatablesBundle\Tests\Response;
+namespace Sg\DatatablesBundle\Tests\Response\Doctrine;
 
-use Doctrine\Common\Persistence\Mapping\ClassMetadata;
-use Doctrine\Common\Persistence\Mapping\ClassMetadataFactory;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Platforms\MySqlPlatform;
+use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\Persistence\Mapping\ClassMetadataFactory;
+use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use ReflectionClass;
 use Sg\DatatablesBundle\Datatable\Ajax;
 use Sg\DatatablesBundle\Datatable\Column\ColumnBuilder;
 use Sg\DatatablesBundle\Datatable\DatatableInterface;
 use Sg\DatatablesBundle\Datatable\Features;
 use Sg\DatatablesBundle\Datatable\Options;
-use Sg\DatatablesBundle\Response\DatatableQueryBuilder;
+use Sg\DatatablesBundle\Response\Doctrine\DatatableQueryBuilder;
 
-class DatatableQueryBuilderTest extends \PHPUnit_Framework_TestCase
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
+final class DatatableQueryBuilderTest extends TestCase
 {
-    /** @var ObjectProphecy|EntityManagerInterface */
-    private $entityManager;
+    use ProphecyTrait;
 
-    /** @var ObjectProphecy|ClassMetadataFactory */
-    private $classMetadataFactory;
+    private EntityManagerInterface|ObjectProphecy $entityManager;
 
-    /** @var ObjectProphecy|Connection */
-    private $connection;
+    private ClassMetadataFactory|ObjectProphecy $classMetadataFactory;
 
-    /** @var ObjectProphecy|QueryBuilder */
-    private $queryBuilder;
+    private Connection|ObjectProphecy $connection;
 
-    /** @var ObjectProphecy|ClassMetadata */
-    private $classMetadata;
+    private ObjectProphecy|QueryBuilder $queryBuilder;
 
-    /** @var ObjectProphecy|\ReflectionClass */
-    private $reflectionClass;
+    private ClassMetadata|ObjectProphecy $classMetadata;
 
-    /** @var ObjectProphecy|ColumnBuilder */
-    private $columnBuilder;
+    private ObjectProphecy|ReflectionClass $reflectionClass;
 
-    /** @var ObjectProphecy|Options */
-    private $options;
+    private ColumnBuilder|ObjectProphecy $columnBuilder;
 
-    /** @var ObjectProphecy|Features */
-    private $features;
+    private ObjectProphecy|Options $options;
 
-    /** @var ObjectProphecy|Ajax */
-    private $ajax;
+    private Features|ObjectProphecy $features;
 
-    /** @var ObjectProphecy|DatatableInterface */
-    private $dataTable;
+    private Ajax|ObjectProphecy $ajax;
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setUp()
+    private DatatableInterface|ObjectProphecy $dataTable;
+
+    protected function setUp(): void
     {
         $this->entityManager = $this->prophesize(EntityManagerInterface::class);
         $this->classMetadataFactory = $this->prophesize(ClassMetadataFactory::class);
         $this->connection = $this->prophesize(Connection::class);
         $this->queryBuilder = $this->prophesize(QueryBuilder::class);
         $this->classMetadata = $this->prophesize(ClassMetadata::class);
-        $this->reflectionClass = $this->prophesize(\ReflectionClass::class);
+        $this->reflectionClass = $this->prophesize(ReflectionClass::class);
         $this->columnBuilder = $this->prophesize(ColumnBuilder::class);
         $this->options = $this->prophesize(Options::class);
         $this->features = $this->prophesize(Features::class);
@@ -78,7 +75,7 @@ class DatatableQueryBuilderTest extends \PHPUnit_Framework_TestCase
         $this->dataTable = $this->prophesize(DatatableInterface::class);
     }
 
-    public function testUsingAPrefixedAliasWhenShortNameIsAReservedWord()
+    public function testUsingAPrefixedAliasWhenShortNameIsAReservedWord(): void
     {
         $entityName = '\App\Entity\Order';
         $shortName = 'Order';
@@ -87,7 +84,7 @@ class DatatableQueryBuilderTest extends \PHPUnit_Framework_TestCase
         $this->getDataTableQueryBuilder($entityName, $shortName);
     }
 
-    public function testUsingTheSortNameWhenShortNameIsNotAReservedWord()
+    public function testUsingTheSortNameWhenShortNameIsNotAReservedWord(): void
     {
         $entityName = '\App\Entity\Account';
         $shortName = 'Account';
@@ -97,11 +94,9 @@ class DatatableQueryBuilderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @param string $entityName
-     * @param string $shortName
-     * @return DatatableQueryBuilder
+     * @throws \Exception
      */
-    private function getDataTableQueryBuilder($entityName, $shortName)
+    private function getDataTableQueryBuilder(string $entityName, string $shortName): DatatableQueryBuilder
     {
         $this->reflectionClass->getShortName()->willReturn($shortName);
         $this->classMetadata->getReflectionClass()->willReturn($this->reflectionClass->reveal());
@@ -112,6 +107,7 @@ class DatatableQueryBuilderTest extends \PHPUnit_Framework_TestCase
         $this->entityManager->createQueryBuilder()->willReturn($this->queryBuilder->reveal());
         $this->entityManager->getConnection()->willreturn($this->connection->reveal());
         $this->columnBuilder->getColumns()->willReturn([]);
+        $this->columnBuilder->getColumnNames()->willReturn([]);
         $this->dataTable->getEntity()->willReturn($entityName);
         $this->dataTable->getEntityManager()->willReturn($this->entityManager->reveal());
         $this->dataTable->getColumnBuilder()->willReturn($this->columnBuilder->reveal());

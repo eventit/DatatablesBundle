@@ -1,9 +1,10 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
  * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,34 +12,27 @@
 
 namespace Sg\DatatablesBundle\Datatable\Filter;
 
-use Doctrine\ORM\QueryBuilder;
-use Doctrine\ORM\Query\Expr\Andx;
 use DateTime;
+use Doctrine\ORM\Query\Expr\Andx;
+use Doctrine\ORM\QueryBuilder;
+use Exception;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-/**
- * Class DateRangeFilter
- *
- * @package Sg\DatatablesBundle\Datatable\Filter
- */
 class DateRangeFilter extends AbstractFilter
 {
-    //-------------------------------------------------
+    // -------------------------------------------------
     // FilterInterface
-    //-------------------------------------------------
+    // -------------------------------------------------
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getTemplate()
+    public function getTemplate(): string
     {
         return '@SgDatatables/filter/daterange.html.twig';
     }
 
     /**
-     * {@inheritdoc}
+     * @throws Exception
      */
-    public function addAndExpression(Andx $andExpr, QueryBuilder $qb, $searchField, $searchValue, $searchTypeOfField, &$parameterCounter)
+    public function addAndExpression(Andx $andExpr, QueryBuilder $qb, $searchField, $searchValue, $searchTypeOfField, &$parameterCounter): Andx
     {
         list($_dateStart, $_dateEnd) = explode(' - ', $searchValue);
         $dateStart = new DateTime($_dateStart);
@@ -51,18 +45,11 @@ class DateRangeFilter extends AbstractFilter
         return $andExpr;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
-    /**
-     * Config options.
-     *
-     * @param OptionsResolver $resolver
-     *
-     * @return $this
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): static
     {
         parent::configureOptions($resolver);
 
@@ -71,16 +58,13 @@ class DateRangeFilter extends AbstractFilter
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Helper
-    //-------------------------------------------------
-
+    // -------------------------------------------------
     /**
      * Returns the type for the <input> element.
-     *
-     * @return string
      */
-    public function getType()
+    public function getType(): string
     {
         return 'text';
     }

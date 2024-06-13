@@ -1,102 +1,138 @@
 <?php
 
+/*
+ * This file is part of the SgDatatablesBundle package.
+ *
+ * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Sg\DatatablesBundle\Response\Elastica;
 
-use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Elastica\Query;
-use Elastica\Query\Nested;
-use Elastica\Query\Terms;
+use Elastica\Query\AbstractQuery;
 use Elastica\Query\BoolQuery;
+use Elastica\Query\Nested;
 use FOS\ElasticaBundle\Finder\PaginatedFinderInterface;
 use FOS\ElasticaBundle\HybridResult;
+use FOS\ElasticaBundle\Paginator\PartialResultsInterface;
 use Sg\DatatablesBundle\Datatable\Column\ColumnInterface;
+use Sg\DatatablesBundle\Datatable\Filter\FilterInterface;
+use Sg\DatatablesBundle\Datatable\Filter\SelectFilter;
 use Sg\DatatablesBundle\Model\ModelDefinitionInterface;
 use Sg\DatatablesBundle\Response\AbstractDatatableQueryBuilder;
 
 abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
 {
-    const CONDITION_TYPE_SHOULD = 'should';
-    const CONDITION_TYPE_MUST = 'must';
+    public const CONDITION_TYPE_SHOULD = 'should';
+    public const CONDITION_TYPE_MUST = 'must';
 
-    /** @var PaginatedFinderInterface */
-    protected $paginatedFinder;
+    public const QUERY_TYPE_TERMS = 'terms';
+    public const QUERY_TYPE_MATCH = 'match';
+    public const QUERY_TYPE_EXACT_MATCH = 'exact_match';
+    public const QUERY_TYPE_REGEXP = 'regexp';
 
-    /** @var ModelDefinitionInterface $modelDefinition */
-    protected $modelDefinition;
+    protected ?PaginatedFinderInterface $paginatedFinder = null;
 
-    /** @var array */
-    protected $nestedPaths;
+    protected ?ModelDefinitionInterface $modelDefinition = null;
 
-    /**
-     * @param BoolQuery $query
-     *
-     * @return BoolQuery
-     */
-    abstract protected function setTermsFilters(BoolQuery $query): BoolQuery;
+    protected array $nestedPaths = [];
 
-    /**
-     * @param PaginatedFinderInterface $paginatedFinder
-     */
-    public function setPaginatedFinder(PaginatedFinderInterface $paginatedFinder)
+    protected array $sourceFields = [];
+
+    public function setPaginatedFinder(PaginatedFinderInterface $paginatedFinder): void
     {
         $this->paginatedFinder = $paginatedFinder;
     }
 
-    /**
-     * @param ModelDefinitionInterface $modelDefinition
-     */
-    public function setModelDefinition(ModelDefinitionInterface $modelDefinition)
+    public function setModelDefinition(ModelDefinitionInterface $modelDefinition): void
     {
         $this->modelDefinition = $modelDefinition;
     }
 
+    public function execute(): ElasticaEntries
+    {
+        $results = $this->getHybridResultsForOffsetAndLength(
+            $this->requestParams['start'],
+            $this->requestParams['length']
+        );
+
+        return $this->generateElasticaEntriesForResults(
+            $results->getTotalHits(),
+            $this->extractSourceFromResultset($results)
+        );
+    }
+
+    /**
+     * @param string[] $fields
+     */
+    public function getAllResultsForFields(array $fields): ElasticaEntries
+    {
+        $resultEntries = [];
+        $this->sourceFields = $fields;
+        $result = $this->getRawResultsForOffsetAndLength(0, 1);
+        $countAll = $result->getTotalHits();
+
+        $resultsPerStep = 100;
+
+        for ($i = 0; $i < $countAll / $resultsPerStep; ++$i) {
+            $partialResults = $this->getRawResultsForOffsetAndLength(
+                $i * $resultsPerStep,
+                ($i + 1) * $resultsPerStep
+            );
+            $resultEntries = $this->extractSourceFromResultset($partialResults, $resultEntries);
+        }
+
+        return $this->generateElasticaEntriesForResults($countAll, $resultEntries);
+    }
+
+    public function getCountAllResults(): int
+    {
+        return $this->paginatedFinder->createRawPaginatorAdapter($this->getQuery(true))->getTotalHits();
+    }
+
+    abstract protected function setTermsFilters(BoolQuery $query): BoolQuery;
+
     /** nothing needed more than in abstract */
-    protected function loadIndividualConstructSettings()
+    protected function loadIndividualConstructSettings(): void
     {
         $this->nestedPaths = [];
         $this->selectColumns = [];
         $this->searchColumns = [];
         $this->orderColumns = [];
+        $this->searchColumnGroups = [];
     }
 
-    /**
-     * @param string $columnAlias
-     * @param string $path
-     * @return $this
-     */
-    protected function addNestedPath(string $columnAlias, $path): self
+    protected function addNestedPath(?string $columnAlias, ?string $path): static
     {
-        if ($columnAlias !== null && $columnAlias !== '' && $path !== null && strpos($path, '.') !== false) {
+        if (null !== $columnAlias && '' !== $columnAlias && null !== $path && str_contains($path, '.')) {
             $pathParts = explode('.', $path);
-            if (count($pathParts) > 1) {
+            if (\count($pathParts) > 1) {
                 $this->nestedPaths[$columnAlias] =
-                    implode('.', array_slice($pathParts, 0, -1));
+                    implode('.', \array_slice($pathParts, 0, -1));
             }
         }
 
         return $this;
     }
 
-    /**
-     * @param string $columnAlias
-     * @return string|null
-     */
-    protected function getNestedPath(string $columnAlias)
+    protected function getNestedPath(string $columnAlias): ?string
     {
-        if ($columnAlias !== '' && isset($this->nestedPaths[$columnAlias])) {
-            return $this->nestedPaths[$columnAlias];
+        if ('' === $columnAlias) {
+            return null;
         }
 
-        return null;
+        return $this->nestedPaths[$columnAlias] ?? null;
     }
 
-    /**
-     * @return $this
-     */
-    protected function initColumnArrays(): self
+    protected function initColumnArrays(): static
     {
         /**
-         * @var int|string $key
+         * @var int|string      $key
          * @var ColumnInterface $column
          */
         foreach ($this->columns as $key => $column) {
@@ -108,95 +144,84 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
             } elseif ($this->isSelectColumn($column)) {
                 $this->addSearchOrderColumn($column, $data);
             } else {
-                if ($this->accessor->isReadable($column, 'orderColumn') &&
-                    $this->isOrderableColumn($column)
+                if ($this->accessor->isReadable($column, 'orderColumn')
+                    && $this->isOrderableColumn($column)
                 ) {
                     $orderColumn = $this->accessor->getValue($column, 'orderColumn');
                     $this->addOrderColumn($column, $orderColumn);
-                } elseif ($this->isOrderableColumn($column)) {
-                    $this->addOrderColumn($column, $data);
                 } else {
                     $this->addOrderColumn($column, null);
                 }
 
-                if ($this->accessor->isReadable($column, 'searchColumn') &&
-                    $this->isSearchableColumn($column)
+                if ($this->accessor->isReadable($column, 'searchColumn')
+                    && $this->isSearchableColumn($column)
                 ) {
                     $searchColumn = $this->accessor->getValue($column, 'searchColumn');
                     $this->addSearchColumn($column, $searchColumn);
-                } elseif ($this->isSearchableColumn($column)) {
-                    $this->addSearchColumn($column, $data);
                 } else {
                     $this->addSearchColumn($column, null);
                 }
             }
+
+            $this->addSearchColumnGroupEntry($column, $key);
         }
 
         return $this;
     }
 
-    /**
-     * @param BoolQuery $query
-     * @return $this
-     */
-    protected function addSearchTerms(BoolQuery $query): self
+    protected function isQueryValid($query): bool
     {
-        // global filtering
-        if (isset($this->requestParams['search']) && '' != $this->requestParams['search']['value']) {
-            /** @var BoolQuery $filterQueries */
-            $filterQueries = new BoolQuery();
-
-            /**
-             * @var int|string $key
-             * @var ColumnInterface $column
-             */
-            foreach ($this->searchColumns as $key => $columnAlias) {
-                if ($columnAlias === null || $columnAlias === '') {
-                    continue;
-                }
-
-                /** @var ColumnInterface $column */
-                $column = $this->columns[$key];
-
-                $this->addColumnSearchTerm(
-                    $filterQueries,
-                    self::CONDITION_TYPE_SHOULD,
-                    $column,
-                    $columnAlias,
-                    $this->requestParams['search']['value']
-                );
-            }
-            if (!empty($filterQueries->getParams())) {
-                $query->addFilter($filterQueries);
-            }
+        if (! $query instanceof AbstractQuery) {
+            return false;
         }
 
-        // individual filtering
-        if (true === $this->accessor->getValue($this->options, 'individualFiltering')) {
-            /** @var BoolQuery $filterQueries */
+        if (empty($query->toArray())) {
+            return false;
+        }
+
+        return ! \is_object($query->getParams());
+    }
+
+    protected function addGlobalFilteringSearchTerms(BoolQuery $query): static
+    {
+        if (isset($this->requestParams['search']) && '' !== $this->requestParams['search']['value']) {
             $filterQueries = new BoolQuery();
 
+            $searchValue = $this->requestParams['search']['value'];
+
             /**
-             * @var int|string $key
+             * @var int|string      $key
              * @var ColumnInterface $column
              */
-            foreach ($this->searchColumns as $key => $columnAlias) {
-                if ($columnAlias === null || $columnAlias === '') {
-                    continue;
+            foreach ($this->columns as $key => $column) {
+                if ($this->isSearchableColumn($column)) {
+                    /** @var string $columnAlias */
+                    $columnAlias = $this->searchColumns[$key];
+                    if ('' === $columnAlias) {
+                        continue;
+                    }
+                    if (null === $columnAlias) {
+                        continue;
+                    }
+
+                    /** @var FilterInterface $filter */
+                    $filter = $this->accessor->getValue($column, 'filter');
+
+                    if ($filter instanceof SelectFilter) {
+                        continue;
+                    }
+
+                    $this->addColumnSearchTerm(
+                        $filterQueries,
+                        self::CONDITION_TYPE_SHOULD,
+                        $column,
+                        $columnAlias,
+                        $searchValue
+                    );
                 }
-
-                /** @var ColumnInterface $column */
-                $column = $this->columns[$key];
-
-                $this->addColumnSearchTerm(
-                    $filterQueries,
-                    self::CONDITION_TYPE_MUST,
-                    $column,
-                    $columnAlias,
-                    $this->requestParams['columns'][$key]['search']['value']
-                );
             }
-            if (!empty($filterQueries->getParams())) {
+
+            if ($this->isQueryValid($filterQueries)) {
                 $query->addFilter($filterQueries);
             }
         }
@@ -204,122 +229,399 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
         return $this;
     }
 
-    /**
-     * @param BoolQuery $filterQueries
-     * @param string $conditionType
-     * @param ColumnInterface $column
-     * @param string $columnAlias
-     * @param int|string $value
-     * @return $this
-     */
+    protected function addIndividualFilteringSearchTerms(BoolQuery $query): static
+    {
+        if (! $this->isIndividualFiltering()) {
+            return $this;
+        }
+
+        if (! \array_key_exists('columns', $this->requestParams)) {
+            return $this;
+        }
+
+        $filterQueries = new BoolQuery();
+
+        /**
+         * @var int|string      $key
+         * @var ColumnInterface $column
+         */
+        foreach ($this->columns as $key => $column) {
+            if (! $this->isSearchableColumn($column)) {
+                continue;
+            }
+
+            if (! \array_key_exists($key, $this->requestParams['columns'])) {
+                continue;
+            }
+
+            /** @var string $columnAlias */
+            $columnAlias = $this->searchColumns[$key];
+            if ('' === $columnAlias) {
+                continue;
+            }
+            if (null === $columnAlias) {
+                continue;
+            }
+
+            $searchValue = $this->requestParams['columns'][$key]['search']['value'];
+
+            if ('null' === $searchValue || '' === trim($searchValue)) {
+                continue;
+            }
+
+            $searchColumnGroup = $this->getColumnSearchColumnGroup($column);
+
+            if ('' !== $searchColumnGroup) {
+                $this->addColumnGroupSearchTerm(
+                    $filterQueries,
+                    $searchColumnGroup,
+                    $searchValue
+                );
+
+                continue;
+            }
+
+            $this->addColumnSearchTerm(
+                $filterQueries,
+                self::CONDITION_TYPE_MUST,
+                $column,
+                $columnAlias,
+                $searchValue
+            );
+        }
+
+        if ($this->isQueryValid($filterQueries)) {
+            $query->addFilter($filterQueries);
+        }
+
+        return $this;
+    }
+
+    protected function addSearchTerms(BoolQuery $query): static
+    {
+        $this->addGlobalFilteringSearchTerms($query);
+        $this->addIndividualFilteringSearchTerms($query);
+
+        return $this;
+    }
+
+    protected function addColumnGroupSearchTerm(
+        BoolQuery $filterQueries,
+        string $searchColumnGroup,
+        int|string $searchValue
+    ): static {
+        /** @var BoolQuery $filterQueries */
+        $groupFilterQueries = new BoolQuery();
+
+        /** @var int|string $key */
+        foreach ($this->searchColumnGroups[$searchColumnGroup] as $key) {
+            $this->addColumnSearchTerm(
+                $groupFilterQueries,
+                self::CONDITION_TYPE_SHOULD,
+                $this->columns[$key],
+                $this->searchColumns[$key],
+                $searchValue
+            );
+        }
+
+        if ($this->isQueryValid($groupFilterQueries)) {
+            $filterQueries->addMust($groupFilterQueries);
+        }
+
+        return $this;
+    }
+
     protected function addColumnSearchTerm(
         BoolQuery $filterQueries,
         string $conditionType,
         ColumnInterface $column,
         string $columnAlias,
-        $value
-    ): self {
+        int|string|bool $searchValue
+    ): static {
+        /** @var AbstractQuery|null $filterSubQuery */
+        $filterSubQuery = null;
+
+        /** @var FilterInterface $filter */
+        $filter = $this->accessor->getValue($column, 'filter');
+
+        /** @var array|null $searchValues */
+        $searchValues = null;
+
+        if (($filter instanceof SelectFilter) && $filter->isMultiple()) {
+            $searchValues = explode(',', $searchValue);
+        }
+
         switch ($column->getTypeOfField()) {
+            case 'boolean':
+                if (is_numeric($searchValue) || \is_bool($searchValue)) {
+                    $filterSubQuery = $this->createIntegerFilterTerm(
+                        $columnAlias,
+                        (int) $searchValue
+                    );
+                }
+                break;
             case 'integer':
-                $this->createIntegerShouldTerm(
-                    $filterQueries,
-                    $columnAlias,
-                    (int)$value
-                );
+                if (\is_array($searchValues) && \count($searchValues) > 1) {
+                    $filterSubQuery = $this->createIntegerMultiFilterTerm(
+                        $columnAlias,
+                        $searchValues
+                    );
+                } elseif (is_numeric($searchValue) || \is_bool($searchValue)) {
+                    $filterSubQuery = $this->createIntegerFilterTerm(
+                        $columnAlias,
+                        (int) $searchValue
+                    );
+                }
                 break;
             case 'string':
-                $this->createStringFilterTerm(
-                    $filterQueries,
-                    $conditionType,
-                    $columnAlias,
-                    (string)$value
-                );
+                $queryType = self::QUERY_TYPE_MATCH;
+
+                if ($filter instanceof SelectFilter) {
+                    $queryType = self::QUERY_TYPE_EXACT_MATCH;
+                }
+
+                if (\is_array($searchValues) && \count($searchValues) > 1) {
+                    $filterSubQuery = $this->createStringMultiFilterTerm(
+                        $columnAlias,
+                        $queryType,
+                        self::CONDITION_TYPE_SHOULD,
+                        (array) $searchValues
+                    );
+                } else {
+                    $filterSubQuery = $this->createStringFilterTerm(
+                        $columnAlias,
+                        $queryType,
+                        $conditionType,
+                        (string) $searchValue
+                    );
+                }
                 break;
             default:
                 break;
         }
 
+        if ($this->isQueryValid($filterSubQuery)) {
+            if (self::CONDITION_TYPE_MUST === $conditionType) {
+                $filterQueries->addMust($filterSubQuery);
+            } elseif (self::CONDITION_TYPE_SHOULD === $conditionType) {
+                $filterQueries->addShould($filterSubQuery);
+            }
+        }
+
         return $this;
     }
 
-    /**
-     * @param BoolQuery $filterQueries
-     * @param string $columnAlias
-     * @param int $value
-     */
-    protected function createIntegerShouldTerm(
-        BoolQuery $filterQueries,
+    protected function createIntegerMultiFilterTerm(
         string $columnAlias,
-        int $value
-    ) {
-        if ($columnAlias !== '' && $value !== 0) {
-            /** @var Terms $integerTerm */
-            $integerTerm = new Terms();
-            $integerTerm->setTerms($columnAlias, [$value]);
+        array $searchValues
+    ): ?AbstractQuery {
+        if ('' === $columnAlias) {
+            return null;
+        }
 
-            /** @var string|null $nestedPath */
-            $nestedPath = $this->getNestedPath($columnAlias);
-            if ($nestedPath !== null) {
-                /** @var Nested $nested */
-                $nested = new Nested();
-                $nested->setPath($nestedPath);
-                /** @var BoolQuery $boolQuery */
-                $boolQuery = new BoolQuery();
-                $boolQuery->addShould($integerTerm);
-                $nested->setQuery($boolQuery);
-                $filterQueries->addShould($nested);
-            } else {
-                $filterQueries->addShould($integerTerm);
+        $searchValues = array_filter($searchValues, static function ($v, $k) {
+            return is_numeric($v) || \is_bool($v);
+        }, ARRAY_FILTER_USE_BOTH);
+
+        if (empty($searchValues)) {
+            return null;
+        }
+
+        if (\count($searchValues) === 1) {
+            return $this->createIntegerFilterTerm(
+                $columnAlias,
+                (int) array_shift($searchValues)
+            );
+        }
+
+        $filterQueries = new BoolQuery();
+
+        foreach ($searchValues as $searchValue) {
+            $filterSubQuery = $this->createIntegerFilterTerm(
+                $columnAlias,
+                (int) $searchValue
+            );
+
+            if ($this->isQueryValid($filterSubQuery)) {
+                $filterQueries->addShould($filterSubQuery);
             }
         }
+
+        if ($this->isQueryValid($filterQueries)) {
+            return $filterQueries;
+        }
+
+        return null;
     }
 
-    /**
-     * @param BoolQuery $filterQueries
-     * @param string $conditionType
-     * @param string $columnAlias
-     * @param string $value
-     */
-    protected function createStringFilterTerm(
-        BoolQuery $filterQueries,
+    protected function createIntegerFilterTerm(
+        string $columnAlias,
+        int $searchValue
+    ): ?AbstractQuery {
+        if ('' === $columnAlias) {
+            return null;
+        }
+
+        $integerTerm = $this->createFilterTerm($columnAlias, $searchValue);
+
+        if ($this->isQueryValid($integerTerm)) {
+            /** @var string|null $nestedPath */
+            $nestedPath = $this->getNestedPath($columnAlias);
+            if (null !== $nestedPath) {
+                $nested = new Nested();
+                $nested->setPath($nestedPath);
+                $boolQuery = new BoolQuery();
+                $boolQuery->addMust($integerTerm);
+                $nested->setQuery($boolQuery);
+
+                return $nested;
+            }
+
+            return $integerTerm;
+        }
+
+        return null;
+    }
+
+    protected function createStringMultiFilterTerm(
+        string $columnAlias,
+        string $queryType,
         string $conditionType,
-        string $columnAlias,
-        string $value
-    ) {
-        if ($columnAlias !== '' && $value !== '') {
-            /** @var Query\Regexp $regexQuery */
-            $regexQuery = new Query\Regexp($columnAlias, '.*' . strtolower($value) . '.*');
+        array $searchValues
+    ): ?AbstractQuery {
+        if ('' === $columnAlias) {
+            return null;
+        }
 
-            /** @var string|null $nestedPath */
-            $nestedPath = $this->getNestedPath($columnAlias);
-            if ($nestedPath !== null) {
-                /** @var Nested $nested */
-                $nested = new Nested();
-                $nested->setPath($nestedPath);
-                /** @var BoolQuery $boolQuery */
-                $boolQuery = new BoolQuery();
-                $boolQuery->addShould($regexQuery);
-                $nested->setQuery($boolQuery);
-                $stringFilterQuery = $nested;
-            } else {
-                $stringFilterQuery = $regexQuery;
-            }
+        if (empty($searchValues)) {
+            return null;
+        }
 
-            if ($conditionType === self::CONDITION_TYPE_MUST) {
-                $filterQueries->addMust($stringFilterQuery);
-            } elseif ($conditionType === self::CONDITION_TYPE_SHOULD) {
-                $filterQueries->addShould($stringFilterQuery);
+        $filterQueries = new BoolQuery();
+
+        foreach ($searchValues as $searchValue) {
+            $filterSubQuery = $this->createStringFilterTerm(
+                $columnAlias,
+                $queryType,
+                $conditionType,
+                (string) $searchValue
+            );
+            if ($this->isQueryValid($filterSubQuery)) {
+                $filterQueries->addShould($filterSubQuery);
             }
         }
+
+        if ($this->isQueryValid($filterQueries)) {
+            return $filterQueries;
+        }
+
+        return null;
     }
 
-    /**
-     *
-     * @param ColumnInterface $column
-     * @param string $data
-     * @return $this
-     */
-    protected function addSearchOrderColumn(ColumnInterface $column, $data): self
+    protected function createStringFilterTerm(
+        string $columnAlias,
+        string $queryType,
+        string $conditionType,
+        string $searchValue
+    ): ?AbstractQuery {
+        if ('' === $columnAlias) {
+            return null;
+        }
+
+        $searchValue = trim($searchValue);
+
+        if ('' === $searchValue || 'null' === $searchValue) {
+            return null;
+        }
+
+        if (self::QUERY_TYPE_MATCH === $queryType) {
+            $fieldQuery = $this->createFilterMatchTerm($columnAlias, $searchValue, $conditionType);
+        } elseif (self::QUERY_TYPE_EXACT_MATCH === $queryType) {
+            $fieldQuery = $this->createFilterExactMatchTerm($columnAlias, $searchValue, $conditionType);
+        } elseif (self::QUERY_TYPE_REGEXP === $queryType) {
+            $fieldQuery = $this->createFilterRegexpTerm($columnAlias . '.raw', $searchValue, $conditionType);
+        } else {
+            $fieldQuery = $this->createFilterTerm($columnAlias . '.raw', $searchValue, $conditionType);
+        }
+
+        if (null !== $fieldQuery && $this->isQueryValid($fieldQuery)) {
+            /** @var string|null $nestedPath */
+            $nestedPath = $this->getNestedPath($columnAlias);
+            if (null !== $nestedPath) {
+                $nested = new Nested();
+                $nested->setPath($nestedPath);
+                $nested->setQuery($fieldQuery);
+
+                return $nested;
+            }
+
+            return $fieldQuery;
+        }
+
+        return null;
+    }
+
+    protected function createFilterTerm(
+        string $columnAlias,
+        string|int $searchValue,
+        string $conditionType = null
+    ): ?AbstractQuery {
+        if ('' !== $columnAlias) {
+            $query = new Query\Term();
+            $query->setTerm($columnAlias, $searchValue);
+
+            return $query;
+        }
+
+        return null;
+    }
+
+    protected function createFilterMatchTerm(
+        string $columnAlias,
+        string|int $searchValue,
+        string $conditionType = null
+    ): ?AbstractQuery {
+        if ('' !== $columnAlias) {
+            $query = new Query\MatchQuery();
+            $query->setFieldQuery($columnAlias, $searchValue);
+            $query->setFieldMinimumShouldMatch($columnAlias, 1);
+            if ($conditionType === self::CONDITION_TYPE_MUST) {
+                $query->setFieldOperator($columnAlias, Query\MatchQuery::OPERATOR_AND);
+            }
+
+            return $query;
+        }
+
+        return null;
+    }
+
+    protected function createFilterExactMatchTerm(
+        string $columnAlias,
+        string|int $searchValue,
+        string $conditionType = null
+    ): ?AbstractQuery {
+        $query = $this->createFilterMatchTerm($columnAlias, $searchValue, $conditionType);
+
+        if (null !== $query && $this->isQueryValid($query) && method_exists($query, 'setFieldMinimumShouldMatch')) {
+            $query->setFieldMinimumShouldMatch($columnAlias, '100%');
+        }
+
+        return $query;
+    }
+
+    protected function createFilterRegexpTerm(
+        string $columnAlias,
+        string|int $searchValue,
+        string $conditionType = null
+    ): ?AbstractQuery {
+        if ('' !== $columnAlias) {
+            return new Query\Regexp($columnAlias, '.*' . $searchValue . '.*');
+        }
+
+        return null;
+    }
+
+    protected function addSearchOrderColumn(ColumnInterface $column, ?string $data): static
     {
         $this->addSearchColumn($column, $data);
         $this->addOrderColumn($column, $data);
@@ -327,67 +629,68 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
         return $this;
     }
 
-    /**
-     * @param ColumnInterface $column
-     * @param string $data
-     * @return $this
-     */
-    protected function addOrderColumn(ColumnInterface $column, $data): self
+    protected function addOrderColumn(ColumnInterface $column, ?string $data): static
     {
         $col = null;
         if ($data !== null && $this->isOrderableColumn($column)) {
-            if ($column->getTypeOfField() == 'string') {
-                $col = $data . '.keyword';
-            } else {
-                $col = $data;
+            $typeOfField = $column->getTypeOfField();
+
+            if ($this->accessor->isReadable($column, 'orderColumnTypeOfField')) {
+                $typeOfField = $this
+                    ->accessor
+                    ->getValue($column, 'orderColumnTypeOfField') ??
+                    $column->getTypeOfField();
             }
+
+            $col = $typeOfField === 'string' ? $data . '.' . $this->getSortFieldSuffix() : $data;
         }
 
-        $col = str_replace('[,]', '', $col);
+        if (null !== $col) {
+            $col = str_replace('[,]', '', $col);
 
-        $this->orderColumns[] = $col;
+            $this->orderColumns[] = $col;
 
-        $this->addNestedPath($col, $data);
-
-        return $this;
-    }
-
-    /**
-     * @param ColumnInterface $column
-     * @param string $data
-     * @return $this
-     */
-    protected function addSearchColumn(ColumnInterface $column, $data): self
-    {
-        $col = $this->isSearchableColumn($column) ?  $data : null;
-        $col = str_replace('[,]', '', $col);
-
-        $this->searchColumns[] = $col;
-
-        $this->addNestedPath($col, $data);
+            $this->addNestedPath($col, $data);
+        }
 
         return $this;
     }
 
-    /**
-     * @param Query $query
-     * @return $this
-     */
-    protected function setOrderBy(Query $query): self
+    protected function getSortFieldSuffix(): string
     {
-        if (isset($this->requestParams['order']) &&
-            \count($this->requestParams['order'])
+        return 'keyword';
+    }
+
+    protected function addSearchColumn(ColumnInterface $column, ?string $data): static
+    {
+        $col = $this->isSearchableColumn($column) ? $data : null;
+
+        if (null !== $col) {
+            $col = str_replace('[,]', '', $col);
+
+            $this->searchColumns[] = $col;
+
+            $this->addNestedPath($col, $data);
+        }
+
+        return $this;
+    }
+
+    protected function setOrderBy(Query $query): static
+    {
+        if (isset($this->requestParams['order'])
+            && (is_countable($this->requestParams['order']) ? \count($this->requestParams['order']) : 0)
         ) {
-            $counter = \count($this->requestParams['order']);
+            $counter = is_countable($this->requestParams['order']) ? \count($this->requestParams['order']) : 0;
 
-            for ($i = 0; $i < $counter; $i++) {
-                $columnIdx = (int)$this->requestParams['order'][$i]['column'];
+            for ($i = 0; $i < $counter; ++$i) {
+                $columnIdx = (int) $this->requestParams['order'][$i]['column'];
                 $requestColumn = $this->requestParams['columns'][$columnIdx];
 
                 if ('true' === $requestColumn['orderable']) {
                     $columnName = $this->orderColumns[$columnIdx];
                     $orderOptions = [
-                        'order' => $this->requestParams['order'][$i]['dir']
+                        'order' => $this->requestParams['order'][$i]['dir'],
                     ];
 
                     /** @var string|null $nestedPath */
@@ -404,100 +707,98 @@ abstract class DatatableQueryBuilder extends AbstractDatatableQueryBuilder
         return $this;
     }
 
-
-    /**
-     * @param bool $countQuery
-     * @return Query
-     */
-    protected function getQuery($countQuery=false): Query
+    protected function getQuery(bool $countQuery = false): Query
     {
-        /** @var Query $query */
         $query = new Query();
 
-        /** @var BoolQuery $boolQuery */
         $boolQuery = new BoolQuery();
 
         $this->setTermsFilters($boolQuery);
 
-        if (!$countQuery) {
+        if (! $countQuery) {
             $this->addSearchTerms($boolQuery);
         }
 
         $query->setQuery($boolQuery);
 
-        if (!$countQuery) {
+        if (! $countQuery) {
             $this->setOrderBy($query);
+        }
+
+        if (! empty($this->sourceFields)) {
+            $query->setSource($this->sourceFields);
         }
 
         return $query;
     }
 
-    /**
-     * @return ElasticaEntries
-     */
-    public function execute(): ElasticaEntries
-    {
-        $results = $this->paginatedFinder->createHybridPaginatorAdapter($this->getQuery())->getResults(
-            $this->requestParams['start'],
-            $this->requestParams['length']
-        );
-
-        $resultEntries = [];
-        /** @var HybridResult $result */
-        foreach ($results->toArray() as $result) {
-            $resultEntries[] = $result->getResult()->getSource();
-        }
-
-        /** @var ElasticaEntries $entries */
-        $entries = new ElasticaEntries();
-        $entries->setCount($results->getTotalHits());
-        $entries->setEntries($resultEntries);
-
-        return $entries;
-    }
-
-    /**
-     * @return int
-     */
-    public function getCountAllResults(): int
-    {
-        return (int)$this->paginatedFinder->createRawPaginatorAdapter($this->getQuery(true))->getTotalHits();
-    }
-
-    /**
-     * @param ClassMetadata $metadata
-     *
-     * @return string
-     */
     protected function getEntityShortName(ClassMetadata $metadata): string
     {
-        return strtolower($metadata->getReflectionClass()->getShortName());
+        return strtolower($metadata->getReflectionClass()?->getShortName() ?? '');
     }
 
-    /**
-     * @param ColumnInterface $column
-     * @return bool
-     */
+    protected function getSafeName($name): string
+    {
+        return $name;
+    }
+
     private function hasCustomDql(ColumnInterface $column): bool
     {
         return true === $this->accessor->getValue($column, 'customDql');
     }
 
-    /**
-     * @param ColumnInterface $column
-     * @return bool
-     */
     private function isSelectColumn(ColumnInterface $column): bool
     {
         return true === $this->accessor->getValue($column, 'selectColumn');
     }
 
-    /**
-     * @param ColumnInterface $column
-     * @return bool
-     */
     private function isOrderableColumn(ColumnInterface $column): bool
     {
         return true === $this->accessor->getValue($column, 'orderable');
+    }
+
+    private function generateElasticaEntriesForResults(int $countAll, array $resultEntries): ElasticaEntries
+    {
+        $entries = new ElasticaEntries();
+        $entries->setCount($countAll);
+        $entries->setEntries($resultEntries);
+
+        return $entries;
+    }
+
+    private function getResultsForOffsetAndLength(
+        int $offset,
+        int $length
+    ): PartialResultsInterface {
+        return $this->paginatedFinder->createPaginatorAdapter($this->getQuery())->getResults($offset, $length);
+    }
+
+    private function getHybridResultsForOffsetAndLength(
+        int $offset,
+        int $length
+    ): PartialResultsInterface {
+        return $this->paginatedFinder->createHybridPaginatorAdapter($this->getQuery())->getResults($offset, $length);
+    }
+
+    private function getRawResultsForOffsetAndLength(
+        int $offset,
+        int $length
+    ): PartialResultsInterface {
+        return $this->paginatedFinder->createRawPaginatorAdapter($this->getQuery())->getResults($offset, $length);
+    }
+
+    private function extractSourceFromResultset(
+        PartialResultsInterface $partialResults,
+        array $resultEntries = []
+    ): array {
+        foreach ($partialResults->toArray() as $item) {
+            if ($item instanceof HybridResult) {
+                $resultEntries[] = $item->getResult()->getSource();
+            } elseif (\is_array($item)) {
+                $resultEntries[] = $item;
+            }
+        }
+
+        return $resultEntries;
     }
 }

@@ -1,9 +1,10 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
  * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,90 +12,74 @@
 
 namespace Sg\DatatablesBundle\Datatable\Column;
 
-use Sg\DatatablesBundle\Datatable\OptionsTrait;
-use Sg\DatatablesBundle\Datatable\AddIfTrait;
-use Sg\DatatablesBundle\Datatable\Editable\EditableInterface;
-
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use Doctrine\DBAL\Types\Type as DoctrineType;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
-use Twig_Environment;
-use Exception;
+use JsonException;
+use RuntimeException;
+use Sg\DatatablesBundle\Datatable\AddIfTrait;
+use Sg\DatatablesBundle\Datatable\OptionsTrait;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Routing\RouterInterface;
+use Twig\Environment as Twig_Environment;
 
-/**
- * Class AbstractColumn
- *
- * @package Sg\DatatablesBundle\Datatable\Column
- */
 abstract class AbstractColumn implements ColumnInterface
 {
-    /**
-     * Use the OptionsResolver.
-     */
-    use OptionsTrait;
-
-    /**
-     * Use an 'add_if' option to check in ColumnBuilder if the Column can be added.
-     */
+    // Use an 'add_if' option to check in ColumnBuilder if the Column can be added.
     use AddIfTrait;
 
-    //-------------------------------------------------
+    use OptionsTrait;
+
+    // -------------------------------------------------
     // Column Types
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Identifies a Data Column.
      */
-    const DATA_COLUMN = 'data';
+    public const DATA_COLUMN = 'data';
 
     /**
      * Identifies an Action Column.
      */
-    const ACTION_COLUMN = 'action';
+    public const ACTION_COLUMN = 'action';
 
     /**
      * Identifies a Multiselect Column.
      */
-    const MULTISELECT_COLUMN = 'multiselect';
+    public const MULTISELECT_COLUMN = 'multiselect';
 
     /**
      * Identifies a Virtual Column.
      */
-    const VIRTUAL_COLUMN = 'virtual';
+    public const VIRTUAL_COLUMN = 'virtual';
 
-    //--------------------------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------------
     // DataTables - Columns Options
     // ----------------------------
     // All Column Options are initialized with 'null' - except 'searchable', 'orderable', and 'visible'.
     // These 'null' initialized options uses the default value of the DataTables plugin.
     // 'searchable', 'orderable', and 'visible' are required in the QueryBuilder and are therefore
     // pre-assigned with a value (true or false).
-    //--------------------------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------------
 
     /**
      * Change the cell type created for the column - either TD cells or TH cells.
      * DataTables default: td
-     * Default: null
-     *
-     * @var null|string
+     * Default: null.
      */
-    protected $cellType;
+    protected ?string $cellType = null;
 
     /**
      * Adds a class to each cell in a column.
-     * Default: null
-     *
-     * @var null|string
+     * Default: null.
      */
-    protected $className;
+    protected ?string $className = null;
 
     /**
      * Add padding to the text content used when calculating the optimal with for a table.
-     * Default: null
-     *
-     * @var null|string
+     * Default: null.
      */
-    protected $contentPadding;
+    protected ?string $contentPadding = null;
 
     /**
      * Set the data source for the column from the rows data object / array.
@@ -102,211 +87,180 @@ abstract class AbstractColumn implements ColumnInterface
      *
      * This property has normally the same value as $this->dql.
      * Is set in the ColumnBuilder.
-     *
-     * @var null|string
      */
-    protected $data;
+    protected mixed $data = null;
 
     /**
      * Set default, static, content for a column.
      * Show an information message for a field that can have a 'null' or 'undefined' value.
-     * Default: null
-     *
-     * @var null|string
+     * Default: null.
      */
-    protected $defaultContent;
+    protected mixed $defaultContent = null;
 
     /**
      * Set a descriptive name for a column. Only needed when working with DataTables' API.
-     * Default: null
-     *
-     * @var null|string
+     * Default: null.
      */
-    protected $name;
+    protected ?string $name = null;
 
     /**
      * Enable or disable ordering on this column.
      * DataTables default: true
-     * Default: true
-     *
-     * @var bool
+     * Default: true.
      */
-    protected $orderable;
+    protected bool $orderable = true;
 
     /**
      * Define multiple column ordering as the default order for a column.
      * DataTables default: Takes the index value of the column automatically.
-     * Default: null
-     *
-     * @var null|int|array
+     * Default: null.
      */
-    protected $orderData;
+    protected array|int|null $orderData = null;
 
     /**
      * Order direction application sequence.
      * DataTables default: ['asc', 'desc']
-     * Default: null
-     *
-     * @var null|array
+     * Default: null.
      */
-    protected $orderSequence;
+    protected ?array $orderSequence = null;
 
     /**
      * Enable or disable filtering on the data in this column.
      * DataTables default: true
-     * Default: true
-     *
-     * @var bool
+     * Default: true.
      */
-    protected $searchable;
+    protected bool $searchable = true;
 
     /**
      * Set the column title.
      * DataTables default: Value read from the column's header cell.
-     * Default: null
-     *
-     * @var null|string
+     * Default: null.
      */
-    protected $title;
+    protected ?string $title = null;
 
     /**
      * Enable or disable the display of this column.
      * DataTables default: true
-     * Default: true
-     *
-     * @var bool
+     * Default: true.
      */
-    protected $visible;
+    protected bool $visible = true;
 
     /**
      * Column width assignment.
      * DataTables default: Auto-detected from the table's content.
-     * Default: null
-     *
-     * @var null|string
+     * Default: null.
      */
-    protected $width;
+    protected ?string $width = null;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Custom Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Join type (default: 'leftJoin'), if the column represents an association.
-     * Default: 'leftJoin'
-     *
-     * @var string
+     * Default: 'leftJoin'.
      */
-    protected $joinType;
+    protected string $joinType = 'leftJoin';
 
     /**
      * The data type of the column.
      * Is set automatically in ColumnBuilder when 'null'.
-     * Default: null
-     *
-     * @var null|string
+     * Default: null.
      */
-    protected $typeOfField;
+    protected ?string $typeOfField = null;
 
     /**
      * The first argument of ColumnBuilders 'add' function.
      * The DatatableQuery class works with this property.
      * If $dql is used as an option, the ColumnBuilder sets $customDql to true.
-     *
-     * @var null|string
      */
-    protected $dql;
+    protected ?string $dql = null;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Extensions Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Set column's visibility priority.
      * Requires the Responsive extension.
-     * Default: null
-     *
-     * @var null|int
+     * Default: null.
      */
-    protected $responsivePriority;
+    protected ?int $responsivePriority = null;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Other Properties
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * True if DQL option is provided.
      * Is set in the ColumnBuilder.
-     *
-     * @var bool
      */
-    protected $customDql;
+    protected bool $customDql = false;
 
     /**
      * The Twig Environment to render Twig templates in Column rowes.
      * Is set in the ColumnBuilder.
-     *
-     * @var Twig_Environment
      */
-    protected $twig;
+    protected ?Twig_Environment $twig = null;
+
+    /**
+     * The Router.
+     * Is set in the ColumnBuilder.
+     */
+    protected ?RouterInterface $router = null;
 
     /**
      * The position in the Columns array.
      * Is set in the ColumnBuilder.
-     *
-     * @var int
      */
-    protected $index;
+    protected int $index = 0;
 
     /**
      * The name of the associated Datatable.
      * Is set in the ColumnBuilder.
-     *
-     * @var string
      */
-    protected $datatableName;
+    protected string $datatableName = '';
 
     /**
      * The fully-qualified class name of the entity (e.g. AppBundle\Entity\Post).
      * Is set in the ColumnBuilder.
-     *
-     * @var string
      */
-    protected $entityClassName;
+    protected string $entityClassName = '';
 
     /**
      * The type of association.
      * Is set in the ColumnBuilder.
-     *
-     * @var null|array
      */
-    protected $typeOfAssociation;
+    protected ?array $typeOfAssociation = null;
 
     /**
      * Saves the original type of field for the DatatableController editAction.
      * Is set in the ColumnBuilder.
-     *
-     * @var null|string
      */
-    protected $originalTypeOfField;
-
-    //-------------------------------------------------
-    // Options
-    //-------------------------------------------------
+    protected ?string $originalTypeOfField = null;
 
     /**
-     * Config options.
-     *
-     * @param OptionsResolver $resolver
-     *
-     * @return $this
+     * If the field is sent in the response, to show in the webpage
+     * Is set in the ColumnBuilder.
+     * Default: true.
      */
-    public function configureOptions(OptionsResolver $resolver)
+    protected bool $sentInResponse = true;
+
+    /**
+     * The group name of search columns to look at in a column search.
+     */
+    protected ?string $searchColumnGroup = null;
+
+    // -------------------------------------------------
+    // Options
+    // -------------------------------------------------
+
+    public function configureOptions(OptionsResolver $resolver): static
     {
         // 'dql' and 'data' options need no default value
-        $resolver->setDefined(array('dql', 'data'));
+        $resolver->setDefined(['dql', 'data']);
 
-        $resolver->setDefaults(array(
+        $resolver->setDefaults([
             'cell_type' => null,
             'class_name' => null,
             'content_padding' => null,
@@ -323,318 +277,195 @@ abstract class AbstractColumn implements ColumnInterface
             'join_type' => 'leftJoin',
             'type_of_field' => null,
             'responsive_priority' => null,
-        ));
+            'sent_in_response' => true,
+            'search_column_group' => null,
+        ]);
 
-        $resolver->setAllowedTypes('cell_type', array('null', 'string'));
-        $resolver->setAllowedTypes('class_name', array('null', 'string'));
-        $resolver->setAllowedTypes('content_padding', array('null', 'string'));
-        $resolver->setAllowedTypes('dql', array('null', 'string'));
-        $resolver->setAllowedTypes('data', array('null', 'string'));
-        $resolver->setAllowedTypes('default_content', array('null', 'string'));
-        $resolver->setAllowedTypes('name', array('null', 'string'));
+        $resolver->setAllowedTypes('cell_type', ['null', 'string']);
+        $resolver->setAllowedTypes('class_name', ['null', 'string']);
+        $resolver->setAllowedTypes('content_padding', ['null', 'string']);
+        $resolver->setAllowedTypes('dql', ['null', 'string']);
+        $resolver->setAllowedTypes('data', ['null', 'string']);
+        $resolver->setAllowedTypes('default_content', ['null', 'string']);
+        $resolver->setAllowedTypes('name', ['null', 'string']);
         $resolver->setAllowedTypes('orderable', 'bool');
-        $resolver->setAllowedTypes('order_data', array('null', 'array', 'int'));
-        $resolver->setAllowedTypes('order_sequence', array('null', 'array'));
+        $resolver->setAllowedTypes('order_data', ['null', 'array', 'int']);
+        $resolver->setAllowedTypes('order_sequence', ['null', 'array']);
         $resolver->setAllowedTypes('searchable', 'bool');
-        $resolver->setAllowedTypes('title', array('null', 'string'));
+        $resolver->setAllowedTypes('title', ['null', 'string']);
         $resolver->setAllowedTypes('visible', 'bool');
-        $resolver->setAllowedTypes('width', array('null', 'string'));
-        $resolver->setAllowedTypes('add_if', array('null', 'Closure'));
+        $resolver->setAllowedTypes('width', ['null', 'string']);
+        $resolver->setAllowedTypes('add_if', ['null', 'Closure']);
         $resolver->setAllowedTypes('join_type', 'string');
-        $resolver->setAllowedTypes('type_of_field', array('null', 'string'));
-        $resolver->setAllowedTypes('responsive_priority', array('null', 'int'));
+        $resolver->setAllowedTypes('type_of_field', ['null', 'string']);
+        $resolver->setAllowedTypes('responsive_priority', ['null', 'int']);
+        $resolver->setAllowedTypes('sent_in_response', ['bool']);
+        $resolver->setAllowedTypes('search_column_group', ['null', 'string']);
 
-        $resolver->setAllowedValues('cell_type', array(null, 'th', 'td'));
-        $resolver->setAllowedValues('join_type', array(null, 'join', 'leftJoin', 'innerJoin'));
-        $resolver->setAllowedValues('type_of_field', array_merge(array(null), array_keys(DoctrineType::getTypesMap())));
+        $resolver->setAllowedValues('cell_type', [null, 'th', 'td']);
+        $resolver->setAllowedValues('join_type', [null, 'join', 'leftJoin', 'innerJoin']);
+        $resolver->setAllowedValues('type_of_field', [...[null], ...array_keys(DoctrineType::getTypesMap())]);
 
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // ColumnInterface
-    //-------------------------------------------------
+    // -------------------------------------------------
 
-    /**
-     * {@inheritdoc}
-     */
-    public function dqlConstraint($dql)
+    public function dqlConstraint($dql): bool
     {
-        if (true === $this->isCustomDql()) {
+        if ($this->isCustomDql()) {
             return true;
-        } else {
-            return preg_match('/^[a-zA-Z0-9_\\-\\.]+$/', $dql) ? true : false;
         }
+
+        return (bool) preg_match('/^[a-zA-Z0-9_\\-\\.]+$/', $dql);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isUnique()
+    public function isUnique(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isAssociation()
+    public function isAssociation(): bool
     {
-        return (false === strstr($this->dql, '.') ? false : true);
+        return str_contains($this->dql, '.');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isToManyAssociation()
+    public function isToManyAssociation(): bool
     {
-        if (true === $this->isAssociation() && null !== $this->typeOfAssociation) {
-            if (in_array(ClassMetadataInfo::ONE_TO_MANY, $this->typeOfAssociation) || in_array(ClassMetadataInfo::MANY_TO_MANY, $this->typeOfAssociation)) {
-                return true;
-            } else {
-                return false;
-            }
+        if (! $this->isAssociation()) {
+            return false;
+        }
+        if (null === $this->typeOfAssociation) {
+            return false;
         }
 
-        return false;
+        return \in_array(ClassMetadataInfo::ONE_TO_MANY, $this->typeOfAssociation, true) || \in_array(ClassMetadataInfo::MANY_TO_MANY, $this->typeOfAssociation, true);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isSelectColumn()
+    public function isSelectColumn(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getOptionsTemplate()
+    public function getOptionsTemplate(): string
     {
         return '@SgDatatables/column/column.html.twig';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function addDataToOutputArray(array &$row)
+    public function addDataToOutputArray(array &$row): static
+    {
+        return $this;
+    }
+
+    public function renderCellContent(array &$row): static
+    {
+        return $this->isToManyAssociation() ? $this->renderToMany($row) : $this->renderSingleField($row);
+    }
+
+    public function renderPostCreateDatatableJsContent(): ?string
     {
         return null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function renderCellContent(array &$row)
-    {
-        $this->isToManyAssociation() ? $this->renderToMany($row) : $this->renderSingleField($row);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function renderPostCreateDatatableJsContent()
+    public function allowedPositions(): ?array
     {
         return null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function allowedPositions()
-    {
-        return null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getColumnType()
+    public function getColumnType(): string
     {
         return self::DATA_COLUMN;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isEditableContentRequired(array $row)
+    public function isEditableContentRequired(array $row): bool
     {
-        if (isset($this->editable)) {
-            if ($this->editable instanceof EditableInterface && true === $this->editable->callEditableIfClosure($row)) {
-                return true;
-            }
-        }
-
         return false;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Getters && Setters
-    //-------------------------------------------------
+    // -------------------------------------------------
 
-    /**
-     * Get cellType.
-     *
-     * @return null|string
-     */
-    public function getCellType()
+    public function getCellType(): ?string
     {
         return $this->cellType;
     }
 
-    /**
-     * Set cellType.
-     *
-     * @param null|string $cellType
-     *
-     * @return $this
-     */
-    public function setCellType($cellType)
+    public function setCellType(?string $cellType): static
     {
         $this->cellType = $cellType;
 
         return $this;
     }
 
-    /**
-     * Get className.
-     *
-     * @return null|string
-     */
-    public function getClassName()
+    public function getClassName(): ?string
     {
         return $this->className;
     }
 
-    /**
-     * Set className.
-     *
-     * @param null|string $className
-     *
-     * @return $this
-     */
-    public function setClassName($className)
+    public function setClassName(?string $className): static
     {
         $this->className = $className;
 
         return $this;
     }
 
-    /**
-     * Get contentPadding.
-     *
-     * @return null|string
-     */
-    public function getContentPadding()
+    public function getContentPadding(): ?string
     {
         return $this->contentPadding;
     }
 
-    /**
-     * Set contentPadding.
-     *
-     * @param null|string $contentPadding
-     *
-     * @return $this
-     */
-    public function setContentPadding($contentPadding)
+    public function setContentPadding(?string $contentPadding): static
     {
         $this->contentPadding = $contentPadding;
 
         return $this;
     }
 
-    /**
-     * Get data.
-     *
-     * @return null|string
-     */
-    public function getData()
+    public function getData(): mixed
     {
         return $this->data;
     }
 
-    /**
-     * Set data.
-     *
-     * @param null|string $data
-     *
-     * @return $this
-     */
-    public function setData($data)
+    public function setData(mixed $data): static
     {
         $this->data = $data;
 
         return $this;
     }
 
-    /**
-     * Get defaultContent.
-     *
-     * @return null|string
-     */
-    public function getDefaultContent()
+    public function getDefaultContent(): mixed
     {
         return $this->defaultContent;
     }
 
-    /**
-     * Set defaultContent.
-     *
-     * @param null|string $defaultContent
-     *
-     * @return $this
-     */
-    public function setDefaultContent($defaultContent)
+    public function setDefaultContent(mixed $defaultContent): static
     {
         $this->defaultContent = $defaultContent;
 
         return $this;
     }
 
-    /**
-     * Get name.
-     *
-     * @return null|string
-     */
-    public function getName()
+    public function getName(): ?string
     {
         return $this->name;
     }
 
-    /**
-     * Set name.
-     *
-     * @param null|string $name
-     *
-     * @return $this
-     */
-    public function setName($name)
+    public function setName(?string $name): static
     {
         $this->name = $name;
 
         return $this;
     }
 
-    /**
-     * Get orderable.
-     *
-     * @return bool
-     */
-    public function getOrderable()
+    public function getOrderable(): bool
     {
         return $this->orderable;
     }
 
-    /**
-     * Set orderable.
-     *
-     * @param bool $orderable
-     *
-     * @return $this
-     */
-    public function setOrderable($orderable)
+    public function setOrderable(bool $orderable): static
     {
         $this->orderable = $orderable;
 
@@ -642,27 +473,18 @@ abstract class AbstractColumn implements ColumnInterface
     }
 
     /**
-     * Get orderData.
-     *
-     * @return null|array|int
+     * @throws JsonException
      */
-    public function getOrderData()
+    public function getOrderData(): int|array|null
     {
-        if (is_array($this->orderData)) {
+        if (\is_array($this->orderData)) {
             return $this->optionToJson($this->orderData);
         }
 
         return $this->orderData;
     }
 
-    /**
-     * Set orderData.
-     *
-     * @param null|array|int $orderData
-     *
-     * @return $this
-     */
-    public function setOrderData($orderData)
+    public function setOrderData(int|array|null $orderData): static
     {
         $this->orderData = $orderData;
 
@@ -670,123 +492,66 @@ abstract class AbstractColumn implements ColumnInterface
     }
 
     /**
-     * Get orderSequence.
-     *
-     * @return null|array
+     * @throws JsonException
      */
-    public function getOrderSequence()
+    public function getOrderSequence(): ?array
     {
-        if (is_array($this->orderSequence)) {
+        if (\is_array($this->orderSequence)) {
             return $this->optionToJson($this->orderSequence);
         }
 
         return $this->orderSequence;
     }
 
-    /**
-     * Set orderSequence.
-     *
-     * @param null|array $orderSequence
-     *
-     * @return $this
-     */
-    public function setOrderSequence($orderSequence)
+    public function setOrderSequence(?array $orderSequence): static
     {
         $this->orderSequence = $orderSequence;
 
         return $this;
     }
 
-    /**
-     * Get searchable.
-     *
-     * @return bool
-     */
-    public function getSearchable()
+    public function getSearchable(): bool
     {
         return $this->searchable;
     }
 
-    /**
-     * Set searchable.
-     *
-     * @param bool $searchable
-     *
-     * @return $this
-     */
-    public function setSearchable($searchable)
+    public function setSearchable(bool $searchable): static
     {
         $this->searchable = $searchable;
 
         return $this;
     }
 
-    /**
-     * Get title.
-     *
-     * @return null|string
-     */
-    public function getTitle()
+    public function getTitle(): ?string
     {
         return $this->title;
     }
 
-    /**
-     * Set title.
-     *
-     * @param null|string $title
-     *
-     * @return $this
-     */
-    public function setTitle($title)
+    public function setTitle(?string $title): static
     {
         $this->title = $title;
 
         return $this;
     }
 
-    /**
-     * Get visible.
-     *
-     * @return bool
-     */
-    public function getVisible()
+    public function getVisible(): bool
     {
         return $this->visible;
     }
 
-    /**
-     * Set visible.
-     *
-     * @param bool $visible
-     *
-     * @return $this
-     */
-    public function setVisible($visible)
+    public function setVisible(bool $visible): static
     {
         $this->visible = $visible;
 
         return $this;
     }
 
-    /**
-     * Get width.
-     *
-     * @return null|string
-     */
-    public function getWidth()
+    public function getWidth(): ?string
     {
         return $this->width;
     }
 
-    /**
-     * Set width.
-     *
-     * @param null|string $width
-     *
-     * @return $this
-     */
-    public function setWidth($width)
+    public function setWidth(?string $width): static
     {
         $this->width = $width;
 
@@ -795,22 +560,16 @@ abstract class AbstractColumn implements ColumnInterface
 
     /**
      * Get join type.
-     *
-     * @return string
      */
-    public function getJoinType()
+    public function getJoinType(): string
     {
         return $this->joinType;
     }
 
     /**
      * Set join type.
-     *
-     * @param string $joinType
-     *
-     * @return $this
      */
-    public function setJoinType($joinType)
+    public function setJoinType(string $joinType): static
     {
         $this->joinType = $joinType;
 
@@ -819,219 +578,131 @@ abstract class AbstractColumn implements ColumnInterface
 
     /**
      * Get type of field.
-     *
-     * @return null|string
      */
-    public function getTypeOfField()
+    public function getTypeOfField(): ?string
     {
         return $this->typeOfField;
     }
 
     /**
      * Set type of field.
-     *
-     * @param null|string $typeOfField
-     *
-     * @return $this
      */
-    public function setTypeOfField($typeOfField)
+    public function setTypeOfField(?string $typeOfField): static
     {
         $this->typeOfField = $typeOfField;
 
         return $this;
     }
 
-    /**
-     * Get responsivePriority.
-     *
-     * @return int|null
-     */
-    public function getResponsivePriority()
+    public function getResponsivePriority(): ?int
     {
         return $this->responsivePriority;
     }
 
-    /**
-     * Set responsivePriority.
-     *
-     * @param int|null $responsivePriority
-     *
-     * @return $this
-     */
-    public function setResponsivePriority($responsivePriority)
+    public function setResponsivePriority(?int $responsivePriority): static
     {
         $this->responsivePriority = $responsivePriority;
 
         return $this;
     }
 
-    /**
-     * Get dql.
-     *
-     * @return null|string
-     */
-    public function getDql()
+    public function getDql(): ?string
     {
         return $this->dql;
     }
 
     /**
-     * Set dql.
-     *
-     * @param null|string $dql
-     *
-     * @return $this
-     * @throws Exception
+     * @throws RuntimeException
      */
-    public function setDql($dql)
+    public function setDql(?string $dql): static
     {
-        if (true === $this->dqlConstraint($dql)) {
+        if ($this->dqlConstraint($dql)) {
             $this->dql = $dql;
         } else {
-            throw new Exception("AbstractColumn::setDql(): $dql is not valid for this Column.");
+            throw new RuntimeException("AbstractColumn::setDql(): {$dql} is not valid for this Column.");
         }
 
         return $this;
     }
 
-    /**
-     * Get customDql.
-     *
-     * @return bool
-     */
-    public function isCustomDql()
+    public function isCustomDql(): bool
     {
         return $this->customDql;
     }
 
-    /**
-     * Set customDql.
-     *
-     * @param bool $customDql
-     *
-     * @return $this
-     */
-    public function setCustomDql($customDql)
+    public function setCustomDql(bool $customDql): static
     {
         $this->customDql = $customDql;
 
         return $this;
     }
 
-    /**
-     * Get Twig.
-     *
-     * @return Twig_Environment
-     */
-    public function getTwig()
+    public function getTwig(): ?Twig_Environment
     {
         return $this->twig;
     }
 
-    /**
-     * Set Twig.
-     *
-     * @param Twig_Environment $twig
-     *
-     * @return $this
-     */
-    public function setTwig(Twig_Environment $twig)
+    public function setTwig(Twig_Environment $twig): static
     {
         $this->twig = $twig;
 
         return $this;
     }
 
-    /**
-     * Get index.
-     *
-     * @return int
-     */
-    public function getIndex()
+    public function getRouter(): ?RouterInterface
+    {
+        return $this->router;
+    }
+
+    public function setRouter(RouterInterface $router): static
+    {
+        $this->router = $router;
+
+        return $this;
+    }
+
+    public function getIndex(): int
     {
         return $this->index;
     }
 
-    /**
-     * Set index.
-     *
-     * @param int $index
-     *
-     * @return $this
-     */
-    public function setIndex($index)
+    public function setIndex(int $index): static
     {
         $this->index = $index;
 
         return $this;
     }
 
-    /**
-     * Get datatableName.
-     *
-     * @return string
-     */
-    public function getDatatableName()
+    public function getDatatableName(): string
     {
         return $this->datatableName;
     }
 
-    /**
-     * Set datatableName.
-     *
-     * @param string $datatableName
-     *
-     * @return $this
-     */
-    public function setDatatableName($datatableName)
+    public function setDatatableName(string $datatableName): static
     {
         $this->datatableName = $datatableName;
 
         return $this;
     }
 
-    /**
-     * Get entityClassName.
-     *
-     * @return string
-     */
-    public function getEntityClassName()
+    public function getEntityClassName(): string
     {
         return $this->entityClassName;
     }
 
-    /**
-     * Set entityClassName.
-     *
-     * @param string $entityClassName
-     *
-     * @return $this
-     */
-    public function setEntityClassName($entityClassName)
+    public function setEntityClassName(string $entityClassName): static
     {
         $this->entityClassName = $entityClassName;
 
         return $this;
     }
 
-    /**
-     * Get typeOfAssociation.
-     *
-     * @return null|array
-     */
-    public function getTypeOfAssociation()
+    public function getTypeOfAssociation(): ?array
     {
         return $this->typeOfAssociation;
     }
 
-    /**
-     * Set typeOfAssociation.
-     *
-     * @param null|array $typeOfAssociation
-     *
-     * @return $this
-     */
-    public function setTypeOfAssociation($typeOfAssociation)
+    public function setTypeOfAssociation(?array $typeOfAssociation): static
     {
         $this->typeOfAssociation = $typeOfAssociation;
 
@@ -1040,38 +711,52 @@ abstract class AbstractColumn implements ColumnInterface
 
     /**
      * Add a typeOfAssociation.
-     *
-     * @param int $typeOfAssociation
-     *
-     * @return $this
      */
-    public function addTypeOfAssociation($typeOfAssociation)
+    public function addTypeOfAssociation(int $typeOfAssociation): static
     {
         $this->typeOfAssociation[] = $typeOfAssociation;
 
         return $this;
     }
 
-    /**
-     * Get originalTypeOfField.
-     *
-     * @return null|string
-     */
-    public function getOriginalTypeOfField()
+    public function getOriginalTypeOfField(): ?string
     {
         return $this->originalTypeOfField;
     }
 
-    /**
-     * Set originalTypeOfField.
-     *
-     * @param null|string $originalTypeOfField
-     *
-     * @return $this
-     */
-    public function setOriginalTypeOfField($originalTypeOfField)
+    public function setOriginalTypeOfField(?string $originalTypeOfField): static
     {
         $this->originalTypeOfField = $originalTypeOfField;
+
+        return $this;
+    }
+
+    public function getSentInResponse(): bool
+    {
+        return $this->sentInResponse;
+    }
+
+    public function setSentInResponse(bool $sentInResponse): static
+    {
+        $this->sentInResponse = $sentInResponse;
+
+        return $this;
+    }
+
+    /**
+     * Get the group name of columns to look at in a column search.
+     */
+    public function getSearchColumnGroup(): ?string
+    {
+        return $this->searchColumnGroup;
+    }
+
+    /**
+     * Set the group name of columns to look at in a column search.
+     */
+    public function setSearchColumnGroup(?string $searchColumnGroup): static
+    {
+        $this->searchColumnGroup = $searchColumnGroup;
 
         return $this;
     }

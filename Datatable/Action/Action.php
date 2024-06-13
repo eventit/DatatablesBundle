@@ -1,9 +1,10 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
  * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,153 +12,101 @@
 
 namespace Sg\DatatablesBundle\Datatable\Action;
 
+use Closure;
+use RuntimeException;
 use Sg\DatatablesBundle\Datatable\HtmlContainerTrait;
 use Sg\DatatablesBundle\Datatable\OptionsTrait;
 use Sg\DatatablesBundle\Datatable\RenderIfTrait;
-
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Exception;
-use Closure;
 
-/**
- * Class Action
- *
- * @package Sg\DatatablesBundle\Datatable\Action
- */
 class Action
 {
-    /**
-     * Use the OptionsResolver.
-     */
-    use OptionsTrait;
-
-    /**
-     * Render an Action only if conditions are TRUE.
-     */
-    use RenderIfTrait;
-
-    /**
+    /*
      * An Action has a 'start_html' and a 'end_html' option.
      * <startHtml>action</endHtml>
      */
     use HtmlContainerTrait;
 
+    use OptionsTrait;
+
+    // Render an Action only if conditions are TRUE.
+    use RenderIfTrait;
+
     /**
      * The name of the Action route.
-     * Default: null
-     *
-     * @var null|string
+     * Default: null.
      */
-    protected $route;
+    protected ?string $route = null;
 
     /**
      * The route parameters.
-     * Default: null
-     *
-     * @var null|array|Closure
+     * Default: null.
      */
-    protected $routeParameters;
+    protected array|Closure|null $routeParameters = null;
 
     /**
      * An icon for the Action.
-     * Default: null
-     *
-     * @var null|string
+     * Default: null.
      */
-    protected $icon;
+    protected ?string $icon = null;
 
     /**
      * A label for the Action.
-     * Default: null
-     *
-     * @var null|string
+     * Default: null.
      */
-    protected $label;
+    protected ?string $label = null;
 
     /**
      * Show confirm message if true.
-     * Default: false
-     *
-     * @var bool
+     * Default: false.
      */
-    protected $confirm;
+    protected bool $confirm = false;
 
     /**
      * The confirm message.
-     * Default: null
-     *
-     * @var null|string
+     * Default: null.
      */
-    protected $confirmMessage;
+    protected ?string $confirmMessage = null;
 
     /**
      * HTML attributes (except 'href' and 'value').
-     * Default: null
-     *
-     * @var null|array|Closure
+     * Default: null.
      */
-    protected $attributes;
+    protected array|Closure|null $attributes = null;
 
     /**
      * Render a button instead of a link.
-     * Default: false
-     *
-     * @var bool
+     * Default: false.
      */
-    protected $button;
+    protected bool $button = false;
 
     /**
      * The button value.
-     * Default: null
-     *
-     * @var null|string
+     * Default: null.
      */
-    protected $buttonValue;
+    protected ?string $buttonValue = null;
 
     /**
      * Use the Datatable-Name as prefix for the button value.
-     * Default: false
-     *
-     * @var bool
+     * Default: false.
      */
-    protected $buttonValuePrefix;
+    protected bool $buttonValuePrefix = false;
 
-    /**
-     * The name of the associated Datatable.
-     *
-     * @var string
-     */
-    protected $datatableName;
-
-    //-------------------------------------------------
-    // Ctor.
-    //-------------------------------------------------
-
-    /**
-     * Action constructor.
-     *
-     * @param string $datatableName
-     */
-    public function __construct($datatableName)
+    public function __construct(protected string $datatableName)
     {
         $this->initOptions();
-        $this->datatableName = $datatableName;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Options
-    //-------------------------------------------------
+    // -------------------------------------------------
 
     /**
      * Configure options.
-     *
-     * @param OptionsResolver $resolver
-     *
-     * @return $this
      */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): static
     {
-        $resolver->setDefaults(array(
+        $resolver->setDefaults([
             'route' => null,
             'route_parameters' => null,
             'icon' => null,
@@ -171,200 +120,118 @@ class Action
             'render_if' => null,
             'start_html' => null,
             'end_html' => null,
-        ));
+        ]);
 
-        $resolver->setAllowedTypes('route', array('null', 'string'));
-        $resolver->setAllowedTypes('route_parameters', array('null', 'array', 'Closure'));
-        $resolver->setAllowedTypes('icon', array('null', 'string'));
-        $resolver->setAllowedTypes('label', array('null', 'string'));
+        $resolver->setAllowedTypes('route', ['null', 'string']);
+        $resolver->setAllowedTypes('route_parameters', ['null', 'array', 'Closure']);
+        $resolver->setAllowedTypes('icon', ['null', 'string']);
+        $resolver->setAllowedTypes('label', ['null', 'string']);
         $resolver->setAllowedTypes('confirm', 'bool');
-        $resolver->setAllowedTypes('confirm_message', array('null', 'string'));
-        $resolver->setAllowedTypes('attributes', array('null', 'array', 'Closure'));
+        $resolver->setAllowedTypes('confirm_message', ['null', 'string']);
+        $resolver->setAllowedTypes('attributes', ['null', 'array', 'Closure']);
         $resolver->setAllowedTypes('button', 'bool');
-        $resolver->setAllowedTypes('button_value', array('null', 'string'));
+        $resolver->setAllowedTypes('button_value', ['null', 'string']);
         $resolver->setAllowedTypes('button_value_prefix', 'bool');
-        $resolver->setAllowedTypes('render_if', array('null', 'Closure'));
-        $resolver->setAllowedTypes('start_html', array('null', 'string'));
-        $resolver->setAllowedTypes('end_html', array('null', 'string'));
+        $resolver->setAllowedTypes('render_if', ['null', 'Closure']);
+        $resolver->setAllowedTypes('start_html', ['null', 'string']);
+        $resolver->setAllowedTypes('end_html', ['null', 'string']);
 
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Getters && Setters
-    //-------------------------------------------------
+    // -------------------------------------------------
 
-    /**
-     * Get route.
-     *
-     * @return null|string
-     */
-    public function getRoute()
+    public function getRoute(): ?string
     {
         return $this->route;
     }
 
-    /**
-     * Set route.
-     *
-     * @param null|string $route
-     *
-     * @return $this
-     */
-    public function setRoute($route)
+    public function setRoute(?string $route): static
     {
         $this->route = $route;
 
         return $this;
     }
 
-    /**
-     * Get routeParameters.
-     *
-     * @return null|array|Closure
-     */
-    public function getRouteParameters()
+    public function getRouteParameters(): array|Closure|null
     {
         return $this->routeParameters;
     }
 
-    /**
-     * Set routeParameters.
-     *
-     * @param null|array|Closure $routeParameters
-     *
-     * @return $this
-     */
-    public function setRouteParameters($routeParameters)
+    public function setRouteParameters(array|Closure|null $routeParameters): static
     {
         $this->routeParameters = $routeParameters;
 
         return $this;
     }
 
-    /**
-     * Get icon.
-     *
-     * @return null|string
-     */
-    public function getIcon()
+    public function getIcon(): ?string
     {
         return $this->icon;
     }
 
-    /**
-     * Set icon.
-     *
-     * @param null|string $icon
-     *
-     * @return $this
-     */
-    public function setIcon($icon)
+    public function setIcon(?string $icon): static
     {
         $this->icon = $icon;
 
         return $this;
     }
 
-    /**
-     * Get label.
-     *
-     * @return null|string
-     */
-    public function getLabel()
+    public function getLabel(): ?string
     {
         return $this->label;
     }
 
-    /**
-     * Set label.
-     *
-     * @param null|string $label
-     *
-     * @return $this
-     */
-    public function setLabel($label)
+    public function setLabel(?string $label): static
     {
         $this->label = $label;
 
         return $this;
     }
 
-    /**
-     * Get confirm.
-     *
-     * @return bool
-     */
-    public function isConfirm()
+    public function isConfirm(): bool
     {
         return $this->confirm;
     }
 
-    /**
-     * Set confirm.
-     *
-     * @param bool $confirm
-     *
-     * @return $this
-     */
-    public function setConfirm($confirm)
+    public function setConfirm(bool $confirm): static
     {
         $this->confirm = $confirm;
 
         return $this;
     }
 
-    /**
-     * Get confirmMessage.
-     *
-     * @return null|string
-     */
-    public function getConfirmMessage()
+    public function getConfirmMessage(): ?string
     {
         return $this->confirmMessage;
     }
 
-    /**
-     * Set confirmMessage.
-     *
-     * @param null|string $confirmMessage
-     *
-     * @return $this
-     */
-    public function setConfirmMessage($confirmMessage)
+    public function setConfirmMessage(?string $confirmMessage): static
     {
         $this->confirmMessage = $confirmMessage;
 
         return $this;
     }
 
-    /**
-     * Get attributes.
-     *
-     * @return null|array|Closure
-     */
-    public function getAttributes()
+    public function getAttributes(): array|Closure|null
     {
         return $this->attributes;
     }
 
     /**
-     * Set attributes.
-     *
-     * @param null|array|Closure $attributes
-     *
-     * @return $this
-     * @throws Exception
+     * @throws RuntimeException
      */
-    public function setAttributes($attributes)
+    public function setAttributes(array|Closure|null $attributes): static
     {
-        if (is_array($attributes)) {
-            if (array_key_exists('href', $attributes)) {
-                throw new Exception('Action::setAttributes(): The href attribute is not allowed in this context.');
+        if (\is_array($attributes)) {
+            if (\array_key_exists('href', $attributes)) {
+                throw new RuntimeException('Action::setAttributes(): The href attribute is not allowed in this context.');
             }
 
-            if (array_key_exists('value', $attributes)) {
-                throw new Exception('Action::setAttributes(): The value attribute is not allowed in this context.');
+            if (\array_key_exists('value', $attributes)) {
+                throw new RuntimeException('Action::setAttributes(): The value attribute is not allowed in this context.');
             }
         }
 
@@ -373,96 +240,48 @@ class Action
         return $this;
     }
 
-    /**
-     * Get button.
-     *
-     * @return bool
-     */
-    public function isButton()
+    public function isButton(): bool
     {
         return $this->button;
     }
 
-    /**
-     * Set button.
-     *
-     * @param bool $button
-     *
-     * @return $this
-     */
-    public function setButton($button)
+    public function setButton(bool $button): static
     {
         $this->button = $button;
 
         return $this;
     }
 
-    /**
-     * Get buttonValue.
-     *
-     * @return null|string
-     */
-    public function getButtonValue()
+    public function getButtonValue(): ?string
     {
         return $this->buttonValue;
     }
 
-    /**
-     * Set buttonValue.
-     *
-     * @param null|string $buttonValue
-     *
-     * @return $this
-     */
-    public function setButtonValue($buttonValue)
+    public function setButtonValue(?string $buttonValue): static
     {
         $this->buttonValue = $buttonValue;
 
         return $this;
     }
 
-    /**
-     * Get buttonValuePrefix.
-     *
-     * @return bool
-     */
-    public function isButtonValuePrefix()
+    public function isButtonValuePrefix(): bool
     {
         return $this->buttonValuePrefix;
     }
 
-    /**
-     * Set buttonValuePrefix.
-     *
-     * @param bool $buttonValuePrefix
-     *
-     * @return $this
-     */
-    public function setButtonValuePrefix($buttonValuePrefix)
+    public function setButtonValuePrefix(bool $buttonValuePrefix): static
     {
         $this->buttonValuePrefix = $buttonValuePrefix;
 
         return $this;
     }
 
-    /**
-     * Get datatableName.
-     *
-     * @return string
-     */
-    public function getDatatableName()
+    public function getDatatableName(): string
     {
         return $this->datatableName;
     }
 
-    /**
-     * Set datatableName.
-     *
-     * @param string $datatableName
-     *
-     * @return $this
-     */
-    public function setDatatableName($datatableName)
+    public function setDatatableName(string $datatableName): static
     {
         $this->datatableName = $datatableName;
 

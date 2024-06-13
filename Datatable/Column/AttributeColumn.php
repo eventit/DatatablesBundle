@@ -12,17 +12,23 @@
 
 namespace Sg\DatatablesBundle\Datatable\Column;
 
-use Sg\DatatablesBundle\Datatable\Editable\EditableInterface;
+use Closure;
+use Doctrine\Common\Annotations\Annotation\Attributes;
+use Exception;
 use Sg\DatatablesBundle\Datatable\Filter\TextFilter;
 use Sg\DatatablesBundle\Datatable\Helper;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class Column extends AbstractColumn
+class AttributeColumn extends AbstractColumn
 {
-    // The Column is editable.
-    use EditableTrait;
-
+    // The AttributeColumn is filterable.
     use FilterableTrait;
+
+    /**
+     * The Attributes container.
+     * A required option.
+     */
+    protected array|Closure|null $attributes = null;
 
     // -------------------------------------------------
     // ColumnInterface
@@ -30,12 +36,19 @@ class Column extends AbstractColumn
 
     public function renderSingleField(array &$row): static
     {
+        $renderAttributes = \call_user_func($this->attributes, $row);
+
         $path = Helper::getDataPropertyPath($this->data);
 
-        if ($this->accessor->isReadable($row, $path) && $this->isEditableContentRequired($row)) {
-            $content = $this->renderTemplate($this->accessor->getValue($row, $path), $row[$this->editable->getPk()]);
-            $this->accessor->setValue($row, $path, $content);
-        }
+        $content = $this->twig->render(
+            $this->getCellContentTemplate(),
+            [
+                'attributes' => $renderAttributes,
+                'data' => $this->accessor->getValue($row, $path),
+            ]
+        );
+
+        $this->accessor->setValue($row, $path, $content);
 
         return $this;
     }
@@ -52,13 +65,10 @@ class Column extends AbstractColumn
             $entries = $this->accessor->getValue($row, $path);
             if ((is_countable($entries) ? \count($entries) : 0) > 0) {
                 foreach ($entries as $key => $entry) {
-                    $currentPath = $path . '[' . $key . ']' . $value;
-                    $currentObjectPath = Helper::getPropertyPathObjectNotation($path, $key, $value);
+                    $currentPath = Helper::getPropertyPathObjectNotation($path, $key, $value);
 
                     $content = $this->renderTemplate(
-                        $this->accessor->getValue($row, $currentPath),
-                        $row[$this->editable->getPk()],
-                        $currentObjectPath
+                        $this->accessor->getValue($row, $currentPath)
                     );
 
                     $this->accessor->setValue($row, $currentPath, $content);
@@ -72,25 +82,12 @@ class Column extends AbstractColumn
 
     public function getCellContentTemplate(): string
     {
-        return '@SgDatatables/render/column.html.twig';
+        return '@SgDatatables/render/attributeColumn.html.twig';
     }
 
-    public function renderPostCreateDatatableJsContent(): ?string
+    public function getColumnType(): string
     {
-        if (! $this->editable instanceof EditableInterface) {
-            return null;
-        }
-
-        return $this->twig->render(
-            '@SgDatatables/column/column_post_create_dt.js.twig',
-            [
-                'column_class_editable_selector' => $this->getColumnClassEditableSelector(),
-                'editable_options' => $this->editable,
-                'entity_class_name' => $this->getEntityClassName(),
-                'column_dql' => $this->dql,
-                'original_type_of_field' => $this->getOriginalTypeOfField(),
-            ]
-        );
+        return parent::ACTION_COLUMN;
     }
 
     // -------------------------------------------------
@@ -103,11 +100,26 @@ class Column extends AbstractColumn
 
         $resolver->setDefaults([
             'filter' => [TextFilter::class, []],
-            'editable' => null,
+            'attributes' => null,
         ]);
 
         $resolver->setAllowedTypes('filter', 'array');
-        $resolver->setAllowedTypes('editable', ['null', 'array']);
+        $resolver->setAllowedTypes('attributes', ['null', 'array', 'Closure']);
+
+        return $this;
+    }
+
+    public function getAttributes(): array|Closure|null
+    {
+        return $this->attributes;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function setAttributes(array|Closure|null $attributes): static
+    {
+        $this->attributes = $attributes;
 
         return $this;
     }
@@ -116,15 +128,15 @@ class Column extends AbstractColumn
     // Helper
     // -------------------------------------------------
 
-    private function renderTemplate(mixed $data, string $pk, ?string $path = null): string
+    /**
+     * Render template.
+     */
+    private function renderTemplate(mixed $data): string
     {
         return $this->twig->render(
             $this->getCellContentTemplate(),
             [
                 'data' => $data,
-                'column_class_editable_selector' => $this->getColumnClassEditableSelector(),
-                'pk' => $pk,
-                'path' => $path,
             ]
         );
     }

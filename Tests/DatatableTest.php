@@ -1,9 +1,10 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
  * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,79 +12,121 @@
 
 namespace Sg\DatatablesBundle\Tests;
 
+use Doctrine\ORM\EntityManager;
+use LogicException;
+use ReflectionClass;
+use Sg\DatatablesBundle\Datatable\AbstractDatatable;
 use Sg\DatatablesBundle\Tests\Datatables\PostDatatable;
-
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-use Symfony\Component\Translation\TranslatorInterface;
-use Symfony\Component\Routing\RouterInterface;
-use Doctrine\ORM\EntityManager;
-use Twig_Environment;
+use Symfony\Contracts\Translation\TranslatorInterface;
+use Twig\Environment;
 
 /**
- * Class DatatableTest
+ * @internal
  *
- * @package Sg\DatatablesBundle\Tests
+ * @coversNothing
  */
-class DatatableTest extends \PHPUnit_Framework_TestCase
+final class DatatableTest extends \PHPUnit\Framework\TestCase
 {
-    /**
-     * testCreate.
-     */
-    public function testCreate()
+    public function testCreate(): void
     {
         $tableClass = PostDatatable::class;
 
         /** @noinspection PhpUndefinedMethodInspection */
-        $authorizationChecker = $this->getMock(AuthorizationCheckerInterface::class);
+        $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
         /** @noinspection PhpUndefinedMethodInspection */
-        $securityToken = $this->getMock(TokenStorageInterface::class);
+        $securityToken = $this->createMock(TokenStorageInterface::class);
         /** @noinspection PhpUndefinedMethodInspection */
-        $translator = $this->getMock(TranslatorInterface::class);
+        $translator = $this->createMock(TranslatorInterface::class);
         /** @noinspection PhpUndefinedMethodInspection */
-        $router = $this->getMock(RouterInterface::class);
+        $router = $this->createMock(RouterInterface::class);
         /** @noinspection PhpUndefinedMethodInspection */
-        $twig = $this->getMock(Twig_Environment::class);
+        $twig = $this->createMock(Environment::class);
 
         /** @noinspection PhpUndefinedMethodInspection */
         $em = $this->getMockBuilder(EntityManager::class)
             ->disableOriginalConstructor()
             ->setMethods(
-                array('getClassMetadata')
+                ['getClassMetadata']
             )
-            ->getMock();
+            ->getMock()
+        ;
 
-        /** @noinspection PhpUndefinedMethodInspection */
-        $em->expects($this->any())
+        // @noinspection PhpUndefinedMethodInspection
+        $em->expects(static::any())
             ->method('getClassMetadata')
-            ->will($this->returnValue($this->getClassMetadataMock()));
+            ->willReturn($this->getClassMetadataMock())
+        ;
 
-        /** @var \Sg\DatatablesBundle\Tests\Datatables\PostDatatable $table */
+        /** @var PostDatatable $table */
         $table = new $tableClass($authorizationChecker, $securityToken, $translator, $router, $em, $twig);
 
-        /** @noinspection PhpUndefinedMethodInspection */
-        $this->assertEquals('post_datatable', $table->getName());
+        /* @noinspection PhpUndefinedMethodInspection */
+        static::assertSame('post_datatable', $table->getName());
 
         $table->buildDatatable();
     }
 
-    /**
-     * Get classMetadataMock.
-     *
-     * @return mixed
-     */
+    public function testInvalidName(): void
+    {
+        /** @noinspection PhpUndefinedMethodInspection */
+        $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
+        /** @noinspection PhpUndefinedMethodInspection */
+        $securityToken = $this->createMock(TokenStorageInterface::class);
+        /** @noinspection PhpUndefinedMethodInspection */
+        $translator = $this->createMock(TranslatorInterface::class);
+        /** @noinspection PhpUndefinedMethodInspection */
+        $router = $this->createMock(RouterInterface::class);
+        /** @noinspection PhpUndefinedMethodInspection */
+        $twig = $this->createMock(Environment::class);
+
+        /** @noinspection PhpUndefinedMethodInspection */
+        $em = $this->getMockBuilder(EntityManager::class)
+            ->disableOriginalConstructor()
+            ->setMethods(
+                ['getClassMetadata']
+            )
+            ->getMock()
+        ;
+
+        // @noinspection PhpUndefinedMethodInspection
+        $em->expects(static::any())
+            ->method('getClassMetadata')
+            ->willReturn($this->getClassMetadataMock())
+        ;
+
+        $mock = $this->getMockBuilder(AbstractDatatable::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['getName'])
+            ->getMockForAbstractClass()
+        ;
+        $mock->expects(static::any())
+            ->method('getName')
+            ->willReturn('invalid.name')
+        ;
+
+        $refledtionClass = new ReflectionClass(AbstractDatatable::class);
+        $constructor = $refledtionClass->getConstructor();
+        $this->expectException(LogicException::class);
+        $constructor->invoke($mock, $authorizationChecker, $securityToken, $translator, $router, $em, $twig);
+    }
+
     public function getClassMetadataMock()
     {
         /** @noinspection PhpUndefinedMethodInspection */
-        $mock = $this->getMockBuilder('Doctrine\ORM\Mapping\ClassMetadata')
+        $mock = $this->getMockBuilder(\Doctrine\ORM\Mapping\ClassMetadata::class)
             ->disableOriginalConstructor()
-            ->setMethods(array('getEntityShortName'))
-            ->getMock();
+            ->setMethods(['getName'])
+            ->getMock()
+        ;
 
-        /** @noinspection PhpUndefinedMethodInspection */
-        $mock->expects($this->any())
-            ->method('getEntityShortName')
-            ->will($this->returnValue('{entityShortName}'));
+        // @noinspection PhpUndefinedMethodInspection
+        $mock->expects(static::any())
+            ->method('getName')
+            ->willReturn('{Name}')
+        ;
 
         return $mock;
     }

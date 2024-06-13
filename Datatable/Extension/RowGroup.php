@@ -1,9 +1,10 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
  * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -12,29 +13,23 @@
 namespace Sg\DatatablesBundle\Datatable\Extension;
 
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use UnexpectedValueException;
 
 class RowGroup extends AbstractExtension
 {
-    /** @var string */
-    protected $dataSrc;
+    protected ?string $dataSrc = null;
 
-    /** @var array */
-    protected $startRender;
+    protected ?array $startRender = null;
 
-    /** @var array */
-    protected $endRender;
+    protected ?array $endRender = null;
 
-    /** @var string */
-    protected $className;
+    protected ?string $className = null;
 
-    /** @var string */
-    protected $emptyDataGroup;
+    protected ?string $emptyDataGroup = null;
 
-    /** @var string */
-    protected $endClassName;
+    protected ?string $endClassName = null;
 
-    /** @var string */
-    protected $startClassName;
+    protected ?string $startClassName = null;
 
     public function __construct()
     {
@@ -42,11 +37,9 @@ class RowGroup extends AbstractExtension
     }
 
     /**
-     * @param OptionsResolver $resolver
-     *
      * @return $this
      */
-    public function configureOptions(OptionsResolver $resolver): ExtensionInterface
+    public function configureOptions(OptionsResolver $resolver): static
     {
         $resolver->setRequired('data_src');
         $resolver->setDefined('start_render');
@@ -73,23 +66,18 @@ class RowGroup extends AbstractExtension
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getDataSrc()
+    public function getDataSrc(): ?string
     {
         return $this->dataSrc;
     }
 
     /**
-     * @param string $dataSrc
-     *
-     * @return $this
+     * @throws UnexpectedValueException
      */
-    public function setDataSrc($dataSrc): self
+    public function setDataSrc(string $dataSrc): static
     {
-        if (\is_string($dataSrc) && empty($dataSrc)) {
-            throw new \UnexpectedValueException(
+        if (empty($dataSrc)) {
+            throw new UnexpectedValueException(
                 'RowGroup::setDataSrc(): the column name is empty.'
             );
         }
@@ -99,30 +87,22 @@ class RowGroup extends AbstractExtension
         return $this;
     }
 
-    /**
-     * @return array|null
-     */
-    public function getStartRender()
+    public function getStartRender(): ?array
     {
         return $this->startRender;
     }
 
-    /**
-     * @param array $startRender
-     *
-     * @return RowGroup
-     */
-    public function setStartRender($startRender): self
+    public function setStartRender(array $startRender): static
     {
-        if (false === array_key_exists('template', $startRender)) {
-            throw new \UnexpectedValueException(
+        if (! \array_key_exists('template', $startRender)) {
+            throw new UnexpectedValueException(
                 'RowGroup::setStartRender(): The "template" option is required.'
             );
         }
 
-        foreach ($startRender as $key => $value) {
-            if (false === \in_array($key, ['template', 'vars',])) {
-                throw new \UnexpectedValueException(
+        foreach (array_keys($startRender) as $key) {
+            if (! \in_array($key, ['template', 'vars'], true)) {
+                throw new UnexpectedValueException(
                     'RowGroup::setStartRender(): ' . $key . ' is not a valid option.'
                 );
             }
@@ -133,30 +113,22 @@ class RowGroup extends AbstractExtension
         return $this;
     }
 
-    /**
-     * @return array|null
-     */
-    public function getEndRender()
+    public function getEndRender(): ?array
     {
         return $this->endRender;
     }
 
-    /**
-     * @param array $endRender
-     *
-     * @return RowGroup
-     */
-    public function setEndRender($endRender): self
+    public function setEndRender(array $endRender): static
     {
-        if (false === array_key_exists('template', $endRender)) {
-            throw new \UnexpectedValueException(
+        if (! \array_key_exists('template', $endRender)) {
+            throw new UnexpectedValueException(
                 'RowGroup::setEndRender(): The "template" option is required.'
             );
         }
 
-        foreach ($endRender as $key => $value) {
-            if (false === \in_array($key, ['template', 'vars',])) {
-                throw new \UnexpectedValueException(
+        foreach (array_keys($endRender) as $key) {
+            if (! \in_array($key, ['template', 'vars'], true)) {
+                throw new UnexpectedValueException(
                     'RowGroup::setEndRender(): ' . $key . ' is not a valid option.'
                 );
             }
@@ -167,23 +139,15 @@ class RowGroup extends AbstractExtension
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getClassName()
+    public function getClassName(): ?string
     {
         return $this->className;
     }
 
-    /**
-     * @param string $className
-     *
-     * @return RowGroup
-     */
-    public function setClassName($className): self
+    public function setClassName(string $className): static
     {
-        if (\is_string($className) && empty($className)) {
-            throw new \UnexpectedValueException(
+        if (empty($className)) {
+            throw new UnexpectedValueException(
                 'RowGroup::setClassName(): the class name is empty.'
             );
         }
@@ -193,23 +157,15 @@ class RowGroup extends AbstractExtension
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getEmptyDataGroup()
+    public function getEmptyDataGroup(): ?string
     {
         return $this->emptyDataGroup;
     }
 
-    /**
-     * @param string $emptyDataGroup
-     *
-     * @return RowGroup
-     */
-    public function setEmptyDataGroup($emptyDataGroup): self
+    public function setEmptyDataGroup(string $emptyDataGroup): static
     {
-        if (\is_string($emptyDataGroup) && empty($emptyDataGroup)) {
-            throw new \UnexpectedValueException(
+        if (empty($emptyDataGroup)) {
+            throw new UnexpectedValueException(
                 'RowGroup::setEmptyDataGroup(): the empty data group text is empty.'
             );
         }
@@ -219,23 +175,15 @@ class RowGroup extends AbstractExtension
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getEndClassName()
+    public function getEndClassName(): ?string
     {
         return $this->endClassName;
     }
 
-    /**
-     * @param string $endClassName
-     *
-     * @return RowGroup
-     */
-    public function setEndClassName($endClassName): self
+    public function setEndClassName(string $endClassName): static
     {
-        if (\is_string($endClassName) && empty($endClassName)) {
-            throw new \UnexpectedValueException(
+        if (empty($endClassName)) {
+            throw new UnexpectedValueException(
                 'RowGroup::setEndClassName(): the end class name is empty.'
             );
         }
@@ -245,23 +193,15 @@ class RowGroup extends AbstractExtension
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getStartClassName()
+    public function getStartClassName(): ?string
     {
         return $this->startClassName;
     }
 
-    /**
-     * @param string $startClassName
-     *
-     * @return RowGroup
-     */
-    public function setStartClassName($startClassName): self
+    public function setStartClassName(string $startClassName): static
     {
-        if (\is_string($startClassName) && empty($startClassName)) {
-            throw new \UnexpectedValueException(
+        if (empty($startClassName)) {
+            throw new UnexpectedValueException(
                 'RowGroup::setStartClassName(): the start class name is empty.'
             );
         }
@@ -271,11 +211,6 @@ class RowGroup extends AbstractExtension
         return $this;
     }
 
-    /**
-     * @param array $config
-     *
-     * @return array
-     */
     public function getJavaScriptConfiguration(array $config = []): array
     {
         if (null !== $this->getDataSrc()) {

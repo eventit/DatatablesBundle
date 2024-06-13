@@ -1,9 +1,10 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
  * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,132 +12,91 @@
 
 namespace Sg\DatatablesBundle\Datatable;
 
+use Closure;
+use Doctrine\ORM\EntityManagerInterface;
 use Sg\DatatablesBundle\Datatable\Column\ColumnBuilder;
 
-use Doctrine\ORM\EntityManagerInterface;
-
 /**
- * Interface DatatableInterface
- *
- * @package Sg\DatatablesBundle\Datatable
+ * Interface DatatableInterface.
  */
 interface DatatableInterface
 {
-    const NAME_REGEX = '/[a-zA-Z0-9\-\_]+/';
+    public const NAME_REGEX = '/^[a-zA-Z0-9\-\_]+$/';
 
     /**
      * Builds the datatable.
-     *
-     * @param array $options
      */
-    public function buildDatatable(array $options = array());
+    public function buildDatatable(array $options = []);
 
     /**
      * Returns a callable that modify the data row.
-     *
-     * @return callable
      */
-    public function getLineFormatter();
+    public function getLineFormatter(): ?Closure;
 
-    /**
-     * Get ColumnBuilder.
-     *
-     * @return ColumnBuilder
-     */
-    public function getColumnBuilder();
+    public function getColumnBuilder(): ColumnBuilder;
 
     /**
      * Get Ajax instance.
-     *
-     * @return Ajax
      */
-    public function getAjax();
+    public function getAjax(): Ajax;
 
     /**
      * Get Options instance.
-     *
-     * @return Options
      */
-    public function getOptions();
+    public function getOptions(): Options;
 
     /**
      * Get Features instance.
-     *
-     * @return Features
      */
-    public function getFeatures();
+    public function getFeatures(): Features;
 
     /**
      * Get Callbacks instance.
-     *
-     * @return Callbacks
      */
-    public function getCallbacks();
+    public function getCallbacks(): Callbacks;
 
     /**
      * Get Events instance.
-     *
-     * @return Events
      */
-    public function getEvents();
+    public function getEvents(): Events;
 
     /**
      * Get Extensions instance.
-     *
-     * @return Extensions
      */
-    public function getExtensions();
+    public function getExtensions(): Extensions;
 
     /**
      * Get Language instance.
-     *
-     * @return Language
      */
-    public function getLanguage();
+    public function getLanguage(): Language;
 
     /**
      * Get the EntityManager.
-     *
-     * @return EntityManagerInterface
      */
-    public function getEntityManager();
+    public function getEntityManager(): EntityManagerInterface;
 
     /**
      * Help function to create an option array for filtering.
-     *
-     * @param array  $entities
-     * @param string $keyFrom
-     * @param string $valueFrom
-     *
-     * @return array
      */
-    public function getOptionsArrayFromEntities($entities, $keyFrom = 'id', $valueFrom = 'name');
+    public function getOptionsArrayFromEntities(array $entities, string $keyFrom = 'id', string $valueFrom = 'name'): array;
 
     /**
      * Returns the name of the entity.
-     *
-     * @return string
      */
-    public function getEntity();
+    public function getEntity(): string;
 
     /**
      * Returns the name of this datatable view.
-     *
-     * @return string
      */
-    public function getName();
+    public function getName(): string;
 
     /**
      * Returns the unique id of this datatable view.
-     *
-     * @return int
      */
-    public function getUniqueId();
+    public function getUniqueId(): int;
 
     /**
      * Returns the unique name of this datatable view.
-     *
-     * @return string
      */
-    public function getUniqueName();
+    public function getUniqueName(): string;
 }

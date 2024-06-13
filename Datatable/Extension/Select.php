@@ -1,8 +1,11 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
+ *
  * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
+ *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
@@ -14,58 +17,41 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class Select extends AbstractExtension
 {
     /**
-     * Indicate if the selected items will be removed when clicking outside of the table
-     *
-     * @var boolean|null
+     * Indicate if the selected items will be removed when clicking outside of the table.
      */
-    protected $blurable;
+    protected ?bool $blurable = null;
 
     /**
-     * Set the class name that will be applied to selected items
-     *
-     * @var string|null
+     * Set the class name that will be applied to selected items.
      */
-    protected $className;
+    protected ?string $className = null;
 
     /**
-     * Enable / disable the display for item selection information in the table summary
-     *
-     * @var boolean|null
+     * Enable / disable the display for item selection information in the table summary.
      */
-    protected $info;
+    protected ?bool $info = null;
 
     /**
-     * Set which table items to select (rows, columns or cells)
-     *
-     * @var string|null
+     * Set which table items to select (rows, columns or cells).
      */
-    protected $items;
+    protected ?string $items = null;
 
     /**
-     * Set the element selector used for mouse event capture to select items
-     *
-     * @var string|null
+     * Set the element selector used for mouse event capture to select items.
      */
-    protected $selector;
+    protected ?string $selector = null;
 
     /**
-     * Set the selection style for end user interaction with the table
-     *
-     * @var string|null
+     * Set the selection style for end user interaction with the table.
      */
-    protected $style;
+    protected ?string $style = null;
 
     public function __construct()
     {
         parent::__construct('select');
     }
 
-    /**
-     * @param OptionsResolver $resolver
-     *
-     * @return $this
-     */
-    public function configureOptions(OptionsResolver $resolver): ExtensionInterface
+    public function configureOptions(OptionsResolver $resolver): static
     {
         $resolver->setDefaults(
             [
@@ -90,129 +76,78 @@ class Select extends AbstractExtension
         return $this;
     }
 
-    /**
-     * @return boolean|null
-     */
-    public function getBlurable()
+    public function getBlurable(): ?bool
     {
         return $this->blurable;
     }
 
-    /**
-     * @param string|null $blurable
-     *
-     * @return $this
-     */
-    public function setBlurable($blurable): self
+    public function setBlurable(?string $blurable): static
     {
         $this->blurable = $blurable;
 
         return $this;
     }
 
-    /**
-     * @return null|string
-     */
-    public function getClassName()
+    public function getClassName(): ?string
     {
         return $this->className;
     }
 
-    /**
-     * @param null|string $className
-     *
-     * @return $this
-     */
-    public function setClassName($className): self
+    public function setClassName(?string $className): static
     {
         $this->className = $className;
 
         return $this;
     }
 
-    /**
-     * @return boolean|null
-     */
-    public function getInfo()
+    public function getInfo(): ?bool
     {
         return $this->info;
     }
 
-    /**
-     * @param boolean|null $info
-     *
-     * @return $this
-     */
-    public function setInfo($info): self
+    public function setInfo(?bool $info): static
     {
         $this->info = $info;
 
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getItems()
+    public function getItems(): ?string
     {
         return $this->items;
     }
 
-    /**
-     * @param string|null $items
-     *
-     * @return $this
-     */
-    public function setItems($items): self
+    public function setItems(?string $items): static
     {
         $this->items = $items;
 
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getSelector()
+    public function getSelector(): ?string
     {
         return $this->selector;
     }
 
-    /**
-     * @param string|null $selector
-     *
-     * @return $this
-     */
-    public function setSelector($selector): self
+    public function setSelector(?string $selector): static
     {
         $this->selector = $selector;
 
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getStyle()
+    public function getStyle(): ?string
     {
         return $this->style;
     }
 
-    /**
-     * @param string|null $style
-     *
-     * @return $this
-     */
-    public function setStyle($style): self
+    public function setStyle(?string $style): static
     {
         $this->style = $style;
 
         return $this;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getJavaScriptConfiguration(array $config = []): array
     {
         if ($this->getBlurable() !== null) {

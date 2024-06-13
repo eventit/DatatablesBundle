@@ -1,9 +1,10 @@
 <?php
 
-/**
+/*
  * This file is part of the SgDatatablesBundle package.
  *
  * (c) stwe <https://github.com/stwe/DatatablesBundle>
+ * (c) event it AG <https://github.com/eventit/DatatablesBundle>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,96 +14,66 @@ namespace Sg\DatatablesBundle\Datatable\Editable;
 
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-/**
- * Class CombodateEditable
- *
- * @package Sg\DatatablesBundle\Datatable\Editable
- */
 class CombodateEditable extends AbstractEditable
 {
     /**
      * Format used for sending value to server.
-     *
-     * @var string
      */
-    protected $format;
+    protected string $format = '';
 
     /**
      * Format used for displaying date. If not specified equals to $format.
-     *
-     * @var null|string
      */
-    protected $viewFormat;
+    protected ?string $viewFormat = null;
 
     /**
      * Minimum value in years dropdown.
-     * Default: 1970
-     *
-     * @var int
+     * Default: 1970.
      */
-    protected $minYear;
+    protected int $minYear = 1970;
 
     /**
      * Maximum value in years dropdown.
-     * Default: 2035
-     *
-     * @var int
+     * Default: 2035.
      */
-    protected $maxYear;
+    protected int $maxYear = 2035;
 
     /**
      * Step of values in minutes dropdown.
-     * Default: 5
-     *
-     * @var int
+     * Default: 5.
      */
-    protected $minuteStep;
+    protected int $minuteStep = 5;
 
     /**
      * Step of values in seconds dropdown.
-     * Default: 1
-     *
-     * @var int
+     * Default: 1.
      */
-    protected $secondStep;
+    protected int $secondStep = 1;
 
     /**
      * If false - number of days in dropdown is always 31.
      * If true - number of days depends on selected month and year.
-     * Default: false
-     *
-     * @var bool
+     * Default: false.
      */
-    protected $smartDays;
+    protected bool $smartDays = false;
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // FilterInterface
-    //-------------------------------------------------
+    // -------------------------------------------------
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getType()
+    public function getType(): string
     {
         return 'combodate';
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Options
-    //-------------------------------------------------
-
-    /**
-     * Config options.
-     *
-     * @param OptionsResolver $resolver
-     *
-     * @return $this
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    // -------------------------------------------------
+    public function configureOptions(OptionsResolver $resolver): static
     {
         parent::configureOptions($resolver);
 
-        $resolver->setDefaults(array(
+        $resolver->setDefaults([
             'format' => 'YYYY-MM-DD',
             'view_format' => null,
             'min_year' => 1970,
@@ -110,10 +81,10 @@ class CombodateEditable extends AbstractEditable
             'minute_step' => 5,
             'second_step' => 1,
             'smart_days' => false,
-        ));
+        ]);
 
         $resolver->setAllowedTypes('format', 'string');
-        $resolver->setAllowedTypes('view_format', array('string', 'null'));
+        $resolver->setAllowedTypes('view_format', ['string', 'null']);
         $resolver->setAllowedTypes('min_year', 'int');
         $resolver->setAllowedTypes('max_year', 'int');
         $resolver->setAllowedTypes('minute_step', 'int');
@@ -123,172 +94,88 @@ class CombodateEditable extends AbstractEditable
         return $this;
     }
 
-    //-------------------------------------------------
+    // -------------------------------------------------
     // Getters && Setters
-    //-------------------------------------------------
+    // -------------------------------------------------
 
-    /**
-     * Get format.
-     *
-     * @return string
-     */
-    public function getFormat()
+    public function getFormat(): string
     {
         return $this->format;
     }
 
-    /**
-     * Set format.
-     *
-     * @param string $format
-     *
-     * @return $this
-     */
-    public function setFormat($format)
+    public function setFormat(string $format): static
     {
         $this->format = $format;
 
         return $this;
     }
 
-    /**
-     * Get viewFormat.
-     *
-     * @return null|string
-     */
-    public function getViewFormat()
+    public function getViewFormat(): ?string
     {
         return $this->viewFormat;
     }
 
-    /**
-     * Set viewFormat.
-     *
-     * @param null|string $viewFormat
-     *
-     * @return $this
-     */
-    public function setViewFormat($viewFormat)
+    public function setViewFormat(?string $viewFormat): static
     {
         $this->viewFormat = $viewFormat;
 
         return $this;
     }
 
-    /**
-     * Get minYear.
-     *
-     * @return int
-     */
-    public function getMinYear()
+    public function getMinYear(): int
     {
         return $this->minYear;
     }
 
-    /**
-     * Set minYear.
-     *
-     * @param int $minYear
-     *
-     * @return $this
-     */
-    public function setMinYear($minYear)
+    public function setMinYear(int $minYear): static
     {
         $this->minYear = $minYear;
 
         return $this;
     }
 
-    /**
-     * Get maxYear.
-     *
-     * @return int
-     */
-    public function getMaxYear()
+    public function getMaxYear(): int
     {
         return $this->maxYear;
     }
 
-    /**
-     * Set maxYear.
-     *
-     * @param int $maxYear
-     *
-     * @return $this
-     */
-    public function setMaxYear($maxYear)
+    public function setMaxYear(int $maxYear): static
     {
         $this->maxYear = $maxYear;
 
         return $this;
     }
 
-    /**
-     * Get minuteStep.
-     *
-     * @return int
-     */
-    public function getMinuteStep()
+    public function getMinuteStep(): int
     {
         return $this->minuteStep;
     }
 
-    /**
-     * Set minuteStep.
-     *
-     * @param int $minuteStep
-     *
-     * @return $this
-     */
-    public function setMinuteStep($minuteStep)
+    public function setMinuteStep(int $minuteStep): static
     {
         $this->minuteStep = $minuteStep;
 
         return $this;
     }
 
-    /**
-     * Get secondStep.
-     *
-     * @return int
-     */
-    public function getSecondStep()
+    public function getSecondStep(): int
     {
         return $this->secondStep;
     }
 
-    /**
-     * Set secondStep.
-     *
-     * @param int $secondStep
-     *
-     * @return $this
-     */
-    public function setSecondStep($secondStep)
+    public function setSecondStep(int $secondStep): static
     {
         $this->secondStep = $secondStep;
 
         return $this;
     }
 
-    /**
-     * Get smartDays.
-     *
-     * @return bool
-     */
-    public function isSmartDays()
+    public function isSmartDays(): bool
     {
         return $this->smartDays;
     }
 
-    /**
-     * Set smartDays.
-     *
-     * @param bool $smartDays
-     *
-     * @return $this
-     */
-    public function setSmartDays($smartDays)
+    public function setSmartDays(bool $smartDays): static
     {
         $this->smartDays = $smartDays;
 
